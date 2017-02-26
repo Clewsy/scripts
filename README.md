@@ -1,5 +1,4 @@
 # scripts
-Assorted bash scripts
 
 bu.sh - Uses scp to back up files and directories listed in a specified file to a remote server.
 
