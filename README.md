@@ -1,5 +1,5 @@
-# scripts
-Assorted bash scripts
+# scripts\n
+Assorted bash scripts\n
 
 bu.sh - Uses scp to back up files and directories listed in a specified file to a remote server.
 grab.sh - Uses rsync (to allow resume after interruption) to download a specified file from a remote server.
