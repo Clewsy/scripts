@@ -13,6 +13,7 @@ RESET="\033[0m"
 
 #Use rsync to grab a file from a remote server
 #The following rsync options are set:
+#-r : sync recursively (include all files and sub-directories)
 #-v : verbose
 #-h : human-readable output
 #-z : compress file data
@@ -83,7 +84,7 @@ echo
 echo "Command: rsync -vhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file""
 
 echo
-rsync -vhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file"
+rsync -rvhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file"
 
 if [ $? == '0' ] ; then
 	echo
