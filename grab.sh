@@ -18,8 +18,8 @@ RESET="\033[0m"
 #-h : human-readable output
 #-z : compress file data
 #--protect-args : allow for whitespace in filenames
-#--progress : display total progress indicator
-#--append : append data to file in case or interruption
+#--progress : display progress indicator
+#--append : append data to file in case of interruption
 
 echo
 echo "Usage: $(basename $0) <REMOTE_FILE>"
