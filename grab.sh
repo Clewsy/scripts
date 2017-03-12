@@ -81,7 +81,7 @@ else	#if no argument is entered then request manual input for the remote server/
 fi
 
 echo
-echo "Command: rsync -vhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file""
+echo "Command: rsync -rvhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file""
 
 echo
 rsync -rvhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file"
