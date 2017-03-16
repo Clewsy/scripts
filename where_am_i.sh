@@ -16,7 +16,7 @@ fi
 echo
 echo "Pulling data from "ipinfo.io"..."
 curl -s -o $TEMP_FILE ipinfo.io
-if [ $? != '0' ] ; then	#check to ensure curl exited with a failure
+if [ $? != '0' ] ; then	#check if curl exited with a failure
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 	echo
