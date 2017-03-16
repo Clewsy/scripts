@@ -1,14 +1,28 @@
 #!/bin/bash
 
+RED="\033[31m"
 BOLD=`tput bold`
 RESET=`tput sgr0`
 
 TEMP_FILE=$(dirname $BASH_SOURCE)/temp	#define the temp file location so that the script will work even if run from a directory without write access
 
+if [ ! $(which curl) ] ; then	#check if curl is not installed
+	echo
+	echo -e "${RED}Error${RESET}: curl is not installed.  Quitting."
+	echo
+	exit 0
+fi
+
 echo
 echo "Pulling data from "ipinfo.io"..."
 curl -s -o $TEMP_FILE ipinfo.io
-
+if [ $? != '0' ] ; then	#check to ensure curl exited with a failure
+	echo
+	echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
+	echo
+	exit 0
+fi
+ 
 ip=$(cat $TEMP_FILE | grep -m 1 "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 hostname=$(cat $TEMP_FILE | grep "hostname" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 city=$(cat $TEMP_FILE | grep "city" | cut -d ":" -f 2 | cut -d "\"" -f 2)
