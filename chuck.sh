@@ -65,19 +65,19 @@ else	#if no argument is entered then request manual input for the remote server/
 
 	echo
 	read -p "Enter local directory/file (source): " loc_file #request source file including location on remote server
-	if [ -z $loc_file ] ; then
+	if [ -z "$loc_file" ] ; then
 		echo "No source file entered.  Using default."
-		loc_file=$DEFAULT_LOCAL_FILE
+		loc_file="$DEFAULT_LOCAL_FILE"
 	fi
-	echo "Local (source) file: $loc_file"
+	echo "Local (source) file: "$loc_file""
 
 	echo
 	read -p "Enter remote directory/file (target): " rem_file #request target file including location on local machine
-	if [ -z $rem_file ] ; then
+	if [ -z "$rem_file" ] ; then
 		echo "No target file set.  Using default."
-		loc_file=$DEFAULT_REMOTE_FILE
+		rem_file="$DEFAULT_REMOTE_FILE"
 	fi
-	echo "Local (target) file: $rem_file"
+	echo "Remote (target) file: "$rem_file""
 fi
 
 echo
