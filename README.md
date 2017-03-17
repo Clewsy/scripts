@@ -4,7 +4,7 @@ bu.sh - Uses scp to back up files and directories listed in a specified file to 
 
 grab.sh - Uses rsync (to allow resume after interruption) to download a specified file from a remote server.
 
-chuck.sh - Very similar to grab.sh but used to upload to the remote server.
+chuck.sh - Very similar to grab.sh, but used to upload to the remote server.
 
 stuff.sh - Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 
