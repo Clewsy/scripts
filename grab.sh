@@ -17,7 +17,7 @@ RESET="\033[0m"
 #-v : verbose
 #-h : human-readable output
 #-z : compress file data
-#-u : update <F4> skip files that are newer on the target
+#-u : update - skip files that are newer on the target
 #--protect-args : allow for whitespace in filenames
 #--progress : display progress indicator
 #--append : append data to file in case of interruption
