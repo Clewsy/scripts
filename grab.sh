@@ -17,6 +17,7 @@ RESET="\033[0m"
 #-v : verbose
 #-h : human-readable output
 #-z : compress file data
+#-u : update <F4> skip files that are newer on the target
 #--protect-args : allow for whitespace in filenames
 #--progress : display progress indicator
 #--append : append data to file in case of interruption
@@ -81,10 +82,10 @@ else	#if no argument is entered then request manual input for the remote server/
 fi
 
 echo
-echo "Command: rsync -rvhz --protect-args --progress --append $rem_user@$rem_server:\""$rem_file"\" \""$loc_file"\""
+echo "Command: rsync -rvhzu --protect-args --progress --append $rem_user@$rem_server:\""$rem_file"\" \""$loc_file"\""
 
 echo
-rsync -rvhz --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file"
+rsync -rvhzu --protect-args --progress --append $rem_user@$rem_server:"$rem_file" "$loc_file"
 
 if [ $? == '0' ] ; then
 	echo
