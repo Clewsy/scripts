@@ -32,7 +32,7 @@ if [ $? != '0' ] ; then		#check if curl exited with a failure
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 	echo
-	exit 0
+	exit -1 
 fi
 
 #parse specific details from the temp file
@@ -66,7 +66,7 @@ do
 		echo
 		echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 		echo
-		exit 0
+		exit -1
 	fi
 	new_ip=$(cat $TEMP_FILE | grep -m 1  "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 done
