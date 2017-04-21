@@ -32,6 +32,7 @@ if [ $? != '0' ] ; then		#check if curl exited with a failure
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 	echo
+	rm $TEMP_FILE
 	exit -1 
 fi
 
@@ -54,6 +55,7 @@ if [ $? != '0' ] ; then
 	echo
 	echo -e "${RED}Error:${RESET} openvpn failed. Quitting"
 	echo
+	rm $TEMP_FILE
 	exit -1
 fi
 
@@ -66,6 +68,7 @@ do
 		echo
 		echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 		echo
+		rm $TEMP_FILE
 		exit -1
 	fi
 	new_ip=$(cat $TEMP_FILE | grep -m 1  "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2)
@@ -78,6 +81,8 @@ echo -e "${GREEN}Connected.${RESET}"
 echo "New ip:   $new_ip"
 echo "New city: $new_city"
 echo
+
+rm $TEMP_FILE
 
 exit 0
 
