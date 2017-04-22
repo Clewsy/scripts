@@ -29,10 +29,10 @@ sudo killall openvpn
 #download current data from ipinfo.io into TEMP_FILE (this is the info without the vpn active)
 curl -s -o $TEMP_FILE ipinfo.io	#-s to supress output while running
 if [ $? != '0' ] ; then		#check if curl exited with a failure
+	rm $TEMP_FILE
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 	echo
-	rm $TEMP_FILE
 	exit -1 
 fi
 
@@ -52,10 +52,10 @@ echo "(\"sudo killall openvpn\" to disable)"
 sudo openvpn $VPN_FILE
 #Following if will quit the script if openvpn exits with a failure
 if [ $? != '0' ] ; then
+	rm $TEMP_FILE
 	echo
 	echo -e "${RED}Error:${RESET} openvpn failed. Quitting"
 	echo
-	rm $TEMP_FILE
 	exit -1
 fi
 
@@ -65,10 +65,10 @@ while [ "$new_ip" == "$current_ip" ]
 do
 	curl -s -o $TEMP_FILE ipinfo.io
 	if [ $? != '0' ] ; then	#check if curl exited with a failure
+		rm $TEMP_FILE
 		echo
 		echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
 		echo
-		rm $TEMP_FILE
 		exit -1
 	fi
 	new_ip=$(cat $TEMP_FILE | grep -m 1  "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2)
