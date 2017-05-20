@@ -27,7 +27,7 @@ echo "Killing any running instances of openvpn"
 sudo killall openvpn
 
 #download current data from ipinfo.io into TEMP_FILE (this is the info without the vpn active)
-curl -s -o $TEMP_FILE ipinfo.io	#-s to supress output while running
+curl --silent --connect-timeout 5 --max-time 10 --output $TEMP_FILE ipinfo.io	#-s to supress output while running
 if [ $? != '0' ] ; then		#check if curl exited with a failure
 	rm $TEMP_FILE
 	echo
@@ -59,11 +59,11 @@ if [ $? != '0' ] ; then
 	exit -1
 fi
 
-#loop until the vpn is active - determined by a change in the city
+#loop until the vpn is active - determined by a change in the ip
 new_ip=$current_ip
 while [ "$new_ip" == "$current_ip" ]
 do
-	curl -s -o $TEMP_FILE ipinfo.io
+	curl --silent --connect-timeout 5 --max-time 10 --output $TEMP_FILE ipinfo.io
 	if [ $? != '0' ] ; then	#check if curl exited with a failure
 		rm $TEMP_FILE
 		echo
