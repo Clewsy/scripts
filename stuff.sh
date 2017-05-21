@@ -1,21 +1,21 @@
 #!/bin/bash
 
-BLACK=`tput setaf 0`
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-BLUE=`tput setaf 4`
-MAGENTA=`tput setaf 5`
-CYAN=`tput setaf 6`
-WHITE=`tput setaf 7`
+BLACK=$(tput setaf 0)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+BLUE=$(tput setaf 4)
+MAGENTA=$(tput setaf 5)
+CYAN=$(tput setaf 6)
+WHITE=$(tput setaf 7)
 
-BOLD=`tput bold`
-DIM=`tput dim`
+BOLD=$(tput bold)
+DIM=$(tput dim)
 
-RESET=`tput sgr0`
+RESET=$(tput sgr0)
 
 ## Set main heading colour from options above.
-COL=${MAGENTA}
+COL=${CYAN}
 
 echo " "
 echo "${COL}╔════════════════════╗${RESET}"
@@ -179,14 +179,19 @@ do
         if [ "$type" == "part" ]; then
                 echo "${COL}----Partition:${RESET} $t"
                 part_size=$(lsblk -no SIZE /dev/$t)             ## Define partition size
-                part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
-                part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
+                if [ "$(lsblk -ln | grep -m 1 $t | awk '{print $7}')" == "/" ]; then	#if lsblk references "/dev/root" instead of corresponding "/dev/$t"
+			part_perc=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}') ## Define partition percentage utilisation of root dir
+			part_used=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}') ## Define partition capacity utilisation of root dir
+		else
+			part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
+                	part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
+		fi
                 part_mount=$(lsblk -no MOUNTPOINT /dev/$t)      ## Define partition mount location
                 echo "${DIM}${COL}------Size:${RESET} $part_size"
                 if [ $part_used ]; then                         ## If data exists for partition utilisation
                         echo "${DIM}${COL}------Utilisation:${RESET} $part_used ($part_perc)"
                 fi
-		if [ "$part_mount" ]; then			## If data exists for partition mount location. Note, had to put $part_used in quotes to prevent error if there is a space in the path (e.g. "/media/b4t/NEW VOLUME")
+		if [ $part_mount ]; then			## If data exists for partition mount location
 			echo "${DIM}${COL}------Mount:${RESET} $part_mount"
 		fi
         fi
@@ -208,11 +213,20 @@ echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | awk '{print $2}')"
 ## Print network and network interface info
 echo "${BOLD}${COL}Network:${RESET}"
 if [ -e /usr/bin/curl ]; then	## Check to ensure that curl is installed
-	echo "${COL}--External IP:${RESET} $(curl -s checkip.dydns.org | grep "setCookie('" | cut -c 57- | head -c-8)" ## Grep external IP.  Requires curl.
+	ext_ip=$(curl -s checkip.dydns.org | grep "setCookie('" | cut -c 57- | head -c-8) ## Grep external IP.  Requires curl.
+	if [ $ext_ip ]; then	## If data exists for ext_ip
+		echo "${COL}--External IP:${RESET} $ext_ip"
+	else
+		echo "${COL}--External IP:${RESET} No External Connection"
+	fi
 else
 	echo "External IP address not detected (curl not installed)"
 fi
-echo "${COL}--DNS:${RESET} $(cat /etc/resolv.conf | grep -m 1 'nameserver' | awk {'print $2'})"         ## Grep primary (first in list) DNS
+dns=$(cat /etc/resolv.conf | grep -m 1 'nameserver' | awk {'print $2'})	## Grep primary (first in list) DNS
+if [ $dns ]; then	## If data exists for DNS
+	echo "${COL}--DNS:${RESET} $dns"
+fi
+##echo "${COL}--DNS:${RESET} $(cat /etc/resolv.conf | grep -m 1 'nameserver' | awk {'print $2'})"         ## Grep primary (first in list) DNS
 echo "${COL}--Hostname:${RESET} $(uname -n)"
 
 if_list=( `ls /sys/class/net`)  ## Define a list of all the network interfaces.
@@ -230,7 +244,9 @@ do
 		if [ $(echo $ip | grep 'addr') ]; then	#depending on the version of ifconfig, output may include 'addr:'
 			ip=$(echo $ip | tail -c+6)	#if so, attenuate so string only includes ip address
 		fi
-                echo "${DIM}${COL}----IP address:${RESET} $ip"
+		if [ $ip ]; then	## If after above processing, data actually exists for ip
+			echo "${DIM}${COL}----IP address:${RESET} $ip"
+		fi
         fi
 
         ## Check if the current interface is connected to an essid
@@ -245,3 +261,5 @@ done
 
 echo "${COL}==================${RESET}"
 echo 
+
+exit 0
