@@ -15,7 +15,7 @@ DIM=$(tput dim)
 RESET=$(tput sgr0)
 
 ## Set main heading colour from options above.
-COL=${CYAN}
+COL=${GREEN}
 
 echo " "
 echo "${COL}╔════════════════════╗${RESET}"
@@ -179,13 +179,8 @@ do
         if [ "$type" == "part" ]; then
                 echo "${COL}----Partition:${RESET} $t"
                 part_size=$(lsblk -no SIZE /dev/$t)             ## Define partition size
-                if [ "$(lsblk -ln | grep -m 1 $t | awk '{print $7}')" == "/" ]; then	#if lsblk references "/dev/root" instead of corresponding "/dev/$t"
-			part_perc=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}') ## Define partition percentage utilisation of root dir
-			part_used=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}') ## Define partition capacity utilisation of root dir
-		else
-			part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
-                	part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
-		fi
+                part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
+                part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
                 part_mount=$(lsblk -no MOUNTPOINT /dev/$t)      ## Define partition mount location
                 echo "${DIM}${COL}------Size:${RESET} $part_size"
                 if [ $part_used ]; then                         ## If data exists for partition utilisation
@@ -213,7 +208,7 @@ echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | awk '{print $2}')"
 ## Print network and network interface info
 echo "${BOLD}${COL}Network:${RESET}"
 if [ -e /usr/bin/curl ]; then	## Check to ensure that curl is installed
-	ext_ip=$(curl -s checkip.dydns.org | grep "setCookie('" | cut -c 57- | head -c-8) ## Grep external IP.  Requires curl.
+	ext_ip=$(curl -s ipinfo.io | grep -m 1 "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2) ## Grep external IP.  Requires curl.
 	if [ $ext_ip ]; then	## If data exists for ext_ip
 		echo "${COL}--External IP:${RESET} $ext_ip"
 	else
