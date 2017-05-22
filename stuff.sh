@@ -15,7 +15,7 @@ DIM=$(tput dim)
 RESET=$(tput sgr0)
 
 ## Set main heading colour from options above.
-COL=${GREEN}
+COL=${CYAN}
 
 echo " "
 echo "${COL}╔════════════════════╗${RESET}"
@@ -179,8 +179,13 @@ do
         if [ "$type" == "part" ]; then
                 echo "${COL}----Partition:${RESET} $t"
                 part_size=$(lsblk -no SIZE /dev/$t)             ## Define partition size
-                part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
-                part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
+		if [ "$(lsblk -ln | grep -m 1 $t | awk '{print $7}')" == "/" ]; then	#if lsblk references "/dev/root" instead of corresponding "/dev/$t"
+			part_perc=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}') ## Define partition percentage utilisation of root dir
+			part_used=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}') ## Define partition capacity utilisation of root dir
+		else
+			part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
+			part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
+		fi
                 part_mount=$(lsblk -no MOUNTPOINT /dev/$t)      ## Define partition mount location
                 echo "${DIM}${COL}------Size:${RESET} $part_size"
                 if [ $part_used ]; then                         ## If data exists for partition utilisation
