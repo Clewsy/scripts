@@ -213,7 +213,7 @@ echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | awk '{print $2}')"
 ## Print network and network interface info
 echo "${BOLD}${COL}Network:${RESET}"
 if [ -e /usr/bin/curl ]; then	## Check to ensure that curl is installed
-	ext_ip=$(curl -s ipinfo.io | grep -m 1 "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2) ## Grep external IP.  Requires curl.
+	ext_ip=$(curl --silent --max-time 5  ipinfo.io | grep -m 1 "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2) ## Grep external IP.  Requires curl.
 	if [ $ext_ip ]; then	## If data exists for ext_ip
 		echo "${COL}--External IP:${RESET} $ext_ip"
 	else
