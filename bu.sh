@@ -12,7 +12,7 @@ too_many_args=1
 bad_file_list=2
 no_rem_dir=3	#ssh command to create remote directory failed
 
-bu_server="b4t-net.ddns.net"
+bu_server="b4t.site"
 bu_remote_dir="$HOME/file_cache/$HOSTNAME"
 
 #Check valid usage.
