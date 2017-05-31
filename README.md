@@ -10,6 +10,6 @@ stuff.sh - Pulls and lists a bunch of useful (to me) info about the host (hardwa
 
 vpn.sh - Kills current openvpn service then reconnects and confirms.  Useful for re-establishing connection if it goes bad.
 
-where_am_i.sh - Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - useful to verify vpn operation.
+wami.sh - Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - useful to verify vpn operation.
 
 ytdl.sh - Written for use with termux (android) to download a youtube video direct to the device.
