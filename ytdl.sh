@@ -19,11 +19,12 @@ GREEN="\033[32m"
 RESET="\033[0m"
 
 ##Defaults
-DEFAULT_DOWNLOAD_DIR=/storage/emulated/0/Download/
+#DEFAULT_DOWNLOAD_DIR=/storage/emulated/0/Download/
+DEFAULT_DOWNLOAD_DIR=~/storage/downloads
 
 echo "---Entering \"Download\" directory"
 cd ${DEFAULT_DOWNLOAD_DIR}
-if [ $? = '0' ]; then	#check to ensure that the downlaod directory exists and is accessible
+if [ $? != '0' ]; then	#check to ensure that the downlaod directory exists and is accessible
 	echo
 	echo "---error accessing specified download directory.  has "termux-setup-storage" been run?"
 	exit -1
