@@ -1,37 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-#This script written to quickly begin downloading a youtube video to the local device.
-#Written for use with termux, reccomended to be run from the ~/.shortcuts directory
-#to enable use via the termux widget (shortcut from the homescreen).
-#Whatever url is currently in the device's clipboard is passed to the script and the
-#download begins immediately.
-#
-#Requirements:
-#termux
-#termux-api (installed from f-droit and also within termux with command "apt install termux-api")
-#python (required for installation of youtube-dl.  install with command "apt install python")
-#youtube-dl (installed from within termux with command "pip install youtube-dl")
-
-
 ##Colours
 RED="\033[31m"
 GREEN="\033[32m"
 RESET="\033[0m"
 
-##Defaults
-DEFAULT_DOWNLOAD_DIR=/storage/emulated/0/Download/
-
 echo "---Entering \"Download\" directory"
-cd ${DEFAULT_DOWNLOAD_DIR}
-if [ $? = '0' ]; then	#check to ensure that the downlaod directory exists and is accessible
-	echo
-	echo "---error accessing specified download directory.  has "termux-setup-storage" been run?"
-	exit -1
-fi
-
+cd /storage/emulated/0/Download/
 echo "current directory= $(pwd)"
 
-if [ -z $(which termux-clipboard-get) ]; then	#if the termux-clipboard-get command is absent then termux-api has not been installed
+if [ -z $(which termux-clipboard-get) ]; then
 	echo
 	echo "---termux-api not installed. Installing now:"
 	apt install termux-api
@@ -48,7 +26,7 @@ fi
 
 echo "----------"
 
-while true	#infinite loop until download is successful
+while true
 do
 	echo
 	echo "url= $url"
@@ -57,7 +35,7 @@ do
 	if [ $? = '0' ]; then
 		echo
 		echo -e "${GREEN}---all done!${RESET}"
-		termux-notification -c "Download complete" -t "$(basename $0)"
+		termux-notification -i "ytdl" -c "Download complete" -t "$(basename $0)"
 		termux-toast "Download complete ($(basename $0))"
 		exit 129
 	else
