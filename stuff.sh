@@ -116,14 +116,21 @@ fi
 
 ###############################
 ## Print available CPU info
+model=$(lscpu | grep "Model name:" | tail -c+24)
+arch=$(lscpu | grep "Architecture" | awk '{print $2}')
+mode=$(lscpu | grep "CPU op-mode" | tail -c+24)
+cores=$(lscpu | grep -m 1 "CPU(s)" | awk '{print $2}')
+speed=$(lscpu | grep "CPU MHz" | awk '{print $3}')
+max_speed=$(lscpu | grep "CPU max" | awk '{print $4}')
+min_speed=$(lscpu | grep "CPU min" | awk '{print $4}')
 echo "${BOLD}${COL}CPU:${RESET}"
-echo "${COL}--Model:${RESET} $(lscpu | grep "Model name:" | tail -c+24)"				## CPUModel and vendor
-echo "${COL}--Architecture${RESET}: $(lscpu | grep "Architecture" | awk '{print $2}')"	## Architecture
-echo "${COL}--Mode(s):${RESET} $(lscpu | grep "CPU op-mode" | tail -c+24)"			## CPU op-mode(s)
-echo "${COL}--Cores:${RESET} $(lscpu | grep -m 1 "CPU(s)" | awk '{print $2}')"		## CPU(s)
-echo "${COL}--Speed:${RESET} $(lscpu | grep "CPU MHz" | awk '{print $3}')MHz"			## CPU MHz
-echo "${COL}--Max Speed:${RESET} $(lscpu | grep "CPU max" | awk '{print $4}')MHz"		## Max CPU MHz
-echo "${COL}--Min Speed:${RESET} $(lscpu | grep "CPU min" | awk '{print $4}')MHz"		## Min CPU MHz
+if [ ! -z "$model" ];		then echo "${COL}--Model:${RESET} ${model}"; fi			## CPUModel and vendor
+if [ ! -z "$arch" ];		then echo "${COL}--Architecture:${RESET} ${arch}"; fi		## Architecture
+if [ ! -z "$mode" ];		then echo "${COL}--Mode(s):${RESET} ${mode}"; fi		## CPU op-mode(s)
+if [ ! -z "$cores" ];		then echo "${COL}--Cores:${RESET} ${cores}"; fi			## CPU(s)
+if [ ! -z "$speed" ];		then echo "${COL}--Speed:${RESET} ${speed}MHz"; fi		## CPU MHz
+if [ ! -z "$max_speed" ];	then echo "${COL}--Max Speed:${RESET} ${max_speed}MHz"; fi	## Max CPU MHz
+if [ ! -z "$min_speed" ];	then echo "${COL}--Min Speed:${RESET} ${min_speed}MHz"; fi	## Min CPU MHz
 
 ###############################
 ## Print memory info
@@ -235,8 +242,10 @@ do
         echo "${COL}--Interface:${RESET} $i"
         status=$(cat /sys/class/net/${i}/operstate)     ## Status of interface up, down or unknown.
         echo "${DIM}${COL}----Status:${RESET} $status"
-        mac=$(ip link show ${i} | head -c-23 | tail -c17)       ## MAC address of the inteface.
-        echo "${DIM}${COL}----MAC address:${RESET} $mac"
+        mac=$(cat /sys/class/net/${i}/address)       ## MAC address of the inteface.
+	if [ ! -z "$mac" ]; then	#check if a MAC address was found
+		echo "${DIM}${COL}----MAC address:${RESET} $mac"	#if so, print it
+	fi
 
         ## Check if the status of the inteface is "up" or "unkown" (not "down")
         if [ $status != "down" ]; then ## If so, print the designated IP address.
