@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Default settings
-DEFAULT_SERVER=b4t-net.ddns.net
+DEFAULT_SERVER=b4t.site
 DEFAULT_USER=b4t
 DEFAULT_LOCAL_FILE=.	#i.e. keep the same location/name as the remote file
 DEFAULT_REMOTE_FILE=~/	#i.e. everything in the home folder
