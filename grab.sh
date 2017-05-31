@@ -23,7 +23,7 @@ RESET="\033[0m"
 
 echo
 echo "Usage: $(basename $0) <REMOTE_FILE>"
-echo "This usage will copy the specified file from b4t@b4t-net.ddns.net to the current working directory."
+echo "This usage will copy the specified file from the default server (${DEFAULT_SERVER}) to the current working directory."
 echo
 echo "Alternatively, use \"$(basename $0)\" with no arguments to prompt for remote user, remote server, remote file (source) and local file (target)."
 
@@ -37,7 +37,6 @@ fi
 if [ ! -z "$1" ] ; then	#if an argument exists then it should be the file on the default remote server
 	rem_file=$1	#set the remote file to the value input as the argument
 	#echo "Command: rsync -avhz --progress --append $rem_user@$rem_server:$rem_file $loc_file"
-	#rsync -vhz --progress --append b4t@b4t-net.ddns.net:$rem_file .
 	rem_user=$DEFAULT_USER
 	rem_server=$DEFAULT_SERVER
 	loc_file=$DEFAULT_LOCAL_FILE
@@ -49,15 +48,15 @@ if [ ! -z "$1" ] ; then	#if an argument exists then it should be the file on the
 else	#if no argument is entered then request manual input for the remote server/file (source) info and the local file (target) info.
 	echo
 	read -p "Enter remote username: " rem_user        #request username for remote login
-	if [ -z $rem_user ] ; then	#set the remote login username to "b4t" if none specified
+	if [ -z $rem_user ] ; then	#set the remote login username to the default if none specified
 		echo "No remote username set.  Using default"
 		rem_user=$DEFAULT_USER
 	fi
 	echo "Username: $rem_user"
 
 	echo
-	read -p "Enter remote server (default=b4t-net.ddns.net): " rem_server   #request server for remote login
-	if [ -z $rem_server ] ; then	#set the remote server to "b4t-net.ddns.net" if none specified
+	read -p "Enter remote server (default=${DEFAULT_SERVER}): " rem_server   #request server for remote login
+	if [ -z $rem_server ] ; then	#set the remote server to the default if none specified
 		echo "No remote server name set.  Using default."
 		rem_server=$DEFAULT_SERVER
 	fi
