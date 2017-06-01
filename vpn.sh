@@ -24,7 +24,7 @@ fi
 #kill current openvpn instance
 echo
 echo "Killing any running instances of openvpn"
-sudo killall openvpn
+sudo pkill openvpn
 
 #download current data from ipinfo.io into TEMP_FILE (this is the info without the vpn active)
 curl --silent --connect-timeout 5 --max-time 10 --output $TEMP_FILE ipinfo.io
@@ -48,7 +48,7 @@ echo "Current city: $current_city"
 #connect to the vpn
 echo
 echo "Running openvpn using config file at \"$VPN_FILE\""
-echo "(\"sudo killall openvpn\" to disable)"
+echo "(\"sudo pkill openvpn\" to disable)"
 sudo openvpn $VPN_FILE
 #Following if will quit the script if openvpn exits with a failure
 if [ $? != '0' ] ; then
