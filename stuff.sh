@@ -25,7 +25,7 @@ echo "${COL}╚════════════════════╝${
 ###############################
 ## Print available product info
 if [ -s "/sys/devices/virtual/dmi/id/product_name" ]; then
-        product_name=$(cat /sys/devices/virtual/dmi/id/product_name | awk NF)
+	product_name=$(cat /sys/devices/virtual/dmi/id/product_name | awk NF)
 	product_version=$(cat /sys/devices/virtual/dmi/id/product_version | awk NF)
 	sys_vendor=$(cat /sys/devices/virtual/dmi/id/sys_vendor | awk NF)
 	if [ ! -z "${product_name}" ]; then
@@ -42,7 +42,7 @@ if [ -s "/sys/devices/virtual/dmi/id/product_name" ]; then
 		fi
 	fi
 else
-        echo "Product information not found"
+	echo "Product information not found"
 fi
 
 ###############################
@@ -52,7 +52,7 @@ if [ -s /sys/devices/virtual/dmi/id/chassis_type ]; then
 	chassis_version=$(cat /sys/devices/virtual/dmi/id/chassis_version | awk NF)
 	chassis_vendor=$(cat /sys/devices/virtual/dmi/id/chassis_vendor | awk NF)
 	if [ ! -z "${chassis_type}" ]; then
-        	if [ ! -z "${chassis_version}" ]; then
+		if [ ! -z "${chassis_version}" ]; then
 			if [ ! -z "${chassis_vendor}" ]; then
 				echo "${BOLD}${COL}Chassis:${RESET} $chassis_type, version $chassis_version ($chassis_vendor)"	## Chassis type, version, vendor
 			else
@@ -61,9 +61,9 @@ if [ -s /sys/devices/virtual/dmi/id/chassis_type ]; then
 		elif [ ! -z "${chassis_vendor}" ]; then
 			echo "${BOLD}${COL}Chassis:${RESET} $chassis_type ($chassis_vendor)"					## Chassis type, vendor
 		fi
-        else
-                echo "${BOLD}${COL}Chassis:${RESET} $chassis_type"								## Chassis type
-        fi
+	else
+		echo "${BOLD}${COL}Chassis:${RESET} $chassis_type"								## Chassis type
+	fi
 else
 	echo "Chassis information not found"
 fi
@@ -75,7 +75,7 @@ if [ -s /sys/devices/virtual/dmi/id/board_name ]; then
 	board_version=$(cat /sys/devices/virtual/dmi/id/board_version)
 	board_vendor=$(cat /sys/devices/virtual/dmi/id/board_vendor)
 	if [ ! -z "${board_name}" ]; then
-        	if [ ! -z "${board_version}" ]; then
+		if [ ! -z "${board_version}" ]; then
 			if [ ! -z "${board_vendor}" ]; then
 				echo "${BOLD}${COL}Motherboard:${RESET} $board_name, version $board_version ($board_vendor)"    ## Motherboard model, version, vendor
 			else
@@ -169,39 +169,39 @@ echo "${BOLD}${COL}Disks and Partitions:${RESET}"
 part_list=( `lsblk -lno NAME `) ## Define a list of disks and partitions.
 for t in "${part_list[@]}"      ## Cycle through loop once for each disk or partition.
 do
-        type=$(lsblk -dno TYPE /dev/$t)
+	type=$(lsblk -dno TYPE /dev/$t)
 
-        # If type is "disk" (not partition)
-        if [ "$type" == "disk" ] || [ "$type" == "rom" ]; then
-                echo "${COL}--Disk:${RESET} $t"
-                disk_model=$(lsblk -dno MODEL /dev/$t)  ## Define disk model
-                disk_size=$(lsblk -dno SIZE /dev/$t)    ## Define disk capacity
+	# If type is "disk" (not partition)
+	if [ "$type" == "disk" ] || [ "$type" == "rom" ]; then
+		echo "${COL}--Disk:${RESET} $t"
+		disk_model=$(lsblk -dno MODEL /dev/$t)  ## Define disk model
+		disk_size=$(lsblk -dno SIZE /dev/$t)    ## Define disk capacity
 		if [ "$disk_model" ]; then		## If data exists for disk model
 			echo "${DIM}${COL}----Model:${RESET} $disk_model"
 		fi
-                echo "${DIM}${COL}----Size:${RESET} $disk_size"
-        fi
+		echo "${DIM}${COL}----Size:${RESET} $disk_size"
+	fi
 
-        # If type is "part" (not disk)
-        if [ "$type" == "part" ]; then
-                echo "${COL}----Partition:${RESET} $t"
-                part_size=$(lsblk -no SIZE /dev/$t)             ## Define partition size
-		if [ "$(lsblk -ln | grep -m 1 $t | awk '{print $7}')" == "/" ]; then	#if lsblk references "/dev/root" instead of corresponding "/dev/$t"
-			part_perc=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}') ## Define partition percentage utilisation of root dir
-			part_used=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}') ## Define partition capacity utilisation of root dir
-		else
-			part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
-			part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
-		fi
-                part_mount=$(lsblk -no MOUNTPOINT /dev/$t)      ## Define partition mount location
-                echo "${DIM}${COL}------Size:${RESET} $part_size"
-                if [ $part_used ]; then                         ## If data exists for partition utilisation
-                        echo "${DIM}${COL}------Utilisation:${RESET} $part_used ($part_perc)"
-                fi
-		if [ $part_mount ]; then			## If data exists for partition mount location
-			echo "${DIM}${COL}------Mount:${RESET} $part_mount"
-		fi
-        fi
+	# If type is "part" (not disk)
+	if [ "$type" == "part" ]; then
+		echo "${COL}----Partition:${RESET} $t"
+		part_size=$(lsblk -no SIZE /dev/$t)             ## Define partition size
+			if [ "$(lsblk -ln | grep -m 1 $t | awk '{print $7}')" == "/" ]; then	#if lsblk references "/dev/root" instead of corresponding "/dev/$t"
+				part_perc=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}') ## Define partition percentage utilisation of root dir
+				part_used=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}') ## Define partition capacity utilisation of root dir
+			else
+				part_perc=$(df -h | grep -m 1 $t | awk '{print $5}') ## Define partition percentage utilisation
+				part_used=$(df -h | grep -m 1 $t | awk '{print $3}') ## Define partition capacity utilisation
+			fi
+			part_mount=$(lsblk -no MOUNTPOINT /dev/$t)      ## Define partition mount location
+			echo "${DIM}${COL}------Size:${RESET} $part_size"
+			if [ $part_used ]; then                         ## If data exists for partition utilisation
+				echo "${DIM}${COL}------Utilisation:${RESET} $part_used ($part_perc)"
+			fi
+			if [ $part_mount ]; then			## If data exists for partition mount location
+				echo "${DIM}${COL}------Mount:${RESET} $part_mount"
+			fi
+	fi
 done
 
 ###############################
@@ -239,26 +239,26 @@ echo "${COL}--Hostname:${RESET} $(uname -n)"
 if_list=( `ls /sys/class/net`)  ## Define a list of all the network interfaces.
 for i in "${if_list[@]}"        ## Cycle through the following loop for each interface.
 do
-        echo "${COL}--Interface:${RESET} $i"
-        status=$(cat /sys/class/net/${i}/operstate)     ## Status of interface up, down or unknown.
-        echo "${DIM}${COL}----Status:${RESET} $status"
-        mac=$(cat /sys/class/net/${i}/address)       ## MAC address of the inteface.
+	echo "${COL}--Interface:${RESET} $i"
+	status=$(cat /sys/class/net/${i}/operstate)     ## Status of interface up, down or unknown.
+	echo "${DIM}${COL}----Status:${RESET} $status"
+	mac=$(cat /sys/class/net/${i}/address)       ## MAC address of the inteface.
 	if [ ! -z "$mac" ]; then	#check if a MAC address was found
 		echo "${DIM}${COL}----MAC address:${RESET} $mac"	#if so, print it
 	fi
 
-        ## Check if the status of the inteface is "up" or "unkown" (not "down")
-        if [ $status != "down" ]; then ## If so, print the designated IP address.
-                ip=$(/sbin/ifconfig ${i} | grep -w 'inet' | awk '{print $2}')
+	## Check if the status of the inteface is "up" or "unkown" (not "down")
+	if [ $status != "down" ]; then ## If so, print the designated IP address.
+		ip=$(/sbin/ifconfig ${i} | grep -w 'inet' | awk '{print $2}')
 		if [ $(echo $ip | grep 'addr') ]; then	#depending on the version of ifconfig, output may include 'addr:'
 			ip=$(echo $ip | tail -c+6)	#if so, attenuate so string only includes ip address
 		fi
 		if [ $ip ]; then	## If after above processing, data actually exists for ip
 			echo "${DIM}${COL}----IP address:${RESET} $ip"
 		fi
-        fi
+	fi
 
-        ## Check if the current interface is connected to an essid
+	## Check if the current interface is connected to an essid
 	if [ -e /sbin/iwgetid ]; then   ## Check to ensure that iwgetid is installed.  If not, print nothing.
 	        if_wifi_conn=$(/sbin/iwgetid | awk '{print $1}')
 	        if [ "$if_wifi_conn" = "${i}" ]; then   ## If so, print the connected essid.
