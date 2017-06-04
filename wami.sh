@@ -1,12 +1,12 @@
 #!/bin/bash
 
 RED="\033[31m"
-BOLD=`tput bold`
-RESET=`tput sgr0`
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
 
-TEMP_FILE=$(dirname $BASH_SOURCE)/temp	#define the temp file location so that the script will work even if run from a directory without write access
+TEMP_FILE="$(dirname "$0")/temp"	#define the temp file location so that the script will work even if run from a directory without write access
 
-if [ ! $(which curl) ] ; then	#check if curl is not installed
+if [ ! "$(which curl)" ] ; then	#check if curl is not installed
 	echo
 	echo -e "${RED}Error${RESET}: curl is not installed.  Quitting."
 	echo
@@ -14,22 +14,21 @@ if [ ! $(which curl) ] ; then	#check if curl is not installed
 fi
 
 echo
-echo "Pulling data from "ipinfo.io"..."
-curl --silent --connect-timeout 5 --max-time 10 --output $TEMP_FILE ipinfo.io
-if [ $? != '0' ] ; then	#check if curl exited with a failure
+echo "Pulling data from \"ipinfo.io\"..."
+if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinfo.io; then	#run curl command bi check if it exited with a failure
 	echo
-	echo -e "${RED}Error${RESET}: Failed to pull data from "ipinfo.io".  Quitting..."
+	echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 	echo
 	exit 0
 fi
  
-ip=$(cat $TEMP_FILE | grep -m 1 "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-hostname=$(cat $TEMP_FILE | grep "hostname" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-city=$(cat $TEMP_FILE | grep "city" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-region=$(cat $TEMP_FILE | grep "region" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-country=$(cat $TEMP_FILE | grep "country" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-loc=$(cat $TEMP_FILE | grep "loc" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-org=$(cat $TEMP_FILE | grep "org" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+ip=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+hostname=$(grep "hostname" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+city=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+region=$(grep "region" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+country=$(grep "country" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+loc=$(grep "loc" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+org=$(grep "org" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 
 echo
 echo "${BOLD}IP:${RESET}------------ ${ip}"
@@ -42,7 +41,4 @@ echo "${BOLD}Organisation:${RESET}-- ${org}"
 echo
 
 
-rm $TEMP_FILE
-
-
-
+rm "$TEMP_FILE"
