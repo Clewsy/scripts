@@ -60,7 +60,7 @@ fi
 new_ip=$current_ip
 while [ "$new_ip" == "$current_ip" ]
 do
-	if ! curl --silent --connect-timeout 5 --max-time 10 --output $TEMP_FILE ipinfo.io ; then	#Execute curl command but exit if it fails
+	if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinfo.io ; then	#Execute curl command but exit if it fails
 		rm "$TEMP_FILE"
 		echo
 		echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
