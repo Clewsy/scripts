@@ -58,7 +58,11 @@ while read -r bu_file ; do		##Loop to repeat commands for each file name entry i
 	fi
 	echo "File/Directory \"${full_path}\" exists."
 	echo -e "${GREEN}Backing up \"${full_path}\" to \"${USER}@${bu_server}:${bu_remote_dir}/$(basename "${full_path}")\"${RESET}" 
-	if ! scp -r -B "${full_path}" "${USER}@${bu_server}:$bu_remote_dir/"; then	#Execute scp and check for error on exit.
+	#about to run scp;
+		#-r for recursively copying files within dirs
+		#-B for batch mode to avoid multilpe password requests
+		#-p to preserve modification times, access times, and modes
+	if ! scp -r -B -p "${full_path}" "${USER}@${bu_server}:$bu_remote_dir/"; then	#Execute scp and check for error on exit.
 		echo -e "${RED}Failed to copy ${full_path} to remote directory${RESET}"
 		continue
 	fi
