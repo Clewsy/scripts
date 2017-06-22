@@ -4,9 +4,9 @@
 #RED=$(tput setaf 1)
 #GREEN=$(tput setaf 2)
 #YELLOW=$(tput setaf 3)
-#BLUE=$(tput setaf 4)
+BLUE=$(tput setaf 4)
 #MAGENTA=$(tput setaf 5)
-CYAN=$(tput setaf 6)
+#CYAN=$(tput setaf 6)
 #WHITE=$(tput setaf 7)
 
 BOLD=$(tput bold)
@@ -15,7 +15,7 @@ DIM=$(tput dim)
 RESET=$(tput sgr0)
 
 ## Set main heading colour from options above.
-COL=${CYAN}
+COL=${BLUE}
 
 echo " "
 echo "${COL}╔════════════════════╗${RESET}"
@@ -212,15 +212,15 @@ echo "${COL}--Machine:${RESET} $(uname -m)"
 echo "${COL}--Kernel:${RESET} $(uname -s)"
 echo "${DIM}${COL}----Version:${RESET} $(uname -v)"
 echo "${DIM}${COL}----Release:${RESET} $(uname -r)"
-echo "${COL}--Distribution:${RESET} $(lsb_release -i | tail -c+17)"
-echo "${DIM}${COL}----Release:${RESET} $(lsb_release -r | awk '{print $2}')"
-echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | awk '{print $2}')"
+echo "${COL}--Distribution:${RESET} $(lsb_release -i | cut -f2)" #tab is the default delimeter for cut
+echo "${DIM}${COL}----Release:${RESET} $(lsb_release -r | cut -f2)"
+echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | cut -f2)"
 
 ###############################
 ## Print network and network interface info
 echo "${BOLD}${COL}Network:${RESET}"
 if [ -e /usr/bin/curl ]; then	## Check to ensure that curl is installed
-	ext_ip=$(curl --silent --max-time 5  ipinfo.io | grep -m 1 "ip" | cut -d ":" -f 2 | cut -d "\"" -f 2) ## Grep external IP.  Requires curl.
+	ext_ip=$(curl --silent --max-time 5  ipinfo.io | grep -m 1 "ip" | cut -d "\"" -f4) ## Grep external IP.  Requires curl.
 	if [ "$ext_ip" ]; then	## If data exists for ext_ip
 		echo "${COL}--External IP:${RESET} $ext_ip"
 	else
