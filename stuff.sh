@@ -233,7 +233,7 @@ dns=$(grep -m 1 'nameserver' /etc/resolv.conf | cut -c12-)	## Grep primary (firs
 if [ "$dns" ]; then	## If data exists for DNS
 	echo "${COL}--DNS:${RESET} $dns"
 fi
-##echo "${COL}--DNS:${RESET} $(cat /etc/resolv.conf | grep -m 1 'nameserver' | awk {'print $2'})"         ## Grep primary (first in list) DNS
+
 echo "${COL}--Hostname:${RESET} $(uname -n)"
 
 mapfile -t if_list < <(ls /sys/class/net)	## Define a list of all the network interfaces.
@@ -249,13 +249,8 @@ do
 
         ## Check if the status of the inteface is "up" or "unkown" (not "down")
         if [ "$status" != "down" ]; then ## If so, print the designated IP address.
-                ip=$(/sbin/ifconfig "${i}" | grep -w 'inet' | awk '{print $2}')
-		if grep -q 'addr' <<< "$ip" ; then	#depending on the version of ifconfig, output may include 'addr:'
-			ip=$(echo "$ip" | tail -c+6)	#if so, attenuate so string only includes ip address
-		fi
-		if [ "$ip" ]; then	## If after above processing, data actually exists for ip
-			echo "${DIM}${COL}----IP address:${RESET} $ip"
-		fi
+                ip=$(/bin/ip addr show "${i}" | grep -w -m1 "inet" | cut -d " " -f6)
+		echo "${DIM}${COL}----IP address:${RESET} $ip"
         fi
 
         ## Check if the current interface is connected to an essid
