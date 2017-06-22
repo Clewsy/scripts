@@ -212,9 +212,13 @@ echo "${COL}--Machine:${RESET} $(uname -m)"
 echo "${COL}--Kernel:${RESET} $(uname -s)"
 echo "${DIM}${COL}----Version:${RESET} $(uname -v)"
 echo "${DIM}${COL}----Release:${RESET} $(uname -r)"
-echo "${COL}--Distribution:${RESET} $(lsb_release -i | cut -f2)" #tab is the default delimeter for cut
-echo "${DIM}${COL}----Release:${RESET} $(lsb_release -r | cut -f2)"
-echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | cut -f2)"
+if [ ! -f /usr/bin/lsb_release ]; then
+	echo "Unable to display distro info. Package lsb-release not installed"
+else
+	echo "${COL}--Distribution:${RESET} $(lsb_release -i | cut -f2)" #tab is the default delimeter for cut
+	echo "${DIM}${COL}----Release:${RESET} $(lsb_release -r | cut -f2)"
+	echo "${DIM}${COL}----Codename:${RESET} $(lsb_release -c | cut -f2)"
+fi
 
 ###############################
 ## Print network and network interface info
@@ -247,11 +251,15 @@ do
 		echo "${DIM}${COL}----MAC address:${RESET} $mac"	#if so, print it
 	fi
 
-        ## Check if the status of the inteface is "up" or "unkown" (not "down")
-        if [ "$status" != "down" ]; then ## If so, print the designated IP address.
-                ip=$(/bin/ip addr show "${i}" | grep -w -m1 "inet" | cut -d " " -f6)
-		echo "${DIM}${COL}----IP address:${RESET} $ip"
-        fi
+	## Check if the status of the inteface is "up" or "unkown" (not "down")
+	if [ "$status" != "down" ]; then ## If so, print the designated IP address.
+		if [ ! -f /bin/ip ]; then
+			echo "Unable to determine interface ip address. /bin/ip needed but iproute2 not installed"
+		else
+			ip=$(/bin/ip addr show "${i}" | grep -w -m1 "inet" | cut -d " " -f6)
+			echo "${DIM}${COL}----IP address:${RESET} $ip"
+		fi
+	fi
 
         ## Check if the current interface is connected to an essid
 	if [ -e /sbin/iwgetid ]; then   ## Check to ensure that iwgetid is installed.  If not, print nothing.
