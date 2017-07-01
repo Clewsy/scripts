@@ -28,7 +28,6 @@ sudo pkill openvpn
 
 #download current data from ipinfo.io into TEMP_FILE (this is the info without the vpn active)
 if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinfo.io ; then #execute curl and check if it exited with a failure
-	rm "$TEMP_FILE"
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 	echo
