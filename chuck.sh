@@ -31,7 +31,7 @@ if [ ! "$(which rsync)" ] ; then	#check to ensure rsync is installed.  If not, e
 	echo
 	echo -e "${RED}Error: rsync is not installed.  Quitting${RESET}"
 	echo
-	exit 0
+	exit -1
 fi
 
 if [ ! -z "$1" ] ; then	#if an argument exists then it should be the file on the default remote server
@@ -91,6 +91,7 @@ else
 	echo
 	echo -e "${RED}Failure.${RESET}"
 	echo
+	exit -1
 fi
 
 exit 0 
