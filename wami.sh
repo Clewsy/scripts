@@ -1,14 +1,14 @@
 #!/bin/bash
 
-RED="\033[31m"
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
+RED="\033[00;31m"
+BOLD="\033[01;37m"
+RESET="\033[00;0m"
 
 TEMP_FILE="$(dirname "$0")/temp"	#define the temp file location so that the script will work even if run from a directory without write access
 
 if [ ! "$(which curl)" ] ; then	#check if curl is not installed
 	echo
-	echo -e "${RED}Error${RESET}: curl is not installed.  Quitting."
+	echo -e "${RED}Error:${RESET} curl is not installed.  Quitting."
 	echo
 	exit -1
 fi
@@ -31,13 +31,13 @@ loc=$(grep "loc" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 org=$(grep "org" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 
 echo
-echo "${BOLD}IP:${RESET}------------ ${ip}"
-echo "${BOLD}Hostname:${RESET}------ ${hostname}"
-echo "${BOLD}City:${RESET}---------- ${city}"
-echo "${BOLD}Region:${RESET}-------- ${region}"
-echo "${BOLD}Country:${RESET}------- ${country}"
-echo "${BOLD}Co-ordinates:${RESET}-- ${loc}"
-echo "${BOLD}Organisation:${RESET}-- ${org}"
+echo  -e "${BOLD}IP:${RESET}------------ ${ip}"
+echo  -e "${BOLD}Hostname:${RESET}------ ${hostname}"
+echo  -e "${BOLD}City:${RESET}---------- ${city}"
+echo  -e "${BOLD}Region:${RESET}-------- ${region}"
+echo  -e "${BOLD}Country:${RESET}------- ${country}"
+echo  -e "${BOLD}Co-ordinates:${RESET}-- ${loc}"
+echo  -e "${BOLD}Organisation:${RESET}-- ${org}"
 echo
 
 rm "$TEMP_FILE"
