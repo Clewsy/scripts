@@ -1,18 +1,18 @@
 #!/bin/bash
 
-#BLACK="\033[00;30m"
-#RED="\033[00;31m"
-#GREEN="\033[00;32m"
-#YELLOW="\033[00;33m"
-#BLUE="\033[00;34m"
-#MAGENTA="\033[00;35m"
-CYAN="\033[00;36m"
-#GRAY="\033[00;37m"
-#WHITE="\033[01;37m"
+#BLACK="\\033[00;30m"
+#RED="\\033[00;31m"
+#GREEN="\\033[00;32m"
+#YELLOW="\\033[00;33m"
+#BLUE="\\033[00;34m"
+#MAGENTA="\\033[00;35m"
+CYAN="\\033[00;36m"
+#GRAY="\\033[00;37m"
+#WHITE="\\033[01;37m"
 
-BOLD="\033[1m"
-DIM="\033[2m"
-RESET="\033[0m"
+BOLD="\\033[1m"
+DIM="\\033[2m"
+RESET="\\033[0m"
 
 ## Set main heading colour from options above.
 COL=${CYAN}
@@ -81,7 +81,7 @@ if [ -s /sys/devices/virtual/dmi/id/board_name ]; then
 			else
 				echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}"			## Motherboard model, version
 			fi
-		elif [ ! -z "${board_vendor}" ]; then
+		elif [ ! -z "${BOARD_VENDOR}" ]; then
 			echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})"					## Motherboard name, vendor
 		else
 			echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME}"							## Motherboard model
@@ -174,7 +174,7 @@ if ! which lsblk >> /dev/null ; then	#If lsblk not installed (send to /dev/null 
 else
 	echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"
 	NUM_PARTS=$(lsblk -lno NAME | wc -w)		## Determine quantity of disks/partitions
-	for (( c=1; c<=$NUM_PARTS; c++ ))		## Loop through output for each of the disks/partitions
+	for (( c=1; c<=NUM_PARTS; c++ ))		## Loop through output for each of the disks/partitions
 	do
 		WORKING_PART=$(lsblk -lno NAME | sed "${c}q;d")		## Define working disk/partition - #"c" from the list output by lsblk command 
 		PART_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_PART}")	## Determine type (disk or partition) of working disk/partition (t)
@@ -264,16 +264,16 @@ fi
 ## Get hostname
 echo -e "${COL}--Hostname:${RESET} $(uname -n)"
 ## Get info for all network interface devices (physical and virtual)
-NUM_DEVS=$(ls /sys/class/net | wc -w)
-for (( c=1; c<=$NUM_DEVS; c++ ))
+NUM_DEVS=$(find /sys/class/net -type l | wc -w)
+for (( c=1; c<=NUM_DEVS; c++ ))
 do
-	WORKING_INTERFACE=$(ls /sys/class/net | sed "${c}q;d")		## Select working interface from the list of interfaces
+	WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)	## Select working interface from the list of interfaces
 	echo -e "${COL}--Interface:${RESET} ${WORKING_INTERFACE}"
-	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)	## Status of interface up, down or unknown.
-	echo -e "${COL}${DIM}----Status:${RESET} ${STATUS}"		## Print interface status
-	MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)	## MAC address of the inteface.
-	if [ ! -z "${MAC}" ]; then					## Check if a MAC address was found
-		echo -e "${COL}${DIM}----MAC address:${RESET} ${MAC}"	## If so, print it
+	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)				## Status of interface up, down or unknown.
+	echo -e "${COL}${DIM}----Status:${RESET} ${STATUS}"					## Print interface status
+	MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)				## MAC address of the inteface.
+	if [ ! -z "${MAC}" ]; then								## Check if a MAC address was found
+		echo -e "${COL}${DIM}----MAC address:${RESET} ${MAC}"				## If so, print it
 	fi
 	
 	## Check if the status of the inteface is "up" or "unkown" (not "down")
@@ -309,7 +309,7 @@ do
 			ESSID=$(iwgetid -r)
 		fi
 	fi
-	if [ ! -z "${ESSID}" ] && [ ${ESSID} != "Wired" ] ; then		#If an essid was found
+	if [ ! -z "${ESSID}" ] && [ "${ESSID}" != "Wired" ] ; then		#If an essid was found
 		echo -e "${COL}${DIM}----Connected ESSID:${RESET} ${ESSID}"
 	fi
 done
