@@ -31,7 +31,7 @@ if [ ! "$(which rsync)" ] ; then	#check to ensure rsync is installed.  If not, e
 	echo
 	echo -e "${RED}Error: rsync is not installed.  Quitting${RESET}"
 	echo
-	exit -1
+	exit 0
 fi
 
 if [ ! -z "$1" ] ; then	#if an argument exists then it should be the file on the default remote server
@@ -47,7 +47,7 @@ if [ ! -z "$1" ] ; then	#if an argument exists then it should be the file on the
 	echo "Local file: $loc_file (default)"
 else	#if no argument is entered then request manual input for the remote server/file (source) info and the local file (target) info.
 	echo
-	read -pr "Enter remote username: " rem_user        #request username for remote login
+	read -p "Enter remote username: " rem_user        #request username for remote login
 	if [ -z "$rem_user" ] ; then	#set the remote login username to the default if none specified
 		echo "No remote username set.  Using default"
 		rem_user=$DEFAULT_USER
@@ -55,7 +55,7 @@ else	#if no argument is entered then request manual input for the remote server/
 	echo "Username: $rem_user"
 
 	echo
-	read -pr "Enter remote server (default=${DEFAULT_SERVER}): " rem_server   #request server for remote login
+	read -p "Enter remote server (default=${DEFAULT_SERVER}): " rem_server   #request server for remote login
 	if [ -z "$rem_server" ] ; then	#set the remote server to the default if none specified
 		echo "No remote server name set.  Using default."
 		rem_server=$DEFAULT_SERVER
@@ -63,7 +63,7 @@ else	#if no argument is entered then request manual input for the remote server/
 	echo "Server: $rem_server"
 
 	echo
-	read -pr "Enter remote directory/file (source): " rem_file #request source file including location on remote server
+	read -p "Enter remote directory/file (source): " rem_file #request source file including location on remote server
 	if [ -z "$rem_file" ] ; then
 		echo "No source file entered.  Using default."
 		rem_file=$DEFAULT_REMOTE_FILE
@@ -71,7 +71,7 @@ else	#if no argument is entered then request manual input for the remote server/
 	echo "Remote (source) file: $rem_file"
 
 	echo
-	read -pr "Enter local directory/file (target): " loc_file #request target file including location on local machine
+	read -p "Enter local directory/file (target): " loc_file #request target file including location on local machine
 	if [ -z "$loc_file" ] ; then
 		echo "No local file set.  Using default."
 		loc_file=$DEFAULT_LOCAL_FILE
@@ -91,7 +91,6 @@ else
 	echo
 	echo -e "${RED}Failure.${RESET}"
 	echo
-	exit -1
 fi
 
 exit 0 
