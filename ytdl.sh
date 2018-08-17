@@ -8,8 +8,8 @@
 #
 #Requirements:
 #termux
-#termux-api (installed from f-droit and also within termux with command "apt install termux-api")
-#python (required for installation of youtube-dl.  install with command "apt install python")
+#termux-api (installed from f-droid and also within termux with command "apt install termux-api")
+#python (required for installation of youtube-dl via pip.  install with command "apt install python")
 #youtube-dl (installed from within termux with command "pip install youtube-dl")
 
 
@@ -37,7 +37,9 @@ if [ -z "$(which termux-clipboard-get)" ]; then	#if the termux-clipboard-get com
 fi
 
 echo
-echo "---Fetching url from clipboard: (if this hangs, ctrl-c to exit then install termux-api from f-droid)"
+echo "---Fetching url from clipboard:"
+echo "	(if this hangs, ctrl-c to exit then install termux-api from f-droid)"
+echo "	(alternatively, try updating youtube-dl with \"sudo pip install --upgrade youtube-dl\")"
 url=$(termux-clipboard-get)
 
 if [ -z "$url" ]; then
@@ -47,12 +49,12 @@ fi
 
 echo "----------"
 
-while true	#infinite loop until download is successful
+while true	#loop until download is successful
 do
 	echo
 	echo "url= $url"
 	echo "---Executing youtube-dl and selecting best video quality"
-	if youtube-dl -c -f best "$url"; then	#execute youtube-dl and check for success on exit.
+	if youtube-dl -c --mark-watched -f best "$url"; then	#execute youtube-dl and check for success on exit.
 		echo
 		echo -e "${GREEN}---all done!${RESET}"
 		termux-notification -i "ytdl" -c "Download complete" -t "$(basename "$0")"
