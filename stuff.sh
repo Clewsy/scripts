@@ -4,9 +4,9 @@
 #RED="\\033[00;31m"
 #GREEN="\\033[00;32m"
 #YELLOW="\\033[00;33m"
-#BLUE="\\033[00;34m"
+BLUE="\\033[00;34m"
 #MAGENTA="\\033[00;35m"
-CYAN="\\033[00;36m"
+#CYAN="\\033[00;36m"
 #GRAY="\\033[00;37m"
 #WHITE="\\033[01;37m"
 
@@ -15,7 +15,7 @@ DIM="\\033[2m"
 RESET="\\033[0m"
 
 ## Set main heading colour from options above.
-COL=${CYAN}
+COL=${BLUE}
 
 echo
 echo -e "${COL}╔════════════════════╗${RESET}"
@@ -176,7 +176,7 @@ else
 	NUM_PARTS=$(lsblk -lno NAME | wc -w)		## Determine quantity of disks/partitions
 	for (( c=1; c<=NUM_PARTS; c++ ))		## Loop through output for each of the disks/partitions
 	do
-		WORKING_PART=$(lsblk -lno NAME | sed "${c}q;d")		## Define working disk/partition - #"c" from the list output by lsblk command 
+		WORKING_PART=$(lsblk -lno NAME | sed "${c}q;d")		## Define working disk/partition - #"c" from the list output by lsblk command
 		PART_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_PART}")	## Determine type (disk or partition) of working disk/partition (t)
 
 	        # If type is "disk" (not partition)
@@ -264,8 +264,8 @@ fi
 ## Get hostname
 echo -e "${COL}--Hostname:${RESET} $(uname -n)"
 ## Get info for all network interface devices (physical and virtual)
-NUM_DEVS=$(find /sys/class/net -type l | wc -w)
-for (( c=1; c<=NUM_DEVS; c++ ))
+NUM_DEVS=$(find /sys/class/net -type l | wc -w)		## Determine the number of network interfaces.
+for (( c=1; c<=NUM_DEVS; c++ ))				## Run this loop for each interface.
 do
 	WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)	## Select working interface from the list of interfaces
 	echo -e "${COL}--Interface:${RESET} ${WORKING_INTERFACE}"
@@ -275,7 +275,7 @@ do
 	if [ ! -z "${MAC}" ]; then								## Check if a MAC address was found
 		echo -e "${COL}${DIM}----MAC address:${RESET} ${MAC}"				## If so, print it
 	fi
-	
+
 	## Check if the status of the inteface is "up" or "unkown" (not "down")
 	if [ "${STATUS}" != "down" ]; then ## If so, print the designated IP address.
 		if ! which ip >> /dev/null ; then			# If ip is not installed (send to /dev/null to suppress stdout)
@@ -292,13 +292,13 @@ do
 		fi
 	fi
 
-	## Check if the current interface is connected to an essid
+	## Check if the current interface is connected to an a
 	if ! which iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
 		if ! which iw >> /dev/null ; then		## If iw is not installed (send to /dev/null to suppress stdout)
 			if ! which nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
 				echo -e "Unable to check for ESSID (iwgetid, iw and nmcli not installed)"
 			else
-				ESSID=$(nmcli | grep "connected to" | cut -d " " -f 4)
+				ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)
 			fi
 		else
 			ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)
@@ -315,6 +315,6 @@ do
 done
 
 echo -e "${COL}==================${RESET}"
-echo 
+echo
 
 exit 0
