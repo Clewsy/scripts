@@ -4,9 +4,9 @@
 #RED="\\033[00;31m"
 #GREEN="\\033[00;32m"
 #YELLOW="\\033[00;33m"
-BLUE="\\033[00;34m"
+#BLUE="\\033[00;34m"
 #MAGENTA="\\033[00;35m"
-#CYAN="\\033[00;36m"
+CYAN="\\033[00;36m"
 #GRAY="\\033[00;37m"
 #WHITE="\\033[01;37m"
 
@@ -15,7 +15,7 @@ DIM="\\033[2m"
 RESET="\\033[0m"
 
 ## Set main heading colour from options above.
-COL=${BLUE}
+COL=${CYAN}
 
 echo
 echo -e "${COL}╔════════════════════╗${RESET}"
@@ -292,7 +292,7 @@ do
 		fi
 	fi
 
-	## Check if the current interface is connected to an a
+	## Check if the current interface is connected to WIFI.  If so, show ESSID.
 	if ! which iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
 		if ! which iw >> /dev/null ; then		## If iw is not installed (send to /dev/null to suppress stdout)
 			if ! which nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
@@ -305,8 +305,10 @@ do
 		fi
 	else
 		IF_WIFI_CONN=$(iwgetid | awk '{print $1}')
-		if [ "${IF_WIFI_CONN}" = "${WORKING_INTERFACE}" ]; then		## If so, print the connected essid.
-			ESSID=$(iwgetid -r)
+		if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then		## If iwgetid shows that WORKING_INTERFACE has aconnected ESSID
+			ESSID=$(iwgetid -r)						## Then get the ESSID.
+		else
+			ESSID=""							## Needed in-case previous loop iteration sets ESSID.
 		fi
 	fi
 	if [ ! -z "${ESSID}" ] && [ "${ESSID}" != "Wired" ] ; then		#If an essid was found
