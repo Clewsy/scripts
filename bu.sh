@@ -17,7 +17,8 @@ NO_REM_DIR=4	#ssh command to create remote directory failed
 
 #Configurable settings
 BU_USER="b4t"
-BU_SERVER="b4t.site"
+BU_SERVER_LOCAL="beaglebone"
+BU_SERVER_REMOTE="b4t.site"
 BU_REMOTE_DIR="$HOME/file_cache/$HOSTNAME"
 BU_FILE_LIST=${1-"${HOME}/bin/bu.list"}		#First argument is the file name of the list of files to be backed up.
 						#If argument not provided, set default. Syntax: parameter=${parameter-default}
@@ -30,6 +31,16 @@ if [ $# -gt 1 ]; then	#Check than no more than one argument is provided.
 	exit $TOO_MANY_ARGS
 fi
 
+#Determine server hostname (i.e. use local network or remote network).
+echo
+echo "Checking for local backup server availability."
+if ping -c 1 -W 1 "$BU_SERVER_LOCAL" >> /dev/null; then	#If a ping to the local server is successful...
+	BU_SERVER="$BU_SERVER_LOCAL"			#Use the local server.
+	echo "Using local server (${BU_SERVER})."
+else
+	BU_SERVER="$BU_SERVER_REMOTE"			#Otherwise, use the remote server.
+	echo "Using remote server (${BU_SERVER})."
+fi
 
 #Validate the backup file list.
 echo
