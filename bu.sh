@@ -19,7 +19,7 @@ NO_REM_DIR=4	#ssh command to create remote directory failed
 BU_USER="b4t"
 BU_SERVER_LOCAL="beaglebone"
 BU_SERVER_REMOTE="b4t.site"
-BU_REMOTE_DIR="$HOME/file_cache/$HOSTNAME"
+BU_REMOTE_DIR="/home/$BU_USER/file_cache/$HOSTNAME"
 BU_FILE_LIST=${1-"${HOME}/bin/bu.list"}		#First argument is the file name of the list of files to be backed up.
 						#If argument not provided, set default. Syntax: parameter=${parameter-default}
 
@@ -72,7 +72,7 @@ fi
 #Validate the backup folder or create if absent.
 echo
 echo "Checking for remote backup directory \"$BU_REMOTE_DIR\" on remote backup server \"$BU_SERVER\" (will be created if absent)."
-if ! ssh $BU_SERVER "mkdir -p $BU_REMOTE_DIR"	#Connects to the remote server and creates the directory to which bu files will be copied.
+if ! ssh $BU_USER@$BU_SERVER "mkdir -p $BU_REMOTE_DIR"	#Connects to the remote server and creates the directory to which bu files will be copied.
 then			#Checks the exit code from the SSH command.  If not zero, then it failed.
 	echo -e "${RED}Failed to create remote directory${RESET}"
 	exit $NO_REM_DIR
