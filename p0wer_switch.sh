@@ -14,12 +14,12 @@ COMMAND="sudo p0wer d on"	# Command to run on server.
 
 echo "Desired command on target: \"${COMMAND}\""
 echo "Attempting local connection."
-ssh ${LOC_USER}@${LOC_SERVER} "${COMMAND}"
+ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"
 if [ $? = '0' ]; then						# If local connection succeeds.
 	echo "Command successfully sent locally."
 else								# Local connection timed out.
 	echo "Unable to make local connection.  Attempting remote connection"
-	ssh ${REM_USER}@${REM_SERVER} "ssh ${LOC_USER}@${LOC_SERVER} "${COMMAND}""
+	ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}""
 	if [ $? = '0' ]; then					# If remote connection succeeds.
 		echo "Command successfully sent remotely."
 	else							# Remote connection timed out.
