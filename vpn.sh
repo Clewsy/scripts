@@ -8,7 +8,8 @@ GREEN="\033[32m"
 RESET="\033[0m"
 
 #define the vpn config file to be used by openvpn.
-VPN_FILE="/etc/openvpn/Windscribe-Australia.ovpn"
+#VPN_FILE="/etc/openvpn/Windscribe-Australia.ovpn"
+VPN_FILE="/home/b4t/openvpn_configs/b4t.ovpn"
 
 #define a temp file into which ipinfo.io data will be entered and then parsed
 TEMP_FILE=$(dirname "$0")/temp	#using $dirname of $0 will create temp in the current working directory
@@ -47,7 +48,7 @@ echo "Current city: $current_city"
 echo
 echo "Running openvpn using config file at \"$VPN_FILE\""
 echo "(\"sudo pkill openvpn\" to disable)"
-if ! sudo openvpn $VPN_FILE ; then	#Execute openvpn then exit script if it fails
+if ! sudo openvpn --config $VPN_FILE --daemon ; then	#Execute openvpn then exit script if it fails
 	rm "$TEMP_FILE"
 	echo
 	echo -e "${RED}Error:${RESET} openvpn failed. Quitting"
