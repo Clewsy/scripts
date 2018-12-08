@@ -2,11 +2,11 @@
 
 #BLACK="\\033[00;30m"
 #RED="\\033[00;31m"
-#GREEN="\\033[00;32m"
+GREEN="\\033[00;32m"
 #YELLOW="\\033[00;33m"
 #BLUE="\\033[00;34m"
 #MAGENTA="\\033[00;35m"
-CYAN="\\033[00;36m"
+#CYAN="\\033[00;36m"
 #GRAY="\\033[00;37m"
 #WHITE="\\033[01;37m"
 
@@ -15,7 +15,7 @@ DIM="\\033[2m"
 RESET="\\033[0m"
 
 ## Set main heading colour from options above.
-COL=${CYAN}
+COL=${GREEN}
 
 echo
 echo -e "${COL}╔════════════════════╗${RESET}"
@@ -296,7 +296,8 @@ do
 	if ! which iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
 		if ! which iw >> /dev/null ; then		## If iw is not installed (send to /dev/null to suppress stdout)
 			if ! which nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
-				echo -e "Unable to check for ESSID (iwgetid, iw and nmcli not installed)"
+				## echo -e "Unable to check for ESSID (iwgetid, iw and nmcli not installed)"	## Probably safe to assume no wifi connection.
+				ESSID=""
 			else
 				ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)
 			fi
