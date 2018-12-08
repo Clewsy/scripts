@@ -1,6 +1,6 @@
 # scripts
 
-bu.sh - Uses scp to back up files and directories listed in a specified file to a remote server.
+bu.sh - Uses rsync to back up files and directories listed in a specified file to a remote server.  Falls back to scp if rsync is not installed.
 
 grab.sh - Uses rsync (to allow resume after interruption) to download a specified file from a remote server.
 
