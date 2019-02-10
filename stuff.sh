@@ -2,11 +2,11 @@
 
 #BLACK="\\033[00;30m"
 #RED="\\033[00;31m"
-GREEN="\\033[00;32m"
+#GREEN="\\033[00;32m"
 #YELLOW="\\033[00;33m"
 #BLUE="\\033[00;34m"
 #MAGENTA="\\033[00;35m"
-#CYAN="\\033[00;36m"
+CYAN="\\033[00;36m"
 #GRAY="\\033[00;37m"
 #WHITE="\\033[01;37m"
 
@@ -15,7 +15,7 @@ DIM="\\033[2m"
 RESET="\\033[0m"
 
 ## Set main heading colour from options above.
-COL=${GREEN}
+COL=${CYAN}
 
 echo
 echo -e "${COL}╔════════════════════╗${RESET}"
@@ -249,14 +249,18 @@ if [ "${DNS}" ]; then	## If data exists for DNS
 	echo -e "${COL}--DNS:${RESET} ${DNS}"
 fi
 ## Show default gateway address
-if ! which route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
-	if ! which netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
-		echo -e "Cannot determine default gateway address (neither route nor netstat installed)"
+if ! which ip >> /dev/null ; then			## If ip not installed (send to /dev/null to suppress stdout)
+	if ! which route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
+		if ! which netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
+			echo -e "Cannot determine default gateway address (neither ip nor route nor netstat installed)"
+		else
+			GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+		fi
 	else
-		GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+		GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 	fi
 else
-	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+	GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
 fi
 if [ "${GW}" ]; then	## If data exists for GW
 	echo -e "${COL}--Gateway:${RESET} ${GW}"
