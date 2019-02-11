@@ -217,13 +217,19 @@ fi
 ## Print OS kernel and distribution info
 echo -e "${COL}${BOLD}Operating System:${RESET}"
 echo -e "${COL}--OS:${RESET} $(uname -o)"			## Print OS
-echo -e "${COL}--Machine:${RESET} $(uname -m)"			## Print machine
+echo -e "${COL}--Architecture:${RESET} $(uname -m)"		## Print machine
 echo -e "${COL}--Kernel:${RESET} $(uname -s)"			## Print kernel
 echo -e "${COL}${DIM}----Version:${RESET} $(uname -v)"		## Print kernel version
 echo -e "${COL}${DIM}----Release:${RESET} $(uname -r)"		## Print kernel release
 if ! which lsb_release >> /dev/null ; then			## If lsb_release not installed (send to /dev/null to suppress stdout)
-	echo -e "Cannot determine distribution information (lsb_release not installed)"
-else
+	if [ ! -f /etc/os-release ]; then			## If file /etc/os-release does not exist
+		echo -e "Cannot determine distribution information (lsb_release not installed and /etc/os-release not present)"
+	else	## Determine distribution info by parsing contents of /etc/os-release
+		echo -e "${COL}${DIM}--Distribution:${RESET} $(grep "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro
+		echo -e "${COL}${DIM}----Version:${RESET} $(grep "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"		## Print distro version
+		echo -e "${COL}${DIM}----ID:${RESET} $(grep "^ID=" /etc/os-release | cut -d "=" -f 2)"				## Print distro ID
+	fi
+else		## Determine distribution info by running command "lsb_release"
 	echo -e "${COL}--Distribution:${RESET} $(lsb_release -i | cut -f2)"		## Print distro
 	echo -e "${COL}${DIM}----Release:${RESET} $(lsb_release -r | cut -f2)"		## Print distro release
 	echo -e "${COL}${DIM}----Codename:${RESET} $(lsb_release -c | cut -f2)"		## Print distro codename
@@ -249,18 +255,14 @@ if [ "${DNS}" ]; then	## If data exists for DNS
 	echo -e "${COL}--DNS:${RESET} ${DNS}"
 fi
 ## Show default gateway address
-if ! which ip >> /dev/null ; then			## If ip not installed (send to /dev/null to suppress stdout)
-	if ! which route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
-		if ! which netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
-			echo -e "Cannot determine default gateway address (neither ip nor route nor netstat installed)"
-		else
-			GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
-		fi
+if ! which route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
+	if ! which netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
+		echo -e "Cannot determine default gateway address (neither route nor netstat installed)"
 	else
-		GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+		GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 	fi
 else
-	GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
+	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 fi
 if [ "${GW}" ]; then	## If data exists for GW
 	echo -e "${COL}--Gateway:${RESET} ${GW}"
