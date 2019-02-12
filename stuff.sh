@@ -253,14 +253,18 @@ if [ -n "${DNS}" ]; then	## If data exists for DNS
 	echo -e "${COL}--DNS:${RESET} ${DNS}"
 fi
 ## Show default gateway address
-if ! command -v route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
-	if ! command -v netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
-		echo -e "Cannot determine default gateway address (neither route nor netstat installed)"
+if ! command -v ip >> /dev/null ; then				## If ip not installed (send to /dev/null to suppress stdout)
+	if ! command -v route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
+		if ! command -v netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
+			echo -e "Cannot determine default gateway address (neither route nor netstat installed)"
+		else
+			GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+		fi
 	else
-		GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+		GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 	fi
 else
-	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+	GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
 fi
 if [ -n "${GW}" ]; then	## If data exists for GW
 	echo -e "${COL}--Gateway:${RESET} ${GW}"
