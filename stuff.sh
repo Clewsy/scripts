@@ -1,21 +1,19 @@
 #!/bin/bash
 
-#BLACK="\\033[00;30m"
-#RED="\\033[00;31m"
-#GREEN="\\033[00;32m"
-#YELLOW="\\033[00;33m"
-#BLUE="\\033[00;34m"
-#MAGENTA="\\033[00;35m"
-CYAN="\\033[00;36m"
-#GRAY="\\033[00;37m"
-#WHITE="\\033[01;37m"
+## Set main heading colour from options above.
+#COL="\\033[00;30m"		#BLACK
+#COL="\\033[00;31m"		#RED
+#COL="\\033[00;32m"		#GREEN
+#COL="\\033[00;33m"		#YELLOW
+#COL="\\033[00;34m"		#BLUE
+#COL="\\033[00;35m"		#MAGENTA
+COL="\\033[00;36m"		#CYAN
+#COL="\\033[00;37m"		#GRAY
+#COL="\\033[01;37m"		#WHITE
 
 BOLD="\\033[1m"
 DIM="\\033[2m"
 RESET="\\033[0m"
-
-## Set main heading colour from options above.
-COL=${CYAN}
 
 echo
 echo -e "${COL}╔════════════════════╗${RESET}"
@@ -28,14 +26,14 @@ if [ -s /sys/devices/virtual/dmi/id/product_name ]; then
 	PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name)
 	PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version)
 	SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor)
-	if [ ! -z "${PRODUCT_NAME}" ]; then
-		if [ ! -z "${PRODUCT_VERSION}" ]; then
-			if [ ! -z "${SYS_VENDOR}" ]; then
+	if [ -n "${PRODUCT_NAME}" ]; then
+		if [ -n "${PRODUCT_VERSION}" ]; then
+			if [ -n "${SYS_VENDOR}" ]; then
 				echo -e "${COL}${BOLD}Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})"
 			else
 				echo -e "${COL}${BOLD}Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}"
 			fi
-		elif [ ! -z "${SYS_VENDOR}" ]; then
+		elif [ -n "${SYS_VENDOR}" ]; then
 			echo -e "${COL}${BOLD}Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})"
 		else
 			echo -e "${COL}${BOLD}Product:${RESET} ${PRODUCT_NAME}"
@@ -51,14 +49,14 @@ if [ -s /sys/devices/virtual/dmi/id/chassis_type ]; then
 	CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type)
 	CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version)
 	CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor)
-	if [ ! -z "${CHASSIS_TYPE}" ]; then
-        	if [ ! -z "${CHASSIS_VERSION}" ]; then
-			if [ ! -z "${CHASSIS_VENDOR}" ]; then
+	if [ -n "${CHASSIS_TYPE}" ]; then
+        	if [ -n "${CHASSIS_VERSION}" ]; then
+			if [ -n "${CHASSIS_VENDOR}" ]; then
 				echo -e "${COL}${BOLD}Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})"	## Chassis type, version, vendor
 			else
 				echo -e "${COL}${BOLD}Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}"			## Chassis type, version
 			fi
-		elif [ ! -z "${CHASSIS_VENDOR}" ]; then
+		elif [ -n "${CHASSIS_VENDOR}" ]; then
 			echo -e "${COL}${BOLD}Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})"					## Chassis type, vendor
 		fi
 	else
@@ -74,14 +72,14 @@ if [ -s /sys/devices/virtual/dmi/id/board_name ]; then
 	BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name)
 	BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version)
 	BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor)
-	if [ ! -z "${BOARD_NAME}" ]; then
-		if [ ! -z "${BOARD_VERSION}" ]; then
-			if [ ! -z "${BOARD_VENDOR}" ]; then
+	if [ -n "${BOARD_NAME}" ]; then
+		if [ -n "${BOARD_VERSION}" ]; then
+			if [ -n "${BOARD_VENDOR}" ]; then
 				echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})"	## Motherboard model, version, vendor
 			else
 				echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}"			## Motherboard model, version
 			fi
-		elif [ ! -z "${BOARD_VENDOR}" ]; then
+		elif [ -n "${BOARD_VENDOR}" ]; then
 			echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})"					## Motherboard name, vendor
 		else
 			echo -e "${COL}${BOLD}Motherboard:${RESET} ${BOARD_NAME}"							## Motherboard model
@@ -97,14 +95,14 @@ if [ -s /sys/devices/virtual/dmi/id/bios_date ]; then
 	BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date)
 	BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version)
 	BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor)
-	if [ ! -z "${BIOS_DATE}" ]; then
-		if [ ! -z "${BIOS_VERSION}" ]; then
-			if [ ! -z "${BIOS_VENDOR}" ]; then
+	if [ -n "${BIOS_DATE}" ]; then
+		if [ -n "${BIOS_VERSION}" ]; then
+			if [ -n "${BIOS_VENDOR}" ]; then
 				echo -e "${COL}${BOLD}Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})"	## Bios date, version, vendor
 			else
 				echo -e "${COL}${BOLD}Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}"			## Bios date, version
 			fi
-		elif [ ! -z "${BIOS_VENDOR}" ]; then
+		elif [ -n "${BIOS_VENDOR}" ]; then
 			echo -e "${COL}${BOLD}Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})"					## Bios date, vendor
 		else
 			echo -e "${COL}${BOLD}Bios:${RESET} ${BIOS_DATE}"							## Bios date
@@ -116,7 +114,7 @@ fi
 
 ###############################
 ## Print available CPU info
-if ! which lscpu >> /dev/null ; then	#If lscpu not installed (send to /dev/null to suppress stdout)
+if ! command -v lscpu >> /dev/null ; then	#If lscpu not installed (send to /dev/null to suppress stdout)
 	echo -e "Cannot determine cpu infomtion (lscpu not installed)"
 else
 	MODEL=$(lscpu | grep "Model name:" | tail -c+24)
@@ -127,13 +125,13 @@ else
 	MAX_SPEED=$(lscpu | grep "CPU max" | awk '{print $4}')
 	MIN_SPEED=$(lscpu | grep "CPU min" | awk '{print $4}')
 	echo -e "${COL}${BOLD}CPU:${RESET}"
-	if [ ! -z "${MODEL}" ];		then echo -e "${COL}--Model:${RESET} ${MODEL}"; fi		## CPUModel and vendor
-	if [ ! -z "${ARCH}" ];		then echo -e "${COL}--Architecture:${RESET} ${ARCH}"; fi	## Architecture
-	if [ ! -z "${MODE}" ];		then echo -e "${COL}--Mode(s):${RESET} ${MODE}"; fi		## CPU op-mode(s)
-	if [ ! -z "${CORES}" ];		then echo -e "${COL}--Cores:${RESET} ${CORES}"; fi		## CPU(s)
-	if [ ! -z "${SPEED}" ];		then echo -e "${COL}--Speed:${RESET} ${SPEED}MHz"; fi		## CPU MHz
-	if [ ! -z "${MAX_SPEED}" ];	then echo -e "${COL}--Max Speed:${RESET} ${MAX_SPEED}MHz"; fi	## Max CPU MHz
-	if [ ! -z "${MIN_SPEED}" ];	then echo -e "${COL}--Min Speed:${RESET} ${MIN_SPEED}MHz"; fi	## Min CPU MHz
+	if [ -n "${MODEL}" ];		then echo -e "${COL}--Model:${RESET} ${MODEL}"; fi		## CPUModel and vendor
+	if [ -n "${ARCH}" ];		then echo -e "${COL}--Architecture:${RESET} ${ARCH}"; fi	## Architecture
+	if [ -n "${MODE}" ];		then echo -e "${COL}--Mode(s):${RESET} ${MODE}"; fi		## CPU op-mode(s)
+	if [ -n "${CORES}" ];		then echo -e "${COL}--Cores:${RESET} ${CORES}"; fi		## CPU(s)
+	if [ -n "${SPEED}" ];		then echo -e "${COL}--Speed:${RESET} ${SPEED}MHz"; fi		## CPU MHz
+	if [ -n "${MAX_SPEED}" ];	then echo -e "${COL}--Max Speed:${RESET} ${MAX_SPEED}MHz"; fi	## Max CPU MHz
+	if [ -n "${MIN_SPEED}" ];	then echo -e "${COL}--Min Speed:${RESET} ${MIN_SPEED}MHz"; fi	## Min CPU MHz
 fi
 
 ###############################
@@ -150,17 +148,17 @@ echo -e "${COL}${DIM}----Free:${RESET}  $(free -h | grep "Swap" | awk '{print $4
 
 ###############################
 ## Print video and audio info (note only first result of each if multiple video or audio devices exist)
-if ! which lspci >> /dev/null ; then		#If lspci not installed (send to /dev/null to suppress stdout)
+if ! command -v lspci >> /dev/null ; then		#If lspci not installed (send to /dev/null to suppress stdout)
 	echo -e "Cannot determine video or audio information (lspci not installed)"
 else
 	VIDEO_INFO=$(lspci -k | grep -m 1 VGA | tail -c+36)
-	if [ ! -z "${VIDEO_INFO}" ]; then
+	if [ -n "${VIDEO_INFO}" ]; then
 		echo -e "${COL}${BOLD}Video:${RESET} ${VIDEO_INFO}"	## Video info
 	else
 		echo -e "Video information not found"
 	fi
 	AUDIO_INFO=$(lspci -k | grep -m 1 Audio | tail -c+23)
-	if [ ! -z "${AUDIO_INFO}" ]; then
+	if [ -n "${AUDIO_INFO}" ]; then
 		echo -e "${COL}${BOLD}Audio:${RESET} ${AUDIO_INFO}"	## Audio info
 	else
 		echo -e "Audio information not found"
@@ -169,7 +167,7 @@ fi
 
 ###############################
 ## Print disk and partition info
-if ! which lsblk >> /dev/null ; then	#If lsblk not installed (send to /dev/null to suppress stdout)
+if ! command -v lsblk >> /dev/null ; then	#If lsblk not installed (send to /dev/null to suppress stdout)
 	echo -e "Cannot determine disk/partition information (lsblk not installed)"
 else
 	echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"
@@ -184,7 +182,7 @@ else
 			echo -e "${COL}--Disk:${RESET} ${WORKING_PART}"
 			DISK_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_PART}")	## Define disk model
 			DISK_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_PART}")	## Define disk capacity
-			if [ "${DISK_MODEL}" ]; then				## If data exists for disk model
+			if [ -n "${DISK_MODEL}" ]; then				## If data exists for disk model
 				echo -e "${COL}${DIM}----Model:${RESET} ${DISK_MODEL}"
 			fi
 			echo -e "${COL}${DIM}----Size:${RESET} ${DISK_SIZE}"
@@ -193,8 +191,8 @@ else
 		## If type is "part" (not disk)
 		if [ "${PART_TYPE}" == "part" ]; then
 			echo -e "${COL}----Partition:${RESET} ${WORKING_PART}"
-			PART_SIZE=$(lsblk -no SIZE /dev/"${WORKING_PART}")		## Define partition size
-			if [ "$(lsblk -ln | grep -m 1 "${WORKING_PART}" | awk '{print $7}')" == "/" ]; then	## If lsblk references "/dev/root" instead of corresponding "/dev/$WORKING_PART"
+			PART_SIZE=$(lsblk -no SIZE /dev/${WORKING_PART})		## Define partition size
+			if [ "$(lsblk -ln | grep -m 1 ${WORKING_PART} | awk '{print $7}')" == "/" ]; then	## If lsblk references "/dev/root" instead of corresponding "/dev/$WORKING_PART"
 				PART_PERC=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}')			## Define partition percentage utilisation of root dir
 				PART_USED=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}')			## Define partition capacity utilisation of root dir
 			else
@@ -203,10 +201,10 @@ else
 			fi
 			PART_MOUNT=$(lsblk -no MOUNTPOINT /dev/"${WORKING_PART}")	## Define partition mount location
 			echo -e "${COL}${DIM}------Size:${RESET} ${PART_SIZE}"
-			if [ "${PART_USED}" ]; then					## If data exists for partition utilisation
+			if [ -n "${PART_USED}" ]; then					## If data exists for partition utilisation
 				echo -e "${COL}${DIM}------Utilisation:${RESET} ${PART_USED} (${PART_PERC})"
 			fi
-			if [ "${PART_MOUNT}" ]; then					## If data exists for partition mount location
+			if [ -n "${PART_MOUNT}" ]; then					## If data exists for partition mount location
 				echo -e "${COL}${DIM}------Mount:${RESET} ${PART_MOUNT}"
 			fi
 		fi
@@ -221,7 +219,7 @@ echo -e "${COL}--Architecture:${RESET} $(uname -m)"		## Print machine
 echo -e "${COL}--Kernel:${RESET} $(uname -s)"			## Print kernel
 echo -e "${COL}${DIM}----Version:${RESET} $(uname -v)"		## Print kernel version
 echo -e "${COL}${DIM}----Release:${RESET} $(uname -r)"		## Print kernel release
-if ! which lsb_release >> /dev/null ; then			## If lsb_release not installed (send to /dev/null to suppress stdout)
+if ! command -v lsb_release >> /dev/null ; then			## If lsb_release not installed (send to /dev/null to suppress stdout)
 	if [ ! -f /etc/os-release ]; then			## If file /etc/os-release does not exist
 		echo -e "Cannot determine distribution information (lsb_release not installed and /etc/os-release not present)"
 	else	## Determine distribution info by parsing contents of /etc/os-release
@@ -239,11 +237,11 @@ fi
 ## Print network and network interface info
 echo -e "${COL}${BOLD}Network:${RESET}"
 ## Show external IP
-if ! which curl >> /dev/null ; then	## If curl not installed (send to /dev/null to suppress stdout)
+if ! command -v curl >> /dev/null ; then	## If curl not installed (send to /dev/null to suppress stdout)
 	echo -e "Cannot determine external IP address (curl not installed)"
 else
 	EXT_IP=$(curl --silent --max-time 5 ipinfo.io | grep -m 1 "ip" | cut -d "\"" -f4)	## Grep external IP.  Requires curl.
-	if [ "${EXT_IP}" ]; then	## If data exists for ext_ip
+	if [ -n "${EXT_IP}" ]; then	## If data exists for ext_ip
 		echo -e "${COL}--External IP:${RESET} ${EXT_IP}"
 	else
 		echo -e "${COL}--External IP:${RESET} No External Connection"
@@ -251,12 +249,12 @@ else
 fi
 ## Show dns server address
 DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)	## Grep primary (first in list) DNS
-if [ "${DNS}" ]; then	## If data exists for DNS
+if [ -n "${DNS}" ]; then	## If data exists for DNS
 	echo -e "${COL}--DNS:${RESET} ${DNS}"
 fi
 ## Show default gateway address
-if ! which route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
-	if ! which netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
+if ! command -v route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
+	if ! command -v netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
 		echo -e "Cannot determine default gateway address (neither route nor netstat installed)"
 	else
 		GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
@@ -264,7 +262,7 @@ if ! which route >> /dev/null ; then		## If route not installed (send to /dev/nu
 else
 	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 fi
-if [ "${GW}" ]; then	## If data exists for GW
+if [ -n "${GW}" ]; then	## If data exists for GW
 	echo -e "${COL}--Gateway:${RESET} ${GW}"
 fi
 ## Get hostname
@@ -278,14 +276,14 @@ do
 	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)				## Status of interface up, down or unknown.
 	echo -e "${COL}${DIM}----Status:${RESET} ${STATUS}"					## Print interface status
 	MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)				## MAC address of the inteface.
-	if [ ! -z "${MAC}" ]; then								## Check if a MAC address was found
+	if [ -n "${MAC}" ]; then								## Check if a MAC address was found
 		echo -e "${COL}${DIM}----MAC address:${RESET} ${MAC}"				## If so, print it
 	fi
 
 	## Check if the status of the inteface is "up" or "unkown" (not "down")
 	if [ "${STATUS}" != "down" ]; then ## If so, print the designated IP address.
-		if ! which ip >> /dev/null ; then			# If ip is not installed (send to /dev/null to suppress stdout)
-			if ! which ifconfig >> /dev/null ; then		# If ifconfig is not installed (send to /dev/null to suppress stdout)
+		if ! command -v ip >> /dev/null ; then			# If ip is not installed (send to /dev/null to suppress stdout)
+			if ! command -v ifconfig >> /dev/null ; then		# If ifconfig is not installed (send to /dev/null to suppress stdout)
 				echo -e "Cannot determine interface ip address (neither ip nor ifconfig installed)"
 			else
 				IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)
@@ -293,15 +291,15 @@ do
 		else
 			IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f6)
 		fi
-		if [ ! -z "${IP}" ]; then				## If an ip address was identified
+		if [ -n "${IP}" ]; then				## If an ip address was identified
 			echo -e "${COL}${DIM}----IP address:${RESET} ${IP}"
 		fi
 	fi
 
 	## Check if the current interface is connected to WIFI.  If so, show ESSID.
-	if ! which iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
-		if ! which iw >> /dev/null ; then		## If iw is not installed (send to /dev/null to suppress stdout)
-			if ! which nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
+	if ! command -v iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
+		if ! command -v iw >> /dev/null ; then		## If iw is not installed (send to /dev/null to suppress stdout)
+			if ! command -v nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
 				## echo -e "Unable to check for ESSID (iwgetid, iw and nmcli not installed)"	## Probably safe to assume no wifi connection.
 				ESSID=""
 			else
@@ -318,7 +316,7 @@ do
 			ESSID=""							## Needed in-case previous loop iteration sets ESSID.
 		fi
 	fi
-	if [ ! -z "${ESSID}" ] && [ "${ESSID}" != "Wired" ] ; then		#If an essid was found
+	if [ -n "${ESSID}" ] && [ "${ESSID}" != "Wired" ] ; then		#If an essid was found
 		echo -e "${COL}${DIM}----Connected ESSID:${RESET} ${ESSID}"
 	fi
 done
