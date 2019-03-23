@@ -193,11 +193,11 @@ else
 			echo -e "${COL}----Partition:${RESET} ${WORKING_PART}"
 			PART_SIZE=$(lsblk -no SIZE /dev/${WORKING_PART})		## Define partition size
 			if [ "$(lsblk -ln | grep -m 1 ${WORKING_PART} | awk '{print $7}')" == "/" ]; then	## If lsblk references "/dev/root" instead of corresponding "/dev/$WORKING_PART"
-				PART_PERC=$(df -h | grep -m 1 "/dev/root" | awk '{print $5}')			## Define partition percentage utilisation of root dir
-				PART_USED=$(df -h | grep -m 1 "/dev/root" | awk '{print $3}')			## Define partition capacity utilisation of root dir
+				PART_PERC=$(df -lh | grep -m 1 "/dev/root" | awk '{print $5}')			## Define partition percentage utilisation of root dir
+				PART_USED=$(df -lh | grep -m 1 "/dev/root" | awk '{print $3}')			## Define partition capacity utilisation of root dir
 			else
-				PART_PERC=$(df -h | grep -m 1 "${WORKING_PART}" | awk '{print $5}')		## Define partition percentage utilisation
-				PART_USED=$(df -h | grep -m 1 "${WORKING_PART}" | awk '{print $3}')		## Define partition capacity utilisation
+				PART_PERC=$(df -lh | grep -m 1 "${WORKING_PART}" | awk '{print $5}')		## Define partition percentage utilisation
+				PART_USED=$(df -lh | grep -m 1 "${WORKING_PART}" | awk '{print $3}')		## Define partition capacity utilisation
 			fi
 			PART_MOUNT=$(lsblk -no MOUNTPOINT /dev/"${WORKING_PART}")	## Define partition mount location
 			echo -e "${COL}${DIM}------Size:${RESET} ${PART_SIZE}"
