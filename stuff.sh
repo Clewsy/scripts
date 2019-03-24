@@ -3,11 +3,11 @@
 ## Set main heading colour from options above.
 #COL="\\033[00;30m"		#BLACK
 #COL="\\033[00;31m"		#RED
-#COL="\\033[00;32m"		#GREEN
+COL="\\033[00;32m"		#GREEN
 #COL="\\033[00;33m"		#YELLOW
 #COL="\\033[00;34m"		#BLUE
 #COL="\\033[00;35m"		#MAGENTA
-COL="\\033[00;36m"		#CYAN
+#COL="\\033[00;36m"		#CYAN
 #COL="\\033[00;37m"		#GRAY
 #COL="\\033[01;37m"		#WHITE
 
@@ -31,22 +31,14 @@ Valid options:
 while getopts 'pcmavdon' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
-		p)
-			GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag
-		c)
-			GET_C_CPU_INFO="TRUE" ;;	## Set C flag
-		m)
-			GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag
-		a)
-			GET_A_AUDIO_INFO="TRUE" ;;	## Set A flag
-		v)
-			GET_V_VIDEO_INFO="TRUE" ;;	## Set V flag
-		d)
-			GET_D_DISKS_INFO="TRUE" ;;	## Set D flag
-		o)
-			GET_O_OS_INFO="TRUE" ;;		## Set O flag
-		n)
-			GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag
+		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag
+		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag
+		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag
+		a)	GET_A_AUDIO_INFO="TRUE" ;;	## Set A flag
+		v)	GET_V_VIDEO_INFO="TRUE" ;;	## Set V flag
+		d)	GET_D_DISKS_INFO="TRUE" ;;	## Set D flag
+		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag
+		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag
 		?)
 			echo -e "$USAGE"		## Invalid option, show usage.
 			exit 1				## Exit.
@@ -57,7 +49,7 @@ shift $(($OPTIND -1))			## This ensures only non-option arguments are considered
 
 if [ -z "$OPTIONS" ]; then		## Check if no options were entered.
 	GET_ALL_INFO="TRUE"		## If so, set the ALL flag.
-fi       
+fi
 
 if (( $# > 0 )); then			## Check if an argument was entered.
 	echo -e "Invalid argument."	## If so, show usage and exit.
@@ -172,21 +164,23 @@ if [[ -n "$GET_C_CPU_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v lscpu >> /dev/null ; then	#If lscpu not installed (send to /dev/null to suppress stdout)
 		echo -e "Cannot determine cpu infomtion (lscpu not installed)"
 	else
-		MODEL=$(lscpu | grep "Model name:" | tail -c+24)
-		ARCH=$(lscpu | grep "Architecture" | awk '{print $2}')
-		MODE=$(lscpu | grep "CPU op-mode" | tail -c+24)
-		CORES=$(lscpu | grep -m 1 "CPU(s)" | awk '{print $2}')
-		SPEED=$(lscpu | grep "CPU MHz" | awk '{print $3}')
-		MAX_SPEED=$(lscpu | grep "CPU max" | awk '{print $4}')
-		MIN_SPEED=$(lscpu | grep "CPU min" | awk '{print $4}')
+		CPU_MODEL=$(lscpu | grep "Model name:" | cut -c24-)
+		CPU_VENDOR=$(lscpu | grep "Vendor ID:" | cut -c24-)
+		CPU_ARCH=$(lscpu | grep "Architecture" | cut -c24-)
+		CPU_MODE=$(lscpu | grep "CPU op-mode" | cut -c24-)
+		CPU_CORES=$(lscpu | grep -m 1 "CPU(s)" | cut -c24-)
+		CPU_SPEED=$(lscpu | grep "CPU MHz" | cut -c24-)
+		CPU_MAX_SPEED=$(lscpu | grep "CPU max" | cut -c24-)
+		CPU_MIN_SPEED=$(lscpu | grep "CPU min" | cut -c24-)
 		echo -e "${COL}${BOLD}CPU:${RESET}"
-		if [ -n "${MODEL}" ];		then echo -e "${COL}--Model:${RESET} ${MODEL}"; fi		## CPUModel and vendor
-		if [ -n "${ARCH}" ];		then echo -e "${COL}--Architecture:${RESET} ${ARCH}"; fi	## Architecture
-		if [ -n "${MODE}" ];		then echo -e "${COL}--Mode(s):${RESET} ${MODE}"; fi		## CPU op-mode(s)
-		if [ -n "${CORES}" ];		then echo -e "${COL}--Cores:${RESET} ${CORES}"; fi		## CPU(s)
-		if [ -n "${SPEED}" ];		then echo -e "${COL}--Speed:${RESET} ${SPEED}MHz"; fi		## CPU MHz
-		if [ -n "${MAX_SPEED}" ];	then echo -e "${COL}--Max Speed:${RESET} ${MAX_SPEED}MHz"; fi	## Max CPU MHz
-		if [ -n "${MIN_SPEED}" ];	then echo -e "${COL}--Min Speed:${RESET} ${MIN_SPEED}MHz"; fi	## Min CPU MHz
+		if [ -n "${CPU_MODEL}" ];	then echo -e "${COL}--Model:${RESET} ${CPU_MODEL}"; fi			## CPUModel and vendor
+		if [ -n "${CPU_VENDOR}" ];	then echo -e "${COL}--Vendor:${RESET} ${CPU_VENDOR}"; fi		## CPUModel and vendor
+		if [ -n "${CPU_ARCH}" ];	then echo -e "${COL}--Architecture:${RESET} ${CPU_ARCH}"; fi		## Architecture
+		if [ -n "${CPU_MODE}" ];	then echo -e "${COL}--Mode(s):${RESET} ${CPU_MODE}"; fi			## CPU op-mode(s)
+		if [ -n "${CPU_CORES}" ];	then echo -e "${COL}--Cores:${RESET} ${CPU_CORES}"; fi			## CPU(s)
+		if [ -n "${CPU_SPEED}" ];	then echo -e "${COL}--Speed:${RESET} ${CPU_SPEED}MHz"; fi		## CPU MHz
+		if [ -n "${CPU_MAX_SPEED}" ];	then echo -e "${COL}--Max Speed:${RESET} ${CPU_MAX_SPEED}MHz"; fi	## Max CPU MHz
+		if [ -n "${CPU_MIN_SPEED}" ];	then echo -e "${COL}--Min Speed:${RESET} ${CPU_MIN_SPEED}MHz"; fi	## Min CPU MHz
 	fi
 fi
 
