@@ -3,11 +3,11 @@
 ## Set main heading colour from options above.
 #COL="\\033[00;30m"		#BLACK
 #COL="\\033[00;31m"		#RED
-COL="\\033[00;32m"		#GREEN
+#COL="\\033[00;32m"		#GREEN
 #COL="\\033[00;33m"		#YELLOW
 #COL="\\033[00;34m"		#BLUE
 #COL="\\033[00;35m"		#MAGENTA
-#COL="\\033[00;36m"		#CYAN
+COL="\\033[00;36m"		#CYAN
 #COL="\\033[00;37m"		#GRAY
 #COL="\\033[01;37m"		#WHITE
 
@@ -233,37 +233,33 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 		NUM_PARTS=$(lsblk -lno NAME | wc -w)		## Determine quantity of disks/partitions
 		for (( c=1; c<=NUM_PARTS; c++ ))		## Loop through output for each of the disks/partitions
 		do
-			WORKING_PART=$(lsblk -lno NAME | sed "${c}q;d")		## Define working disk/partition - #"c" from the list output by lsblk command
-			PART_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_PART}")	## Determine type (disk or partition) of working disk/partition (t)
+			WORKING_PART=$(lsblk -ino NAME | sed -n "${c}p" | cut -d "-" -f 2)	## Define working disk/partition - #"c" from the lsblk list
+			PART_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_PART}")			## Determine type (disk or part) of working disk/partition (t)
 
-		        # If type is "disk" (not partition)
+		        ## If type is "disk" or "rom" (i.e. not a partition or raid)
 		        if [ "${PART_TYPE}" == "disk" ] || [ "${PART_TYPE}" == "rom" ]; then
-				echo -e "${COL}--Disk:${RESET} ${WORKING_PART}"
+				echo -e "${COL}--Device:${RESET} ${WORKING_PART}"
 				DISK_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_PART}")	## Define disk model
 				DISK_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_PART}")	## Define disk capacity
+				echo -e "${COL}${DIM}----Type:${RESET} ${PART_TYPE}"
 				if [ -n "${DISK_MODEL}" ]; then				## If data exists for disk model
 					echo -e "${COL}${DIM}----Model:${RESET} ${DISK_MODEL}"
 				fi
 				echo -e "${COL}${DIM}----Size:${RESET} ${DISK_SIZE}"
-			fi
 
-			## If type is "part" (not disk)
-			if [ "${PART_TYPE}" == "part" ]; then
-				echo -e "${COL}----Partition:${RESET} ${WORKING_PART}"
-				PART_SIZE=$(lsblk -no SIZE /dev/${WORKING_PART})		## Define partition size
-				if [ "$(lsblk -ln | grep -m 1 ${WORKING_PART} | awk '{print $7}')" == "/" ]; then	## If lsblk references "/dev/root" instead of corresponding "/dev/$WORKING_PART"
-					PART_PERC=$(df -lh | grep -m 1 "/dev/root" | awk '{print $5}')			## Define partition percentage utilisation of root dir
-					PART_USED=$(df -lh | grep -m 1 "/dev/root" | awk '{print $3}')			## Define partition capacity utilisation of root dir
-				else
-					PART_PERC=$(df -lh | grep -m 1 "${WORKING_PART}" | awk '{print $5}')		## Define partition percentage utilisation
-					PART_USED=$(df -lh | grep -m 1 "${WORKING_PART}" | awk '{print $3}')		## Define partition capacity utilisation
-				fi
-				PART_MOUNT=$(lsblk -no MOUNTPOINT /dev/"${WORKING_PART}")	## Define partition mount location
+			## If type is not "disk" or "rom" (i.e. a partition or raid)
+			else
+				echo -e "${COL}----Dependent:${RESET} ${WORKING_PART}"
+				PART_SIZE=$(lsblk -no SIZE /dev/${WORKING_PART})				## Define partition size
+				PART_PERC=$(df -lh | grep -m 1 "/dev/${WORKING_PART}" | awk '{print $5}')	## Define partition percentage utilisation of root dir
+				PART_USED=$(df -lh | grep -m 1 "/dev/${WORKING_PART}" | awk '{print $3}')	## Define partition capacity utilisation of root dir
+				PART_MOUNT=$(lsblk -no MOUNTPOINT /dev/"${WORKING_PART}")			## Define partition mount location
+				echo -e "${COL}${DIM}------Type:${RESET} ${PART_TYPE}"
 				echo -e "${COL}${DIM}------Size:${RESET} ${PART_SIZE}"
-				if [ -n "${PART_USED}" ]; then					## If data exists for partition utilisation
+				if [ -n "${PART_USED}" ]; then							## If data exists for partition utilisation
 					echo -e "${COL}${DIM}------Utilisation:${RESET} ${PART_USED} (${PART_PERC})"
 				fi
-				if [ -n "${PART_MOUNT}" ]; then					## If data exists for partition mount location
+				if [ -n "${PART_MOUNT}" ]; then							## If data exists for partition mount location
 					echo -e "${COL}${DIM}------Mount:${RESET} ${PART_MOUNT}"
 				fi
 			fi
