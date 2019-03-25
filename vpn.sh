@@ -15,11 +15,11 @@ VPN_FILE="/home/b4t/openvpn_configs/b4t.ovpn"
 TEMP_FILE=$(dirname "$0")/temp	#using $dirname of $0 will create temp in the current working directory
 
 #following if will quit the script if curl is not installed.
-if [ ! "$(which curl)" ] ; then	#check if curl is not installed
+if ! command -v curl ; then	#check if curl is not installed
 	echo
 	echo -e "${RED}Error${RESET}: curl is not installed.  Quitting."
 	echo
-	exit -1
+	exit 1
 fi
 
 #kill current openvpn instance
@@ -32,7 +32,7 @@ if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinf
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 	echo
-	exit -1 
+	exit 1 
 fi
 
 #parse specific details from the temp file
@@ -53,7 +53,7 @@ if ! sudo openvpn --config $VPN_FILE --daemon ; then	#Execute openvpn then exit 
 	echo
 	echo -e "${RED}Error:${RESET} openvpn failed. Quitting"
 	echo
-	exit -1
+	exit 1
 fi
 
 #loop until the vpn is active - determined by a change in the ip
@@ -65,7 +65,7 @@ do
 		echo
 		echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 		echo
-		exit -1
+		exit 1
 	fi
 	new_ip=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 done
