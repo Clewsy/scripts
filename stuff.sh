@@ -31,14 +31,14 @@ Valid options:
 while getopts 'pcmavdon' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
-		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag
-		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag
-		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag
-		a)	GET_A_AUDIO_INFO="TRUE" ;;	## Set A flag
-		v)	GET_V_VIDEO_INFO="TRUE" ;;	## Set V flag
-		d)	GET_D_DISKS_INFO="TRUE" ;;	## Set D flag
-		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag
-		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag
+		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag - product info (inc. motherboard, chassis, bios)
+		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag - cpu
+		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag - memory
+		a)	GET_A_AUDIO_INFO="TRUE" ;;	## Set A flag - audio hardware
+		v)	GET_V_VIDEO_INFO="TRUE" ;;	## Set V flag - video hardware
+		d)	GET_D_DISKS_INFO="TRUE" ;;	## Set D flag - disks and partitions (inc. raid)
+		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag - operating system (inc. kernel)
+		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag - network
 		?)
 			echo -e "$USAGE"		## Invalid option, show usage.
 			exit 1				## Exit.
@@ -205,7 +205,7 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 		echo -e "Cannot determine audio or video information (lspci not installed)"
 	else
 		if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_ALL_INFO" ]]; then
-			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | tail -c+23)
+			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
 			if [ -n "${AUDIO_INFO}" ]; then
 				echo -e "${COL}${BOLD}Audio:${RESET} ${AUDIO_INFO}"	## Audio info
 			else
@@ -213,7 +213,7 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 			fi
 		fi
 		if [[ -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]]; then
-			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | tail -c+36)
+			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
 			if [ -n "${VIDEO_INFO}" ]; then
 				echo -e "${COL}${BOLD}Video:${RESET} ${VIDEO_INFO}"	## Video info
 			else
@@ -315,7 +315,7 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v ip >> /dev/null ; then				## If ip not installed (send to /dev/null to suppress stdout)
 		if ! command -v route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
 			if ! command -v netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
-				echo -e "Cannot determine default gateway address (neither route nor netstat installed)"
+				echo -e "Cannot determine default gateway address (neither ip nor route nor netstat installed)"
 			else
 				GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 			fi
@@ -352,7 +352,7 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 					IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)
 				fi
 			else
-				IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f6)
+				IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)
 			fi
 			if [ -n "${IP}" ]; then				## If an ip address was identified
 				echo -e "${COL}${DIM}----IP address:${RESET} ${IP}"
