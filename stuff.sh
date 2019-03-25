@@ -16,7 +16,7 @@ DIM="\\033[2m"
 RESET="\\033[0m"
 
 USAGE="
-Usage: $(basename $0) [option]
+Usage: $(basename "$0") [option]
 Valid options:
 -p	Product info
 -c 	CPU info
@@ -49,7 +49,7 @@ while getopts 'pcmavdonh' OPTION; do			## Call getopts to identify selected opti
 			;;
 	esac
 done
-shift $(($OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 if [ -z "$OPTIONS" ]; then		## Check if no options were entered.
 	GET_ALL_INFO="TRUE"		## If so, set the ALL flag.
@@ -254,7 +254,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 			## If type is not "disk" or "rom" (i.e. a partition or raid)
 			else
 				echo -e "${COL}----Dependent:${RESET} ${WORKING_PART}"
-				PART_SIZE=$(lsblk -no SIZE /dev/${WORKING_PART})				## Define partition size
+				PART_SIZE=$(lsblk -no SIZE "/dev/${WORKING_PART}")				## Define partition size
 				PART_PERC=$(df -lh | grep -m 1 "/dev/${WORKING_PART}" | awk '{print $5}')	## Define partition percentage utilisation of root dir
 				PART_USED=$(df -lh | grep -m 1 "/dev/${WORKING_PART}" | awk '{print $3}')	## Define partition capacity utilisation of root dir
 				PART_MOUNT=$(lsblk -no MOUNTPOINT /dev/"${WORKING_PART}")			## Define partition mount location
