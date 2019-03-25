@@ -26,9 +26,10 @@ Valid options:
 -d	Disks and partitions info
 -o	Operating system and kernel info
 -n	Network info
+-h	Print this help
 "
 
-while getopts 'pcmavdon' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'pcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
 		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag - product info (inc. motherboard, chassis, bios)
@@ -39,6 +40,9 @@ while getopts 'pcmavdon' OPTION; do			## Call getopts to identify selected optio
 		d)	GET_D_DISKS_INFO="TRUE" ;;	## Set D flag - disks and partitions (inc. raid)
 		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag - operating system (inc. kernel)
 		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag - network
+		h)	echo -e "$USAGE"		## Print help (usage).
+			exit 0				## Exit successfully.
+			;;
 		?)
 			echo -e "$USAGE"		## Invalid option, show usage.
 			exit 1				## Exit.
