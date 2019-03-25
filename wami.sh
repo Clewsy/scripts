@@ -6,11 +6,11 @@ RESET="\033[00;0m"
 
 TEMP_FILE="$(dirname "$0")/temp"	#define the temp file location so that the script will work even if run from a directory without write access
 
-if [ ! "$(which curl)" ] ; then	#check if curl is not installed
+if ! command -v curl >> /dev/null ; then	#check if curl is not installed
 	echo
 	echo -e "${RED}Error:${RESET} curl is not installed.  Quitting."
 	echo
-	exit -1
+	exit 1
 fi
 
 echo
@@ -19,7 +19,7 @@ if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinf
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 	echo
-	exit -1
+	exit 1
 fi
  
 ip=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
