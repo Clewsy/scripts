@@ -17,10 +17,10 @@ NO_REM_DIR=4	#ssh command to create remote directory failed
 
 #Configurable settings
 BU_USER="b4t"
-BU_SERVER_LOCAL="beaglebone"
+BU_SERVER_LOCAL="seymour"
 BU_SERVER_REMOTE="b4t.site"
 BU_REMOTE_DIR="/home/$BU_USER/file_cache/$HOSTNAME"
-BU_FILE_LIST=${1-"$(dirname $0)/bu.list"}	#First argument is the file name of the list of files to be backed up.
+BU_FILE_LIST=${1-"$(dirname "$0")/bu.list"}	#First argument is the file name of the list of files to be backed up.
 						#If argument not provided, set default (bu.list in same dir as script).
 						#Syntax: parameter=${parameter-default}
 
@@ -43,10 +43,10 @@ echo -e "${GREEN}Backup file list \"$BU_FILE_LIST\" validated.${RESET}"
 #Verify if rsync is installed.  If not, verify scp is installed.
 echo
 echo -e "Checking for rsync (preferred) or scp:"
-if ! which rsync >> /dev/null ; then		#If rsync not installed (send to /dev/null to suppress stdout)
+if ! command -v rsync >> /dev/null ; then		#If rsync not installed (send to /dev/null to suppress stdout)
 	echo
 	echo -e "${ORANGE}Warning: rsync not installed.${RESET}  Defaulting to scp for backup operations"
-	if ! which scp >> /dev/null; then	#if scp not installed (send to /dev/null to suppress stdout)
+	if ! command -v scp >> /dev/null; then	#if scp not installed (send to /dev/null to suppress stdout)
 		echo -e "${RED}Error: scp is also not installed.${RESET}  Quitting."
 		exit $NO_SERVICE
 	fi
