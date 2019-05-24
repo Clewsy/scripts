@@ -17,7 +17,7 @@ NO_REM_DIR=4	#ssh command to create remote directory failed
 
 #Configurable settings
 BU_USER="b4t"
-BU_SERVER_LOCAL="seymour"
+BU_SERVER_LOCAL="seymour.local"
 BU_SERVER_REMOTE="b4t.site"
 BU_REMOTE_DIR="/home/$BU_USER/file_cache/$HOSTNAME"
 BU_FILE_LIST=${1-"$(dirname "$0")/bu.list"}	#First argument is the file name of the list of files to be backed up.

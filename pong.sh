@@ -4,7 +4,8 @@
 RED="\033[02;31m"
 ORANGE="\033[02;33m"
 GREEN="\033[02;32m"
-BLUE="\033[01;34m"
+BLUE="\033[00;34m"
+BLACK="\033[00;30m"
 BOLD="\033[01;37m"
 RESET="\033[0m"
 
@@ -34,25 +35,26 @@ echo "--------------------------------------------------------------------------
 while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				##<&2 needed as descriptor for nested while read loops (while read loop within called script)
 
-	if ! ssh $REM_SYS "~/bin/bu.sh"; then						#Attempt to connect via ssh and run the backup script "bu.sh"
-		echo "$REM_SYS\t ${RED}Failure.${RESET}" >> $TEMP_SUMMARY_FILE		#If the above fails for the current host, record the failure
-		continue								# then try the next host in the list.
+	#Strip the "user@" from the current entry in the hosts file.
+	REM_HOST=$(echo "${REM_SYS}" | cut -d "@" -f 2)
+	echo -e "Pinging ${REM_HOST}..."
+
+	if ! ping -c 1 -W 1 $REM_HOST >> /dev/null; then	#Attempt to ping the current host machine.
+		echo "${GREEN}Ping${BLACK}--------${RESET}$REM_HOST\t${BLACK}--------${RED}Miss${RESET}" >> $TEMP_SUMMARY_FILE		#Record failure.
 	else
-		echo "$REM_SYS\t ${GREEN}Success.${RESET}" >> $TEMP_SUMMARY_FILE	#If the above succeeds, record the success.
-											#Note a "success" means the ssh session was created and exited
-											# gracefully.  Failures with the called script are not checcked.
+		echo "${GREEN}Ping${BLACK}--------${RESET}$REM_HOST\t${BLACK}--------${GREEN}Pong${RESET}" >> $TEMP_SUMMARY_FILE	#Record success.
 	fi
-	echo "----------------------------------------------------------------------------------------------------------"
 
 done 2< "$REM_SYS_LIST"		##File read by the while loop which includes a list of files to be backed up.
 
+
 #Print out in a pretty format a table indicating the success or failure for each host in the list.
 echo
-echo -e "${BOLD}╔════════Summary:════════╗${RESET}"
+echo -e "${BOLD}╔═══Summary:════════════════════════╗${RESET}"
 while read -r RESULT ; do
-	echo -e ${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}
+	echo -e ${BOLD}║${RESET}${RESULT}${BOLD}║${RESET} | column
 done < "$TEMP_SUMMARY_FILE"
-echo -e "${BOLD}╚════════════════════════╝${RESET}"
+echo -e "${BOLD}╚═══════════════════════════════════╝${RESET}"
 echo
 
 #Delete the temporary file.

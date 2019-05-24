@@ -17,3 +17,5 @@ ytdl.sh - Written for use with termux (android) to download a youtube video dire
 power_switch.sh - Written for use with termux (android) to connect to a server that can control wireless mains outlets via p0wer (https://gitlab.com/Clewsy/p0wer).
 
 ball.sh - Runs bu.sh on a bunch of remote systems defined in a list file.
+
+pong.sh - Runs through a list of servers, pings each once for a second then returns a success or fail result.
