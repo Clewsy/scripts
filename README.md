@@ -18,4 +18,6 @@ power_switch.sh - Written for use with termux (android) to connect to a server t
 
 ball.sh - Runs bu.sh on a bunch of remote systems defined in a list file.
 
+apt_all.sh - Runs apt-get update, dist-upgrade, autoremove and autoclean on a bunch of machines in a list file.
+
 pong.sh - Runs through a list of servers, pings each once for a second then returns a success or fail result.
