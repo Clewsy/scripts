@@ -10,20 +10,19 @@ LOC_USER="b4t"			# User for attempting local network connection (faster).
 LOC_SERVER="p0wer"		# Hostname fo rattempting local network connection.
 REM_USER="b4t"			# User for attempting remote network connection (if local fails)
 REM_SERVER="b4t.site"		# Hostname for remote network connection.
-COMMAND="sudo p0wer d on"	# Command to run on server.
+COMMAND="sudo p0wer a on"	# Command to run on server.
 
 echo "Desired command on target: \"${COMMAND}\""
 echo "Attempting local connection."
-ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"
-if [ $? = '0' ]; then						# If local connection succeeds.
+if ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"; then		# If local connection succeeds.
 	echo "Command successfully sent locally."
 else								# Local connection timed out.
 	echo "Unable to make local connection.  Attempting remote connection"
-	ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}""
-	if [ $? = '0' ]; then					# If remote connection succeeds.
+	if ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} \"${COMMAND}\""; then
 		echo "Command successfully sent remotely."
 	else							# Remote connection timed out.
 		echo "Unable to connect.  Quitting."
 	fi
 fi
 
+exit 0
