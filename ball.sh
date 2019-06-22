@@ -10,9 +10,9 @@ RESET="\033[0m"
 SUCCESS=0	#Toight
 BAD_LIST_FILE=1	#Specified or default list file not readable
 
-TEMP_SUMMARY_FILE="$(dirname "$0")/summary"	#Define the temp file location so that the script will work even if run from a directory without write access
-if [ -e "${TEMP_SUMMARY_FILE}" ]; then
-	rm "${TEMP_SUMMARY_FILE}"			#If it exists, delete the temporary file (in case script failed previously before deleting it).
+TEMP_BALL_SUMMARY="$(dirname "$0")/temp_ball_summary"	#Define the temp file location so that the script will work even if run from a directory without write access
+if [ -e "${}" ]; then
+	rm "${TEMP_BALL_SUMMARY}"			#If it exists, delete the temporary file (in case script failed previously before deleting it).
 fi
 
 REM_SYS_LIST=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name of the list of remote systems.
@@ -28,7 +28,7 @@ fi
 echo -e "${GREEN}Remote system list \"${REM_SYS_LIST}\" validated.${RESET}"
 
 #Create a working system list from the original file list but with #comments stripped.
-TEMP_REM_SYS_LIST="$(dirname $0)/temp_bu_file_list"		#Create the temporary file.
+TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"		#Create the temporary file.
 while read -r LINE ; do						#Iterate for every line in the system list.
 	STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
 	if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
@@ -44,10 +44,10 @@ while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry
 
 	echo -e "Attempting backup for \"${REM_SYS}\""
 	if ! ssh -t "${REM_SYS}" "~/bin/bu.sh"; then					#Attempt to connect via ssh and run the backup script "bu.sh"
-		echo -E "${REM_SYS}\t ${RED}Failure.${RESET}" >> ${TEMP_SUMMARY_FILE}	#If the above fails for the current host, record the failure
+		echo -E "${REM_SYS}\t ${RED}Failure.${RESET}" >> ${TEMP_BALL_SUMMARY}	#If the above fails for the current host, record the failure
 		continue								# then try the next host in the list.
 	else
-		echo -E "${REM_SYS}\t ${GREEN}Success.${RESET}" >> ${TEMP_SUMMARY_FILE}	#If the above succeeds, record the success.
+		echo -E "${REM_SYS}\t ${GREEN}Success.${RESET}" >> ${TEMP_BALL_SUMMARY}	#If the above succeeds, record the success.
 											#Note a "success" means the ssh session was created and exited
 											# gracefully.  Failures with the called script are not checcked.
 	fi
@@ -60,11 +60,11 @@ echo
 echo -e "${BOLD}╔════════Summary:════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
-done < "${TEMP_SUMMARY_FILE}"
+done < "${TEMP_BALL_SUMMARY}"
 echo -e "${BOLD}╚════════════════════════╝${RESET}"
 echo
 
-rm "${TEMP_SUMMARY_FILE}"	#Delete the temporary summary file.
+rm "${TEMP_BALL_SUMMARY}"	#Delete the temporary summary file.
 rm "${TEMP_REM_SYS_LIST}"	#Delete the temporary system list file.
 
 exit ${SUCCESS}
