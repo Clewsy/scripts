@@ -40,6 +40,15 @@ if [ ! -f "$BU_FILE_LIST" ] || [ ! -r "$BU_FILE_LIST" ]; then	#If bu.list is not
 fi
 echo -e "${GREEN}Backup file list \"$BU_FILE_LIST\" validated.${RESET}"
 
+#Create a working backup file list from the original file list but with #comments stripped.
+TEMP_BU_FILE_LIST="$(dirname $0)/temp_bu_file_list"		#Create the temporary file.
+while read -r LINE ; do						#Iterate for every line in the backup file list.
+	STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
+	if [ $STRIPPED_LINE != "\n" ] ; then			#If all that is left is NOT just a "newline" (i.e. if entire row is NOT a comment)
+	  	echo $STRIPPED_LINE >> "${TEMP_BU_FILE_LIST}"	#Then copy the stripped line to the temp file.
+	fi
+done < "${BU_FILE_LIST}"
+
 #Verify if rsync is installed.  If not, verify scp is installed.
 echo
 echo -e "Checking for rsync (preferred) or scp:"
@@ -79,6 +88,7 @@ echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}
 
 
 #Loop through the file list, validate file names and run backup command
+#(Actually using the temp file list which is the same as the file list but with comments stripped).
 echo
 while read -r BU_FILE ; do		##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
         echo "--------"
@@ -111,7 +121,9 @@ while read -r BU_FILE ; do		##Loop to repeat commands for each file name entry i
 	fi
 	echo -e "${GREEN}Success.${RESET}"
 
-done < "$BU_FILE_LIST"		##File read by the while loop which includes a list of files to be backed up.
+done < "$TEMP_BU_FILE_LIST"	#File read by the while loop which includes a list of files to be backed up.
+
+rm $TEMP_BU_FILE_LIST		#Delete the temporary file list (file list with comments stripped).
 
 echo
 echo "Backup complete"
