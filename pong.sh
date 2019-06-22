@@ -27,6 +27,15 @@ if [ ! -f "${REM_SYS_LIST}" ] || [ ! -r "${REM_SYS_LIST}" ]; then	#If ball.list 
 fi
 echo -e "${GREEN}Remote system list \"${REM_SYS_LIST}\" validated.${RESET}"	#Tell user the file list looks okay.
 
+#Create a working system list from the original file list but with #comments stripped.
+TEMP_REM_SYS_LIST="$(dirname $0)/temp_bu_file_list"		#Create the temporary file.
+while read -r LINE ; do						#Iterate for every line in the system list.
+	STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
+	if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+	  	echo ${STRIPPED_LINE} >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
+	fi
+done < "${REM_SYS_LIST}"
+
 #Loop through the remote system list.
 echo "-----------------------------------------------"
 while read -r REM_SYS; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
@@ -45,7 +54,7 @@ while read -r REM_SYS; do	##Loop to repeat commands for each file name entry in 
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${COLUMN_SPACER}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record success.
 	fi
 
-done < "${REM_SYS_LIST}"		##File read by the while loop which includes a list of files to be backed up.
+done < "${TEMP_REM_SYS_LIST}"		##File read by the while loop which includes a list of files to be backed up.
 
 
 #Print out in a pretty format a table indicating the success or failure of ppinging each host in the list.
@@ -57,6 +66,7 @@ done < "${TEMP_SUMMARY_FILE}"
 echo -e "${BOLD}╚═══════════════════════════╝${RESET}"
 echo
 
-rm "$TEMP_SUMMARY_FILE"	#Delete the temporary file.
+rm "${TEMP_SUMMARY_FILE}"	#Delete the temporary summary file.
+rm "${TEMP_REM_SYS_LIST}"	#Delete the temporary system list file.
 
 exit $SUCCESS

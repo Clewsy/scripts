@@ -44,8 +44,8 @@ echo -e "${GREEN}Backup file list \"$BU_FILE_LIST\" validated.${RESET}"
 TEMP_BU_FILE_LIST="$(dirname $0)/temp_bu_file_list"		#Create the temporary file.
 while read -r LINE ; do						#Iterate for every line in the backup file list.
 	STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
-	if [ $STRIPPED_LINE != "\n" ] ; then			#If all that is left is NOT just a "newline" (i.e. if entire row is NOT a comment)
-	  	echo $STRIPPED_LINE >> "${TEMP_BU_FILE_LIST}"	#Then copy the stripped line to the temp file.
+	if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+	  	echo ${STRIPPED_LINE} >> "${TEMP_BU_FILE_LIST}"	#Then copy the stripped line to the temp file.
 	fi
 done < "${BU_FILE_LIST}"
 
