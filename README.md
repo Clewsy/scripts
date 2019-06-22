@@ -23,3 +23,5 @@ apt_all.sh - Runs apt-get update, dist-upgrade, autoremove and autoclean on a bu
 pong.sh - Runs through a list of servers, pings each once for a second then returns a success or fail result.
 
 whodis.sh - Grabs the contents of the /tmp/dhcp.leases file on a remote router, pretties it up and prints it to stdout.
+
+cal_backup.sh - Generates an *.ics file from a nextcloud calendar and archives it.  Intended to be used as a cronjob.
