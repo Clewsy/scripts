@@ -16,7 +16,7 @@ DIM="\\033[2m"
 RESET="\\033[0m"
 
 USAGE="
-Usage: $(basename "$0") [option]
+Usage: $(basename $0) [option]
 Valid options:
 -p	Product info
 -c 	CPU info
@@ -49,7 +49,7 @@ while getopts 'pcmavdonh' OPTION; do			## Call getopts to identify selected opti
 			;;
 	esac
 done
-shift $((OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $(($OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 if [ -z "$OPTIONS" ]; then		## Check if no options were entered.
 	GET_ALL_INFO="TRUE"		## If so, set the ALL flag.
@@ -234,39 +234,65 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 		echo -e "Cannot determine disk/partition information (lsblk not installed)"
 	else
 		echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"
-		NUM_PARTS=$(lsblk -lno NAME | wc -w)		## Determine quantity of disks/partitions
-		for (( c=1; c<=NUM_PARTS; c++ ))		## Loop through output for each of the disks/partitions
+		########First level lsblk tree
+		NUM_DISKS=$(lsblk -ndo NAME | wc -l)
+		for (( c=1; c<=NUM_DISKS; c++ ))		## Loop through output for each of the disks/partitions
 		do
-			WORKING_PART=$(lsblk -ino NAME | sed -n "${c}p" | cut -d "-" -f 2)	## Define working disk/partition - #"c" from the lsblk list
-			PART_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_PART}")			## Determine type (disk or part) of working disk/partition (t)
 
-		        ## If type is "disk" or "rom" (i.e. not a partition or raid)
-		        if [ "${PART_TYPE}" == "disk" ] || [ "${PART_TYPE}" == "rom" ]; then
-				echo -e "${COL}--Device:${RESET} ${WORKING_PART}"
-				DISK_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_PART}")	## Define disk model
-				DISK_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_PART}")	## Define disk capacity
-				echo -e "${COL}${DIM}----Type:${RESET} ${PART_TYPE}"
-				if [ -n "${DISK_MODEL}" ]; then				## If data exists for disk model
-					echo -e "${COL}${DIM}----Model:${RESET} ${DISK_MODEL}"
-				fi
-				echo -e "${COL}${DIM}----Size:${RESET} ${DISK_SIZE}"
-
-			## If type is not "disk" or "rom" (i.e. a partition or raid)
-			else
-				echo -e "${COL}----Dependent:${RESET} ${WORKING_PART}"
-				PART_SIZE=$(lsblk -no SIZE "/dev/${WORKING_PART}")				## Define partition size
-				PART_PERC=$(df -lh | grep -m 1 "/dev/${WORKING_PART}" | awk '{print $5}')	## Define partition percentage utilisation of root dir
-				PART_USED=$(df -lh | grep -m 1 "/dev/${WORKING_PART}" | awk '{print $3}')	## Define partition capacity utilisation of root dir
-				PART_MOUNT=$(lsblk -no MOUNTPOINT /dev/"${WORKING_PART}")			## Define partition mount location
-				echo -e "${COL}${DIM}------Type:${RESET} ${PART_TYPE}"
-				echo -e "${COL}${DIM}------Size:${RESET} ${PART_SIZE}"
-				if [ -n "${PART_USED}" ]; then							## If data exists for partition utilisation
-					echo -e "${COL}${DIM}------Utilisation:${RESET} ${PART_USED} (${PART_PERC})"
-				fi
-				if [ -n "${PART_MOUNT}" ]; then							## If data exists for partition mount location
-					echo -e "${COL}${DIM}------Mount:${RESET} ${PART_MOUNT}"
-				fi
+			WORKING_DEVICE=$(lsblk -idno NAME | sed -n "${c}p" | cut -d "-" -f 2-10)	## Define device name
+			DEVICE_TYPE=$(lsblk -dno TYPE /dev/${WORKING_DEVICE})				## Define device type
+			DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEVICE}")			## Define device model
+			DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEVICE}")				## Define device capacity
+			echo -e "${COL}--Device:${RESET} ${WORKING_DEVICE}"				## Print device name
+			echo -e "${COL}${DIM}----Type:${RESET} ${DEVICE_TYPE}"				## Print device type
+			if [ -n "${DEVICE_MODEL}" ]; then						## If data exists for disk model
+				echo -e "${COL}${DIM}----Model:${RESET} ${DEVICE_MODEL}"		## Print device model
 			fi
+			echo -e "${COL}${DIM}----Size:${RESET} ${DEVICE_SIZE}"				## Print device size
+
+			########Second level lsblk tree
+			NUM_CHILDREN=$(lsblk -no NAME /dev/${WORKING_DEVICE} | wc -l)		## Count the number of children
+			for (( d=2; d<=NUM_CHILDREN; d++ ))					## Start at 2 because NUM_CHILDREN included parent
+			do
+				WORKING_CHILD=$(lsblk -ino NAME /dev/${WORKING_DEVICE} | sed -n "${d}p" | cut -d "-" -f 2-10)	## Define the name
+				if [ -e /dev/${WORKING_CHILD} ]; then
+					CHILD_TYPE=$(lsblk -dno TYPE /dev/${WORKING_CHILD})			## Define the type
+					CHILD_SIZE=$(lsblk -dno SIZE /dev/${WORKING_CHILD})			## Define size
+					CHILD_PERC=$(df -lh | grep -m 1 "${WORKING_CHILD}" | awk '{print $5}')	## Define percentage utilisation
+					CHILD_USED=$(df -lh | grep -m 1 "${WORKING_CHILD}" | awk '{print $3}')	## Define capacity utilisation
+					CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/${WORKING_CHILD})		## Define mount location
+					echo -e "${COL}----Child:${RESET} ${WORKING_CHILD}"			## Print name
+					echo -e "${COL}${DIM}------Type:${RESET} ${CHILD_TYPE}"			## Print type
+					echo -e "${COL}${DIM}------Size:${RESET} ${CHILD_SIZE}"			## Print size
+					if [ -n "${CHILD_USED}" ]; then						## If data exists for utilisation
+						echo -e "${COL}${DIM}------Utilisation:${RESET} ${CHILD_USED} (${CHILD_PERC})"	## Print utilization
+					fi
+					if [ -n "${CHILD_MOUNT}" ]; then					## If data exists for mountpoint
+						echo -e "${COL}${DIM}------Mount:${RESET} ${CHILD_MOUNT}"	## Print mountpoint
+					fi
+
+					########Third level and beyond in lsblk tree
+					NUM_GRANDCHILDREN=$(lsblk -no NAME /dev/${WORKING_CHILD} | wc -l)	## Count the number of grandchildren
+					for (( e=2; e<=NUM_GRANDCHILDREN; e++ ))		## Start at 2 because NUM_GRANDCHILDREN included child
+					do
+						WORKING_GRANDCHILD=$(lsblk -ino NAME /dev/${WORKING_CHILD} | sed -n "${e}p" | cut -d "-" -f 2-10)	## Name
+						GRANDCHILD_TYPE=$(lsblk -in /dev/${WORKING_CHILD} | sed -n "${e}p" | awk '{print $6}')			## Type
+						GRANDCHILD_SIZE=$(lsblk -no SIZE /dev/${WORKING_CHILD} | sed -n "${e}p")				## Size
+						GRANDCHILD_PERC=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $5}')	## Percentage used
+						GRANDCHILD_USED=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $3}')	## Capacity used
+						GRANDCHILD_MOUNT=$(lsblk -in /dev/${WORKING_CHILD} | sed -n "${e}p" | awk '{print $7}')	## Mountpoint
+						echo -e "${COL}------Grandchild:${RESET} ${WORKING_GRANDCHILD}"		## Print name
+						echo -e "${COL}${DIM}--------Type:${RESET} ${GRANDCHILD_TYPE}"		## Print type
+						echo -e "${COL}${DIM}--------Size:${RESET} ${GRANDCHILD_SIZE}"		## Print size
+						if [ -n "${GRANDCHILD_USED}" ]; then					## If data exists for utilisation
+							echo -e "${COL}${DIM}--------Utilisation:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"
+						fi
+						if [ -n "${GRANDCHILD_MOUNT}" ]; then					## If data exists for mountpoint
+							echo -e "${COL}${DIM}--------Mount:${RESET} ${GRANDCHILD_MOUNT}"## Print the mountpoint
+						fi
+					done
+				fi
+			done
 		done
 	fi
 fi
@@ -300,37 +326,37 @@ fi
 if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${BOLD}Network:${RESET}"
 	## Show external IP
-	if ! command -v curl >> /dev/null ; then	## If curl not installed (send to /dev/null to suppress stdout)
-		echo -e "Cannot determine external IP address (curl not installed)"
+	if ! command -v curl >> /dev/null ; then							## If curl not installed
+		echo -e "Cannot determine external IP address (curl not installed)"			## Print a "no curl" error
 	else
-		EXT_IP=$(curl --silent --max-time 5 ipinfo.io | grep -m 1 "ip" | cut -d "\"" -f4)	## Grep external IP.  Requires curl.
-		if [ -n "${EXT_IP}" ]; then	## If data exists for ext_ip
-			echo -e "${COL}--External IP:${RESET} ${EXT_IP}"
-		else
-			echo -e "${COL}--External IP:${RESET} No External Connection"
+		EXT_IP=$(curl --silent --max-time 5 ipinfo.io | grep -m 1 "ip" | cut -d "\"" -f4)	## Grep external IP
+		if [ -n "${EXT_IP}" ]; then								## If data exists for ext_ip
+			echo -e "${COL}--External IP:${RESET} ${EXT_IP}"				## Print the external IP
+		else											## Otherwise
+			echo -e "${COL}--External IP:${RESET} No External Connection"			## Print no connection
 		fi
 	fi
-	## Show dns server address
+	## Show primary dns address
 	DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)	## Grep primary (first in list) DNS
-	if [ -n "${DNS}" ]; then	## If data exists for DNS
-		echo -e "${COL}--DNS:${RESET} ${DNS}"
+	if [ -n "${DNS}" ]; then						## If data exists for DNS
+		echo -e "${COL}--DNS:${RESET} ${DNS}"				## Print the DNS
 	fi
 	## Show default gateway address
-	if ! command -v ip >> /dev/null ; then				## If ip not installed (send to /dev/null to suppress stdout)
-		if ! command -v route >> /dev/null ; then		## If route not installed (send to /dev/null to suppress stdout)
-			if ! command -v netstat >> /dev/null ; then	## If netstat not installed (send to /dev/null to suppress stdout)
+	if ! command -v ip >> /dev/null ; then							## If ip not installed
+		if ! command -v route >> /dev/null ; then					## If route not installed
+			if ! command -v netstat >> /dev/null ; then				## If netstat not installed
 				echo -e "Cannot determine default gateway address (neither ip nor route nor netstat installed)"
 			else
-				GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+				GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')	## Use netstat to determine the gateway
 			fi
 		else
-			GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+			GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')			## Use route to determine the gateway
 		fi
 	else
-		GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
+		GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)				## Use ip to determine the gateway
 	fi
-	if [ -n "${GW}" ]; then	## If data exists for GW
-		echo -e "${COL}--Gateway:${RESET} ${GW}"
+	if [ -n "${GW}" ]; then									## If data exists for GW
+		echo -e "${COL}--Gateway:${RESET} ${GW}"					## Print the gateway address
 	fi
 	## Get hostname
 	echo -e "${COL}--Hostname:${RESET} $(uname -n)"
@@ -339,52 +365,51 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 	for (( c=1; c<=NUM_DEVS; c++ ))				## Run this loop for each interface.
 	do
 		WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)	## Select working interface from the list of interfaces
-		echo -e "${COL}--Interface:${RESET} ${WORKING_INTERFACE}"
-		STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)				## Status of interface up, down or unknown.
-		echo -e "${COL}${DIM}----Status:${RESET} ${STATUS}"					## Print interface status
+		STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)				## Status of interface up, down or unknown
 		MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)				## MAC address of the inteface.
+		echo -e "${COL}--Interface:${RESET} ${WORKING_INTERFACE}"				## Print the interface name
+		echo -e "${COL}${DIM}----Status:${RESET} ${STATUS}"					## Print interface status
 		if [ -n "${MAC}" ]; then								## Check if a MAC address was found
-			echo -e "${COL}${DIM}----MAC address:${RESET} ${MAC}"				## If so, print it
+			echo -e "${COL}${DIM}----MAC address:${RESET} ${MAC}"				## Print the interface MAC address
 		fi
 
 		## Check if the status of the inteface is "up" or "unkown" (not "down")
 		if [ "${STATUS}" != "down" ]; then ## If so, print the designated IP address.
-			if ! command -v ip >> /dev/null ; then			# If ip is not installed (send to /dev/null to suppress stdout)
+			if ! command -v ip >> /dev/null ; then				# If ip is not installed (send to /dev/null to suppress stdout)
 				if ! command -v ifconfig >> /dev/null ; then		# If ifconfig is not installed (send to /dev/null to suppress stdout)
 					echo -e "Cannot determine interface ip address (neither ip nor ifconfig installed)"
 				else
-					IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)
+					IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)	## Use ifconfig
 				fi
 			else
-				IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)
+				IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)			## Use ip
 			fi
-			if [ -n "${IP}" ]; then				## If an ip address was identified
-				echo -e "${COL}${DIM}----IP address:${RESET} ${IP}"
+			if [ -n "${IP}" ]; then							## If an ip address was identified
+				echo -e "${COL}${DIM}----IP address:${RESET} ${IP}"		## Print the IP address
 			fi
 		fi
 
 		## Check if the current interface is connected to WIFI.  If so, show ESSID.
 		if ! command -v iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
-			if ! command -v iw >> /dev/null ; then		## If iw is not installed (send to /dev/null to suppress stdout)
+			if ! command -v iw >> /dev/null ; then			## If iw is not installed (send to /dev/null to suppress stdout)
 				if ! command -v nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
-					## echo -e "Unable to check for ESSID (iwgetid, iw and nmcli not installed)"	## Probably safe to assume no wifi connection.
 					ESSID=""
 				else
-					ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)
+					ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)	## Use nmcli to determine ESSID
 				fi
 			else
-				ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)
+				ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)		## Use iw to detemine ESSID
 			fi
 		else
-			IF_WIFI_CONN=$(iwgetid | awk '{print $1}')
-			if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then		## If iwgetid shows that WORKING_INTERFACE has aconnected ESSID
+			IF_WIFI_CONN=$(iwgetid | awk '{print $1}')				## Use iwgetid to determine ESSID
+			if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then		## If iwgetid shows that WORKING_INTERFACE has a connected ESSID
 				ESSID=$(iwgetid -r)						## Then get the ESSID.
 			else
-				ESSID=""							## Needed in-case previous loop iteration sets ESSID.
+				ESSID=""							## Needed in-case previous loop iteration sets ESSID
 			fi
 		fi
-		if [ -n "${ESSID}" ] && [ "${ESSID}" != "Wired" ] ; then		#If an essid was found
-			echo -e "${COL}${DIM}----Connected ESSID:${RESET} ${ESSID}"
+		if [ -n "${ESSID}" ] && [ "${ESSID}" != "Wired" ] ; then		## If an essid was found
+			echo -e "${COL}${DIM}----Connected ESSID:${RESET} ${ESSID}"	## Print the ESSID
 		fi
 	done
 fi
