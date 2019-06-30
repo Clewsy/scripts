@@ -56,9 +56,14 @@ echo
 while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				##<&2 needed as descriptor for nested while read loops (while read loop within called script)
 
-	if [ ${#REM_SYS} -gt 14 ]		#If the host name is a string greater than 14 characters
-		then COLUMN_SPACER="\t\t"	#Then long hostname so only want a single tab spacer
-		else COLUMN_SPACER="\t\t\t"	#Else short hostname so want two tab spacers.
+	if [ ${#REM_SYS} -gt 6 ]; then
+		if [ ${#REM_SYS} -gt 14 ]; then		#If the host name is a string greater than 14 characters
+			COLUMN_SPACER="\t\t"	#Then long hostname so only want a single tab spacer
+		else
+		       	COLUMN_SPACER="\t\t\t"	#Else short hostname so want two tab spacers.
+		fi
+	else
+		COLUMN_SPACER="\t\t\t\t"
 	fi
 	echo "${BOLD}║${REM_SYS}${COLUMN_SPACER}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	#Record current system
 	echo "------------------------------------------------------"
