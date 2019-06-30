@@ -287,8 +287,8 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 						if [ -n "${GRANDCHILD_USED}" ]; then					## If data exists for utilisation
 							echo -e "${COL}${DIM}--------Utilisation:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"
 						fi
-						if [ -n "${GRANDCHILD_MOUNT}" ]; then					## If data exists for mountpoint
-							echo -e "${COL}${DIM}--------Mount:${RESET} ${GRANDCHILD_MOUNT}"## Print the mountpoint
+						if [ -n "${GRANDCHILD_MOUNT}" ]; then						## If data exists for mountpoint
+							echo -e "${COL}${DIM}--------Mount:${RESET} ${GRANDCHILD_MOUNT}"	## Print the mountpoint
 						fi
 					done
 				fi
