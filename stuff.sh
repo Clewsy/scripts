@@ -210,12 +210,12 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 	else
 		if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_ALL_INFO" ]]; then
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
-			if [ -n "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
+			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Audio:${RESET} ${AUDIO_INFO}"	## Audio info
 		fi
 		if [[ -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]]; then
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if [ -n "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
+			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Video:${RESET} ${VIDEO_INFO}"	## Video info
 		fi
 	fi
