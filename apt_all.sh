@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#This script will take an argument or either a single host, or a list of hosts.
+#It will then run apt-get update, apt-get dist-upgrade, apt-get autoremove and then apt-get autoclean on the provided host/s.
+
 ##Colours
 RED="\033[02;31m"
 GREEN="\033[02;32m"
@@ -8,34 +11,45 @@ RESET="\033[0m"
 
 #Exit codes
 SUCCESS=0	#Noice
-BAD_LIST_FILE=1	#Specified or default list file not readable
+BAD_USAGE=1	#Incorrect usage
 
-TEMP_SUMMARY_FILE="$(dirname "$0")/summary"		#Define the temp file location so that the script will work even if run from a directory without write access
-if [ -e "${TEMP_SUMMARY_FILE}" ]; then
-	rm "${TEMP_SUMMARY_FILE}"			# If it exists, delete the temporary file (in case script failed previously before deleting it).
+USAGE="
+Usage: $(basename $0) [hosts]
+Where [hosts] can be:
+	- [user@host]
+	- [host]	(same user as current)
+	- [hosts.list]	(file containing a list of [user@host] or [host]
+	- ommitted	(script will look for host.list file of the name \"my_hosts.list\")
+"
+
+if [ $# -gt 1 ]; then		#If more than one argument is entered.
+	echo -e "${USAGE}"	#Print the usage
+	exit ${BAD_USAGE}	#Exit
 fi
 
-REM_SYS_LIST=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name of the list of remote systems.
-							#If argument not provided, set default (ball.list in same dir as script).
-							#Syntax: parameter=${parameter-default}
+ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name of the list of remote systems.
+						#If argument not provided, set default (ball.list in same dir as script).
+						#Syntax: parameter=${parameter-default}
 
-#Validate the list of remote systems.
+TEMP_SUMMARY_FILE="$(dirname "$0")/summary"		#Define temp file location so the script will work even if run from a directory without write access
+if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	#If it exists, delete the temporary file (in case script failed previously).
+
+TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"	#Define a working system list
+if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	#If it exists, delete the temporary file (in case script failed previously).
+
 echo
-echo "Remote system list is \"${REM_SYS_LIST}\"."
-if [ ! -f "${REM_SYS_LIST}" ] || [ ! -r "${REM_SYS_LIST}" ]; then	#If list file is not (!) a normal file (-f) or (||) in is not (!) readable (-r)
-	echo -e "${RED}Remote system list \"${REM_SYS_LIST}\" not found, invalid file type or no read access.${RESET}"	#Output error message
-	exit ${BAD_LIST_FILE}												#Exit
+if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	#If list file is not (!) a normal file (-f) or (||) in is not (!) readable (-r)
+	echo -e "Remote system is \"${ARGUMENT}\""		#Then assume provided argument is a single host (either [host] or [user@host])
+	echo "${ARGUMENT}" > "${TEMP_REM_SYS_LIST}"		#Create the temp list file which will just contain the single entry.
+else
+	echo -e "Remote system list \"${ARGUMENT}\" validated.${RESET}"	#Tell the user the list looks okay
+	while read -r LINE ; do						#Iterate for every line in the system list.
+		STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
+		if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+	  		echo ${STRIPPED_LINE} >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
+		fi
+	done < "${ARGUMENT}"
 fi
-echo -e "${GREEN}Remote system list \"${REM_SYS_LIST}\" validated.${RESET}"	#Tell the user the list looks okay
-
-#Create a working system list from the original file list but with #comments stripped.
-TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"		#Create the temporary file.
-while read -r LINE ; do						#Iterate for every line in the system list.
-	STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
-	if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
-	  	echo ${STRIPPED_LINE} >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
-	fi
-done < "${REM_SYS_LIST}"
 
 #Loop through the remote system list.
 echo
