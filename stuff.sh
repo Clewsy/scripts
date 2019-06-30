@@ -168,14 +168,14 @@ if [[ -n "$GET_C_CPU_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v lscpu >> /dev/null ; then	#If lscpu not installed (send to /dev/null to suppress stdout)
 		echo -e "Cannot determine cpu infomtion (lscpu not installed)"
 	else
-		CPU_MODEL=$(lscpu | grep "Model name:" | cut -c24-)
-		CPU_VENDOR=$(lscpu | grep "Vendor ID:" | cut -c24-)
-		CPU_ARCH=$(lscpu | grep "Architecture" | cut -c24-)
-		CPU_MODE=$(lscpu | grep "CPU op-mode" | cut -c24-)
-		CPU_CORES=$(lscpu | grep -m 1 "CPU(s)" | cut -c24-)
-		CPU_SPEED=$(lscpu | grep "CPU MHz" | cut -c24-)
-		CPU_MAX_SPEED=$(lscpu | grep "CPU max" | cut -c24-)
-		CPU_MIN_SPEED=$(lscpu | grep "CPU min" | cut -c24-)
+		CPU_MODEL=$(lscpu | grep "Model name" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_VENDOR=$(lscpu | grep "Vendor ID" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_ARCH=$(lscpu | grep "Architecture" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_MODE=$(lscpu | grep "CPU op-mode" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_CORES=$(lscpu | grep -m 1 "CPU(s)" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_SPEED=$(lscpu | grep "CPU MHz" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_MAX_SPEED=$(lscpu | grep "CPU max" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+		CPU_MIN_SPEED=$(lscpu | grep "CPU min" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
 		echo -e "${COL}${BOLD}CPU:${RESET}"
 		if [ -n "${CPU_MODEL}" ];	then echo -e "${COL}--Model:${RESET} ${CPU_MODEL}"; fi			## CPUModel and vendor
 		if [ -n "${CPU_VENDOR}" ];	then echo -e "${COL}--Vendor:${RESET} ${CPU_VENDOR}"; fi		## CPUModel and vendor
