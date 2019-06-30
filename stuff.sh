@@ -89,7 +89,7 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 			fi
 		fi
 	else
-		echo -e "Product information not found"
+		echo -e "${COL}${BOLD}Product:${RESET} Information not found"
 	fi
 
 	###############################
@@ -112,7 +112,7 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 			echo -e "${COL}${BOLD}Chassis:${RESET} ${CHASSIS_TYPE}"									## Chassis type
 		fi
 	else
-		echo -e "Chassis information not found"
+		echo -e "${COL}${BOLD}Chassis:${RESET} Information not found"
 	fi
 
 	###############################
@@ -135,7 +135,7 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 			fi
 		fi
 	else
-		echo -e "Motherboard information not found"
+		echo -e "${COL}${BOLD}Motherboard:${RESET} Information not found"
 	fi
 
 	###############################
@@ -158,7 +158,7 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 			fi
 		fi
 	else
-		echo -e "Bios information not found"
+		echo -e "${COL}${BOLD}BIOS:${RESET} Information not found"
 	fi
 fi
 
@@ -166,7 +166,7 @@ fi
 ## Print available CPU info
 if [[ -n "$GET_C_CPU_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v lscpu >> /dev/null ; then	#If lscpu not installed (send to /dev/null to suppress stdout)
-		echo -e "Cannot determine cpu infomtion (lscpu not installed)"
+		echo -e "${COL}${BOLD}CPU:${RESET} Cannot determine cpu infomtion (lscpu not installed)"
 	else
 		CPU_MODEL=$(lscpu | grep "Model name" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
 		CPU_VENDOR=$(lscpu | grep "Vendor ID" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
@@ -206,23 +206,17 @@ fi
 ## Print audio and video info (note only first result of each if multiple video or audio devices exist)
 if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v lspci >> /dev/null ; then		#If lspci not installed (send to /dev/null to suppress stdout)
-		echo -e "Cannot determine audio or video information (lspci not installed)"
+		echo -e "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed)"
 	else
 		if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_ALL_INFO" ]]; then
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
-			if [ -n "${AUDIO_INFO}" ]; then
-				echo -e "${COL}${BOLD}Audio:${RESET} ${AUDIO_INFO}"	## Audio info
-			else
-				echo -e "Audio information not found"
-			fi
+			if [ -n "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
+			echo -e "${COL}${BOLD}Audio:${RESET} ${AUDIO_INFO}"	## Audio info
 		fi
 		if [[ -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]]; then
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if [ -n "${VIDEO_INFO}" ]; then
-				echo -e "${COL}${BOLD}Video:${RESET} ${VIDEO_INFO}"	## Video info
-			else
-				echo -e "Video information not found"
-			fi
+			if [ -n "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
+			echo -e "${COL}${BOLD}Video:${RESET} ${VIDEO_INFO}"	## Video info
 		fi
 	fi
 fi
