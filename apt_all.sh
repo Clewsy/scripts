@@ -31,21 +31,21 @@ ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name o
 						#If argument not provided, set default (ball.list in same dir as script).
 						#Syntax: parameter=${parameter-default}
 
-TEMP_SUMMARY_FILE="$(dirname "$0")/summary"		#Define temp file location so the script will work even if run from a directory without write access
+TEMP_SUMMARY_FILE="$(dirname "$0")/summary"				#Define temp summary file location.
 if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	#If it exists, delete the temporary file (in case script failed previously).
 
-TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"	#Define a working system list
+TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"			#Define a working system list
 if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	#If it exists, delete the temporary file (in case script failed previously).
 
 echo
-if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	#If list file is not (!) a normal file (-f) or (||) in is not (!) readable (-r)
+if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	#If argument is not (!) a normal file (-f) or (||) in is not (!) readable (-r)
 	echo -e "Remote system is \"${ARGUMENT}\""		#Then assume provided argument is a single host (either [host] or [user@host])
 	echo "${ARGUMENT}" > "${TEMP_REM_SYS_LIST}"		#Create the temp list file which will just contain the single entry.
 else
 	echo -e "Remote system list \"${ARGUMENT}\" validated.${RESET}"	#Tell the user the list looks okay
 	while read -r LINE ; do						#Iterate for every line in the system list.
 		STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
-		if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+		if [ ${STRIPPED_LINE} ]; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
 	  		echo ${STRIPPED_LINE} >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
 		fi
 	done < "${ARGUMENT}"
@@ -53,18 +53,16 @@ fi
 
 #Loop through the remote system list.
 echo
-while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
-				##<&2 needed as descriptor for nested while read loops (while read loop within called script)
+while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST).
+				##<&2 needed as descriptor for nested while read loops (while read loop within called script).
 
-	if [ ${#REM_SYS} -gt 6 ]; then
-		if [ ${#REM_SYS} -gt 14 ]; then		#If the host name is a string greater than 14 characters
-			COLUMN_SPACER="\t\t"	#Then long hostname so only want a single tab spacer
-		else
-		       	COLUMN_SPACER="\t\t\t"	#Else short hostname so want two tab spacers.
-		fi
-	else
-		COLUMN_SPACER="\t\t\t\t"
-	fi
+	##Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
+	case ${#REM_SYS} in
+		[1-6])		COLUMN_SPACER="\t\t\t\t";;	##1-6 characters
+		[7-9] | 1[0-4])	COLUMN_SPACER="\t\t\t";;	##7-14 characters
+		*)		COLUMN_SPACER="\t\t"		##>14 characters
+	esac
+
 	echo "${BOLD}║${REM_SYS}${COLUMN_SPACER}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	#Record current system
 	echo "------------------------------------------------------"
 	echo "Running apt-get commands for ${REM_SYS}"					#Also print current system to stdout.
