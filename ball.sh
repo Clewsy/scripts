@@ -45,11 +45,19 @@ while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry
 				##<&2 needed as descriptor for nested while read loops (while read loop within called script)
 
 	echo -e "Attempting backup for \"${REM_SYS}\""
+
+	##Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
+	case ${#REM_SYS} in
+		[1-6])		COLUMN_SPACER="\t\t";;	##1-6 characters
+		[7-9] | 1[0-4])	COLUMN_SPACER="\t";;	##7-14 characters
+		*)		COLUMN_SPACER=""	##>14 characters
+	esac
+
 	if ! ssh -t "${REM_SYS}" "${COMMAND}"; then					#Attempt to connect via ssh and run the backup script "bu.sh"
-		echo -E "${REM_SYS}\t ${RED}Failure.${RESET}" >> ${TEMP_BALL_SUMMARY}	#If the above fails for the current host, record the failure
+		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> ${TEMP_BALL_SUMMARY}	#If the above fails for the current host, record the failure
 		continue								# then try the next host in the list.
 	else
-		echo -E "${REM_SYS}\t ${GREEN}Success.${RESET}" >> ${TEMP_BALL_SUMMARY}	#If the above succeeds, record the success.
+		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> ${TEMP_BALL_SUMMARY}	#If the above succeeds, record the success.
 											#Note a "success" means the ssh session was created and exited
 											# gracefully.  Failures with the called script are not checcked.
 	fi
