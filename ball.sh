@@ -19,7 +19,7 @@ ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name o
 #Syntax: parameter=${parameter-default}
 
 TEMP_BALL_SUMMARY="$(dirname "$0")/temp_ball_summary"	#Define the temp summary file location.
-if [ -e "${}" ]; then rm "${TEMP_BALL_SUMMARY}"; fi	#If it exists, delete the temporary file (in case script failed previously before deleting it).
+if [ -e "${TEMP_BALL_SUMMARY}" ]; then rm "${TEMP_BALL_SUMMARY}"; fi	#If it exists, delete the temporary file (in case script failed previously before deleting it).
 
 TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"			#Define a working system list
 if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	#If it exists, delete the temporary file (in case script failed previously).
