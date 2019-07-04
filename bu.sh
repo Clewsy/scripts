@@ -14,8 +14,9 @@ RESET="\033[0m"
 SUCCESS=0	#Noice
 BAD_USAGE=1	#incorrest usage
 BAD_ARGUMENT=2	#specified or default file list not readable
-NO_SERVICE=3    #neither rsync nor scp are installed
-NO_REM_DIR=4	#ssh command to create remote directory failed
+BAD_LIST_FILE=3	#list file not identified as ascii text file
+NO_SERVICE=4	#neither rsync nor scp are installed
+NO_REM_DIR=5	#ssh command to create remote directory failed
 
 #Configurable settings
 BU_USER="b4t"
@@ -80,24 +81,34 @@ fi
 
 TEMP_BU_FILE_LIST="$(dirname $0)/temp_bu_file_list"	#Define the temporary file which will contain a list of file/s to be backed up..
 
-if [ "${ARGUMENT_TYPE}" == "FILE" ]; then				#If the provided argument is a specific file to be backed up (option -f)
-	echo -e "Backup the following file: $ARGUMENT"			#Print the file to be backed up.
+if [ "${ARGUMENT_TYPE}" == "FILE" ]; then						#If provided argument is a specific file to be backed up (option -f)
+	echo -e "Backup the following file: ${ARGUMENT}"				#Print the file to be backed up.
 	echo "$(find $(pwd) -name $(basename ${ARGUMENT}))" > ${TEMP_BU_FILE_LIST}	#Create the list of files to be backed up - in this case a list of one.
 											#Use find to capture the absolute directory location of the file.
 else
-	echo "Backup file list is \"$ARGUMENT\""			#Else the argument is assumed a list of files (option -l or no option).
-	while read -r LINE ; do						#Iterate for every line in the backup file list.
-		STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
-		if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
-			echo ${STRIPPED_LINE} >> "${TEMP_BU_FILE_LIST}"	#Then copy the stripped line to the temp file.
+	if ! $(file "${ARGUMENT}" | grep "ASCII text" >> /dev/null); then	#Check that the list file is ascii text as expected.
+		echo -e "Bad backup list file (expecting ascii text file)."	#If not, print usage and exit.
+		echo -e "${USAGE}"
+		exit ${BAD_LIST_FILE}
+	else
+		echo "Backup file list is \"$ARGUMENT\""			#Else the argument is assumed a list of files (option -l or no option).
+		while read -r LINE ; do						#Iterate for every line in the backup file list.
+			STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
+			if [ -e "${STRIPPED_LINE}" ]; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+				echo ${STRIPPED_LINE} >> "${TEMP_BU_FILE_LIST}"	#Then copy the stripped line to the temp file.
+			fi
+		done < "${ARGUMENT}"
+		if [ ! -e ${TEMP_BU_FILE_LIST} ]; then						#If the temp list file was not created
+			echo -e "The list file did not contain any valid files to back up."	#Then id didn't contain any valid files.
+			echo -e "${USAGE}"							#So print usage and exit.
+			exit ${BAD_LIST_FILE}
 		fi
-	done < "${ARGUMENT}"
+	fi
 fi
-
 
 #Verify if rsync is installed.  If not, verify scp is installed.
 echo -e "Checking for rsync (preferred) or scp:"
-if ! command -v rsync >> /dev/null ; then		#If rsync not installed (send to /dev/null to suppress stdout)
+if ! command -v rsync >> /dev/null; then		#If rsync not installed (send to /dev/null to suppress stdout)
 	echo
 	echo -e "${ORANGE}Warning: rsync not installed.${RESET}  Defaulting to scp for backup operations"
 	if ! command -v scp >> /dev/null; then	#if scp not installed (send to /dev/null to suppress stdout)
@@ -168,6 +179,6 @@ done < "$TEMP_BU_FILE_LIST"	#File read by the while loop which includes a list o
 rm $TEMP_BU_FILE_LIST		#Delete the temporary file list (file list with comments stripped).
 
 echo
-echo "Backup complete"
+echo "Script complete"
 echo
 exit ${SUCCESS}
