@@ -3,20 +3,20 @@
 ##This script will take as an input either a specific file or a list of multiple files.
 ##These files will be backed up to the specified server.
 
-#Configurable settings
+##########Configurable settings
 BU_USER="b4t"
 BU_SERVER_LOCAL="seymour.local"
 BU_SERVER_REMOTE="b4t.site"
 BU_REMOTE_DIR="/home/$BU_USER/file_cache/$HOSTNAME"
 
-##Colours
+##########Colours
 RED="\033[02;31m"
 ORANGE="\033[02;33m"
 GREEN="\033[02;32m"
 BLUE="\033[01;34m"
 RESET="\033[0m"
 
-#Exit codes
+##########Exit codes
 SUCCESS=0	#Noice
 BAD_USAGE=1	#incorrest usage
 BAD_ARGUMENT=2	#specified or default file list not readable
@@ -24,6 +24,7 @@ BAD_LIST_FILE=3	#list file not identified as ascii text file
 NO_SERVICE=4	#neither rsync nor scp are installed
 NO_REM_DIR=5	#ssh command to create remote directory failed
 
+##########Usage
 USAGE="
 Usage: $(basename $0) [option] [file/list]
 Where [file/list] is either:
@@ -40,6 +41,7 @@ Valid options:
 
 DEST="/dev/null"
 
+##########Interpret options
 while getopts 'fdlvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered.
 	case "$OPTION" in
@@ -58,9 +60,9 @@ while getopts 'fdlvh' OPTION; do			## Call getopts to identify selected options 
 	esac
 done
 shift $(($OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
-
 if [ -z "$OPTIONS" ]; then ARGUMENT_TYPE="LIST"; fi	## Check if no options were entered.  If so, set the ALL flag.
 
+##########CHeck correct usage
 if [ $# -gt 1 ]; then			## Check if more than one argument was entered.
 	echo -e "Too many arguments."	## If so, show usage and exit.
 	echo -e "${USAGE}"
@@ -68,12 +70,13 @@ if [ $# -gt 1 ]; then			## Check if more than one argument was entered.
 fi
 
 if [ "${ARGUMENT_TYPE}" == "FILE" ] && [ $# -lt 1 ]; then	##Check if expected argument is a file but no argument entered.
-	echo -e "Missing argument."			##If true, show usage and exit.
-	echo -e "${USAGE}"				##(Note, no argument acceptable for -l option as default list file will be assumed)
+	echo -e "Missing argument."				##If true, show usage and exit.
+	echo -e "${USAGE}"					##(Note, no argument acceptable for -l option as default list file will be assumed)
 	exit ${BAD_USAGE}
 fi
 
-ARGUMENT=${1-"$(dirname "$0")/bu.list"}	#First argument is the file name of the list of files to be backed up.
+##########Validate argument
+ARGUMENT=${1-"$(dirname "$0")/bu.list"}	#First argument is the file name of the list of files to be backed up or a specific file to be backed up..
 					#If argument not provided, set default (bu.list in same dir as script).
 					#Syntax: parameter=${parameter-default}
 
@@ -83,13 +86,47 @@ if [ ! -e "${ARGUMENT}" ]; then		#Check the argument exists
 	exit ${BAD_ARGUMENT};
 fi
 
+##########Verify if rsync is installed.  If not, verify scp is installed.
+echo -e "\nChecking for rsync (preferred) or scp:" > ${DEST}
+if ! command -v rsync >> /dev/null; then		#If rsync not installed (send to /dev/null to suppress stdout)
+	echo -e "${ORANGE}Warning: rsync not installed.${RESET}  Defaulting to scp for backup operations" > ${DEST}
+	if ! command -v scp >> /dev/null; then	#if scp not installed (send to /dev/null to suppress stdout)
+		echo -e "${RED}Error: neither rsync nor scp is installed.${RESET}  Quitting."
+		exit ${NO_SERVICE}
+	fi
+	RSYNC_INSTALLED="FALSE"	#Flag false so scp is used for copy operations
+else
+	echo -e "${GREEN}Confirmation:${RESET} rsync installed." > ${DEST}
+	RSYNC_INSTALLED="TRUE"	#Flag true so rsync is used for copy operations
+fi
+
+##########Determine server hostname (i.e. use local network or remote network).
+echo -e "\nChecking for local backup server availability." > ${DEST}
+if ping -c 1 -W 1 -q "${BU_SERVER_LOCAL}" > ${DEST} 2>&1; then	#If a ping to the local server is successful... (suppress stderr)
+	BU_SERVER="${BU_SERVER_LOCAL}"				#Use the local server.
+	echo "Using local server (${BU_SERVER})." > ${DEST}
+else
+	BU_SERVER="${BU_SERVER_REMOTE}"				#Otherwise, use the remote server.
+	echo "Using remote server (${BU_SERVER})." > ${DEST}
+fi
+
+##########Validate the backup folder or create if absent.
+echo -e "\nChecking for remote backup directory \"${BU_REMOTE_DIR}\" on remote backup server \"${BU_SERVER}\" (will be created if absent)." > ${DEST}
+if ! ssh ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}"; then	#Connects to the remote server and creates the dir to which bu files will be copied.
+	echo -e "${RED}Failed to create remote directory${RESET}"	#If this fails, print error and exit.
+	exit ${NO_REM_DIR}
+fi
+echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}" > ${DEST}
+
+
+##########Set up the temp files
 TEMP_BU_SUMMARY="$(dirname "$0")/temp_bu_summary"			#Define the temp summary file location.
 if [ -e "${TEMP_BU_SUMMARY}" ]; then rm "${TEMP_BU_SUMMARY}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
 TEMP_BU_FILE_LIST="$(dirname $0)/temp_bu_file_list"			#Define the temporary file which will contain a list of file/s to be backed up..
 if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BALL_FILE_LIST}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
-#Fill the temp list file.
+##########Fill the temp list file.
 if [ "${ARGUMENT_TYPE}" == "FILE" ]; then						#If provided argument is a specific file to be backed up (option -f)
 	echo -e "\nBackup the following file: ${ARGUMENT}" > ${DEST}			#Print the file to be backed up.
 	echo "$(find $(pwd) -name $(basename ${ARGUMENT}))" > ${TEMP_BU_FILE_LIST}	#Create the list of files to be backed up - in this case a list of one.
@@ -134,41 +171,9 @@ else										#Else if argument is not a specific file, assume it is a list of f
 	fi
 fi
 
-#Verify if rsync is installed.  If not, verify scp is installed.
-echo -e "\nChecking for rsync (preferred) or scp:" > ${DEST}
-if ! command -v rsync >> /dev/null; then		#If rsync not installed (send to /dev/null to suppress stdout)
-	echo -e "${ORANGE}Warning: rsync not installed.${RESET}  Defaulting to scp for backup operations" > ${DEST}
-	if ! command -v scp >> /dev/null; then	#if scp not installed (send to /dev/null to suppress stdout)
-		echo -e "${RED}Error: neither rsync nor scp is installed.${RESET}  Quitting."
-		exit ${NO_SERVICE}
-	fi
-	RSYNC_INSTALLED="FALSE"	#Flag false so scp is used for copy operations
-else
-	echo -e "${GREEN}Confirmation:${RESET} rsync installed." > ${DEST}
-	RSYNC_INSTALLED="TRUE"	#Flag true so rsync is used for copy operations
-fi
-
-#Determine server hostname (i.e. use local network or remote network).
-echo -e "\nChecking for local backup server availability." > ${DEST}
-if ping -c 1 -W 1 -q "${BU_SERVER_LOCAL}" > ${DEST} 2>&1; then	#If a ping to the local server is successful... (suppress stderr)
-	BU_SERVER="${BU_SERVER_LOCAL}"				#Use the local server.
-	echo "Using local server (${BU_SERVER})." > ${DEST}
-else
-	BU_SERVER="${BU_SERVER_REMOTE}"				#Otherwise, use the remote server.
-	echo "Using remote server (${BU_SERVER})." > ${DEST}
-fi
-
-#Validate the backup folder or create if absent.
-echo -e "\nChecking for remote backup directory \"${BU_REMOTE_DIR}\" on remote backup server \"${BU_SERVER}\" (will be created if absent)." > ${DEST}
-if ! ssh ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}"; then	#Connects to the remote server and creates the dir to which bu files will be copied.
-	echo -e "${RED}Failed to create remote directory${RESET}"	#If this fails, print error and exit.
-	exit ${NO_REM_DIR}
-fi
-echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}" > ${DEST}
-
+##########Loop through the file list and run backup command
+##########(Actually using the temp file list which is the same as the file list but with comments stripped and filenames expanded).
 echo > ${DEST}
-#Loop through the file list and run backup command
-#(Actually using the temp file list which is the same as the file list but with comments stripped and filenames expanded).
 while read -r BU_FILE; do		##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
         echo -e "--------" > ${DEST}
 	echo -e "${BLUE}Backing up \"${BU_FILE}\" to \"${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${RESET}"	#Run copy command (rsync or scp)
@@ -186,14 +191,16 @@ while read -r BU_FILE; do		##Loop to repeat commands for each file name entry in
 	echo -E "${GREEN}Success: ${RESET}Backup of ${BU_FILE}" >> "${TEMP_BU_SUMMARY}"
 done < "${TEMP_BU_FILE_LIST}"	#File read by the while loop which includes a list of files to be backed up.
 
+##########Display summary of results
 echo -e "\nBackup summary:"
 while read -r SUMMARY_LINE; do
 	echo -e "${SUMMARY_LINE}"
 done < "${TEMP_BU_SUMMARY}"
 
-rm ${TEMP_BU_FILE_LIST} ${TEMP_BU_SUMMARY}		#Delete the temporary files
+##########Delete the temp files
+rm ${TEMP_BU_FILE_LIST} ${TEMP_BU_SUMMARY}
 
+##########All done
 echo -e "\nScript complete.\n" > ${DEST}
 echo
-
 exit ${SUCCESS}
