@@ -150,7 +150,7 @@ fi
 
 #Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-if ping -c 1 -W 1 "${BU_SERVER_LOCAL}" >> /dev/null; then	#If a ping to the local server is successful...
+if ping -c 1 -W 1 -q "${BU_SERVER_LOCAL}" > ${DEST} 2>&1; then	#If a ping to the local server is successful... (suppress stderr)
 	BU_SERVER="${BU_SERVER_LOCAL}"				#Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
 else
