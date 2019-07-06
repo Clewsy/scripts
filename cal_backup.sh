@@ -13,12 +13,12 @@
 
 ##generate a user and password specifically for this script in nextcloud: settings->security->devices & sessions->create new app password
 ##define the user in accordance with the nextcloud access
-USER="goober"
+USER="jadon"
 ##define the password in accordance with the nextcloud access.
 PASSWORD="2B3TF-E62Aq-cdpNX-Ca2kZ-2FgKM"
 
 #define the calendar identifier.  you can find it within the url when you load the calendar in the nextcloud webui.
-CALENDAR="9256b433-dcf8-4268-97ca-2d399d0a1c12"
+CALENDAR="9256b433-dcf8-4263-97ca-2d399d0a1c12"
 
 ##the filename to be used for saving the archived *.ics calendar file.  prepended by the date command to generate a timestamp.
 FILENAME="$(date +%Y%m%d%H%M%S)_${USER}_calendar_backup.ics"
@@ -42,5 +42,9 @@ CALENDAR_URL="${NEXTCLOUD_URL}/remote.php/dav/calendars/${USER}/${CALENDAR}/?exp
 ##run as user www-data so that www-data remains the file owner.  this way the file can be r/w accessed within the nextcloud webui.
 curl -o ${USER_FILES}/${DIRNAME}/${FILENAME} -u ${USER}:${PASSWORD} ${CALENDAR_URL}
 
+##delete any calendar backups older than a month
+find ${USER_FILES}/${DIRNAME} -mtime +30 -delete
+
 ##do a directory-specific files:scan to so that the new ics file is entered into the nextcloud database
 php7.1 ${NEXTCLOUD_ROOT}/occ files:scan --path "${USER}/files/${DIRNAME}"
+
