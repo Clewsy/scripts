@@ -173,13 +173,13 @@ while read -r BU_FILE; do		##Loop to repeat commands for each file name entry in
         echo -e "--------" > ${DEST}
 	echo -e "${BLUE}Backing up \"${BU_FILE}\" to \"${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${RESET}"	#Run copy command (rsync or scp)
 	if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	#Use rsync (preferred, dir structure will be retained within backup dir)
-		if ! rsync -r -R -v --progress "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then	#Execute rsync, check for exit error
-			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}" >> "${TEMP_BU_SUMMARY}"
+		if ! rsync -r --relative -v --human-readable --progress --archive "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}" >> "${TEMP_BU_SUMMARY}"	#If rsync failed
 			continue	#Proceed to the next file in the list.
 		fi
 	else						#Use scp (dir structure will not be retained)
 		if ! scp -r -B "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then		#Execute scp, check for exit error
-			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}"
+			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}" >> "${TEMP_BU_SUMMARY}"	#If scp failed
 			continue	#Proceed to the next file in the list.
 		fi
 	fi
