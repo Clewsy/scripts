@@ -14,7 +14,7 @@ SUCCESS=0	#Noice
 BAD_USAGE=1	#Incorrect usage
 
 USAGE="
-Usage: $(basename $0) [hosts]
+Usage: $(basename "$0") [hosts]
 Where [hosts] can be:
 	- [user@host]
 	- [host]	(same user as current)
@@ -34,7 +34,7 @@ ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name o
 TEMP_SUMMARY_FILE="$(dirname "$0")/summary"				#Define temp summary file location.
 if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	#If it exists, delete the temporary file (in case script failed previously).
 
-TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"			#Define a working system list
+TEMP_REM_SYS_LIST="$(dirname "$0")/temp_rem_sys_list"			#Define a working system list
 if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	#If it exists, delete the temporary file (in case script failed previously).
 
 echo
@@ -44,9 +44,9 @@ if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	#If argument is not (!
 else
 	echo -e "Remote system list \"${ARGUMENT}\" validated.${RESET}"	#Tell the user the list looks okay
 	while read -r LINE ; do						#Iterate for every line in the system list.
-		STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
-		if [ ${STRIPPED_LINE} ]; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
-	  		echo ${STRIPPED_LINE} >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
+		STRIPPED_LINE="$(echo "${LINE}" | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
+		if [ "${STRIPPED_LINE}" ]; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+	  		echo "${STRIPPED_LINE}" >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
 		fi
 	done < "${ARGUMENT}"
 fi
