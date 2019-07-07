@@ -26,7 +26,7 @@ NO_REM_DIR=5	#ssh command to create remote directory failed
 
 ##########Usage
 USAGE="
-Usage: $(basename $0) [option] [file/list]
+Usage: $(basename "$0") [option] [file/list]
 Where [file/list] is either:
 	file	-	a specific file/directory to be backed up (requires option \"-f\").
 	list	-	a text list of files/directories to be backed up.
@@ -59,7 +59,7 @@ while getopts 'fdlvh' OPTION; do			## Call getopts to identify selected options 
 			;;
 	esac
 done
-shift $(($OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 if [ -z "$OPTIONS" ]; then ARGUMENT_TYPE="LIST"; fi	## Check if no options were entered.  If so, set the ALL flag.
 
 ##########CHeck correct usage
@@ -112,8 +112,8 @@ fi
 
 ##########Validate the backup folder or create if absent.
 echo -e "\nChecking for remote backup directory \"${BU_REMOTE_DIR}\" on remote backup server \"${BU_SERVER}\" (will be created if absent)." > ${DEST}
-if ! ssh ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}"; then	#Connects to the remote server and creates the dir to which bu files will be copied.
-	echo -e "${RED}Failed to create remote directory${RESET}"	#If this fails, print error and exit.
+if ! ssh -t ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	#Connects to the remote server and creates the backup dir.
+	echo -e "${RED}Failed to create remote directory${RESET}"		#If this fails, print error and exit.
 	exit ${NO_REM_DIR}
 fi
 echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}" > ${DEST}
@@ -123,19 +123,18 @@ echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}
 TEMP_BU_SUMMARY="$(dirname "$0")/temp_bu_summary"			#Define the temp summary file location.
 if [ -e "${TEMP_BU_SUMMARY}" ]; then rm "${TEMP_BU_SUMMARY}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
-TEMP_BU_FILE_LIST="$(dirname $0)/temp_bu_file_list"			#Define the temporary file which will contain a list of file/s to be backed up..
+TEMP_BU_FILE_LIST="$(dirname "$0")/temp_bu_file_list"			#Define the temporary file which will contain a list of file/s to be backed up..
 if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BALL_FILE_LIST}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
 ##########Fill the temp list file.
 if [ "${ARGUMENT_TYPE}" == "FILE" ]; then					#If provided argument is a specific file to be backed up (option -f)
-	ARGUMENT="$(readlink -f ${ARGUMENT})"					#Convert to full path (readlink -f will convert from relative path.)
+	ARGUMENT="$(readlink -f "${ARGUMENT}")"					#Convert to full path (readlink -f will convert from relative path.)
 	echo -e "\nBackup the following file: ${ARGUMENT}" > ${DEST}		#Print the file to be backed up.
-	echo "${ARGUMENT}" > ${TEMP_BU_FILE_LIST}				#Create the list of files to be backed up - in this case a list of one.
+	echo "${ARGUMENT}" > "${TEMP_BU_FILE_LIST}"				#Create the list of files to be backed up - in this case a list of one.
 										#Use find to capture the absolute directory location of the file.
-cat ${TEMP_BU_FILE_LIST}
 else										#Else if argument is not a specific file, assume it is a list of files.
 	if	command -v file >> /dev/null && 				#If "file" is installed and...
-		! $(file "${ARGUMENT}" | grep "ASCII text" >> /dev/null); then	#list file is not ascii text (as expected).
+		! file "${ARGUMENT}" | grep "ASCII text" >> /dev/null; then	#list file is not ascii text (as expected).
 			echo -e "Bad backup list file (expecting ascii text file)."	#Then print usage and exit.
 			echo -e "${USAGE}"
 			exit ${BAD_LIST_FILE}
@@ -165,7 +164,7 @@ else										#Else if argument is not a specific file, assume it is a list of f
 			fi
 		done < "${ARGUMENT}"
 		if [ ! -e "${TEMP_BU_FILE_LIST}" ]; then							#If the temp list file was not created
-			rm ${TEMP_BU_SUMMARY}									#Delete the summary file.
+			rm "${TEMP_BU_SUMMARY}"									#Delete the summary file.
 			echo -e "${RED}The list file did not contain any valid files to back up.${RESET}"	#Then id didn't contain any valid files.
 			echo -e "${USAGE}"									#So print usage and exit.
 			exit ${BAD_LIST_FILE}
@@ -200,7 +199,7 @@ while read -r SUMMARY_LINE; do
 done < "${TEMP_BU_SUMMARY}"
 
 ##########Delete the temp files
-rm ${TEMP_BU_FILE_LIST} ${TEMP_BU_SUMMARY}
+rm "${TEMP_BU_FILE_LIST}" "${TEMP_BU_SUMMARY}"
 
 ##########All done
 echo -e "\nScript complete.\n" > ${DEST}
