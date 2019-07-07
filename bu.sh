@@ -127,10 +127,12 @@ TEMP_BU_FILE_LIST="$(dirname $0)/temp_bu_file_list"			#Define the temporary file
 if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BALL_FILE_LIST}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
 ##########Fill the temp list file.
-if [ "${ARGUMENT_TYPE}" == "FILE" ]; then						#If provided argument is a specific file to be backed up (option -f)
-	echo -e "\nBackup the following file: ${ARGUMENT}" > ${DEST}			#Print the file to be backed up.
-	echo "$(find $(pwd) -name $(basename ${ARGUMENT}))" > ${TEMP_BU_FILE_LIST}	#Create the list of files to be backed up - in this case a list of one.
-											#Use find to capture the absolute directory location of the file.
+if [ "${ARGUMENT_TYPE}" == "FILE" ]; then					#If provided argument is a specific file to be backed up (option -f)
+	ARGUMENT="$(readlink -f ${ARGUMENT})"					#Convert to full path (readlink -f will convert from relative path.)
+	echo -e "\nBackup the following file: ${ARGUMENT}" > ${DEST}		#Print the file to be backed up.
+	echo "${ARGUMENT}" > ${TEMP_BU_FILE_LIST}				#Create the list of files to be backed up - in this case a list of one.
+										#Use find to capture the absolute directory location of the file.
+cat ${TEMP_BU_FILE_LIST}
 else										#Else if argument is not a specific file, assume it is a list of files.
 	if	command -v file >> /dev/null && 				#If "file" is installed and...
 		! $(file "${ARGUMENT}" | grep "ASCII text" >> /dev/null); then	#list file is not ascii text (as expected).
