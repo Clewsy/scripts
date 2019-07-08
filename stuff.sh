@@ -304,9 +304,9 @@ if [[ -n "$GET_O_OS_INFO" || -n "$GET_ALL_INFO" ]]; then
 		if [ ! -f /etc/os-release ]; then			## If file /etc/os-release does not exist
 			echo -e "Cannot determine distribution information (lsb_release not installed and /etc/os-release not present)"
 		else	## Determine distribution info by parsing contents of /etc/os-release
-			echo -e "${COL}${DIM}--Distribution:${RESET} $(grep "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro
-			echo -e "${COL}${DIM}----Version:${RESET} $(grep "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"		## Print distro version
-			echo -e "${COL}${DIM}----ID:${RESET} $(grep "^ID=" /etc/os-release | cut -d "=" -f 2)"				## Print distro ID
+			echo -e "${COL}--Distribution:${RESET} $(grep "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro
+			echo -e "${COL}${DIM}----Version:${RESET} $(grep "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro version
+			echo -e "${COL}${DIM}----ID:${RESET} $(grep "^ID=" /etc/os-release | cut -d "=" -f 2)"			## Print distro ID
 		fi
 	else		## Determine distribution info by running command "lsb_release"
 		echo -e "${COL}--Distribution:${RESET} $(lsb_release -i | cut -f2)"		## Print distro
