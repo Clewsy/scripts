@@ -225,7 +225,7 @@ fi
 ## Print disk and partition info
 if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v lsblk >> /dev/null ; then	#If lsblk not installed (send to /dev/null to suppress stdout)
-		echo -e "Cannot determine disk/partition information (lsblk not installed)"
+		echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk not installed)"
 	else
 		echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"
 		########First level lsblk tree
@@ -302,7 +302,7 @@ if [[ -n "$GET_O_OS_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${DIM}----Release:${RESET} $(uname -r)"		## Print kernel release
 	if ! command -v lsb_release >> /dev/null ; then			## If lsb_release not installed (send to /dev/null to suppress stdout)
 		if [ ! -f /etc/os-release ]; then			## If file /etc/os-release does not exist
-			echo -e "Cannot determine distribution information (lsb_release not installed and /etc/os-release not present)"
+			echo -e "${COL}--Distribution: ${RESET}Cannot determine distribution information (lsb_release not installed and /etc/os-release not present)"
 		else	## Determine distribution info by parsing contents of /etc/os-release
 			echo -e "${COL}--Distribution:${RESET} $(grep "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro
 			echo -e "${COL}${DIM}----Version:${RESET} $(grep "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro version
