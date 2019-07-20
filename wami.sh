@@ -1,16 +1,16 @@
 #!/bin/bash
 
-RED="\033[00;31m"
-BOLD="\033[01;37m"
-RESET="\033[00;0m"
+RED="\033[31m"
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
 
 TEMP_FILE="$(dirname "$0")/temp"	#define the temp file location so that the script will work even if run from a directory without write access
 
-if ! command -v curl >> /dev/null ; then	#check if curl is not installed
+if [ ! "$(which curl)" ] ; then	#check if curl is not installed
 	echo
-	echo -e "${RED}Error:${RESET} curl is not installed.  Quitting."
+	echo -e "${RED}Error${RESET}: curl is not installed.  Quitting."
 	echo
-	exit 1
+	exit -1
 fi
 
 echo
@@ -19,25 +19,26 @@ if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinf
 	echo
 	echo -e "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 	echo
-	exit 1
+	exit -1
 fi
- 
-ip=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-hostname=$(grep "hostname" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-city=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-region=$(grep "region" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-country=$(grep "country" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-loc=$(grep "loc" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-org=$(grep "org" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+
+IP=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+POSTAL=$(grep -m 1 "postal" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+HOST_NAME=$(grep "hostname" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)	#Use the underscore since $HOSTNAME is already in use
+CITY=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+REGION=$(grep "region" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+COUNTRY=$(grep "country" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+LOC=$(grep "loc" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+ORG=$(grep "org" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 
 echo
-echo  -e "${BOLD}IP:${RESET}------------ ${ip}"
-echo  -e "${BOLD}Hostname:${RESET}------ ${hostname}"
-echo  -e "${BOLD}City:${RESET}---------- ${city}"
-echo  -e "${BOLD}Region:${RESET}-------- ${region}"
-echo  -e "${BOLD}Country:${RESET}------- ${country}"
-echo  -e "${BOLD}Co-ordinates:${RESET}-- ${loc}"
-echo  -e "${BOLD}Organisation:${RESET}-- ${org}"
+if [ -n "${IP}" ];		then echo -e "${BOLD}IP:${RESET}------------ ${IP}";		fi
+if [ -n "${POSTAL}" ];		then echo -e "${BOLD}Post Code:${RESET}----- ${POSTAL}";	fi
+if [ -n "${HOST_NAME}" ];	then echo -e "${BOLD}Hostname:${RESET}------ ${HOST_NAME}";	fi
+if [ -n "${CITY}" ];		then echo -e "${BOLD}City:${RESET}---------- ${CITY}";		fi
+if [ -n "${REGION}" ];		then echo -e "${BOLD}Region:${RESET}-------- ${REGION}";	fi
+if [ -n "${COUNTRY}" ];		then echo -e "${BOLD}Country:${RESET}------- ${COUNTRY}";	fi
+if [ -n "${LOC}" ];		then echo -e "${BOLD}Co-ordinates:${RESET}-- ${LOC}";		fi
 echo
 
 rm "$TEMP_FILE"
