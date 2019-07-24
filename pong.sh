@@ -28,11 +28,11 @@ fi
 echo -e "${GREEN}Remote system list \"${REM_SYS_LIST}\" validated.${RESET}"	#Tell user the file list looks okay.
 
 #Create a working system list from the original file list but with #comments stripped.
-TEMP_REM_SYS_LIST="$(dirname $0)/temp_rem_sys_list"		#Create the temporary file.
+TEMP_REM_SYS_LIST="$(dirname "$0")/temp_rem_sys_list"		#Create the temporary file.
 while read -r LINE ; do						#Iterate for every line in the system list.
-	STRIPPED_LINE="$(echo ${LINE} | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
-	if [ ${STRIPPED_LINE} ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
-	  	echo ${STRIPPED_LINE} >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
+	STRIPPED_LINE="$(echo "${LINE}" | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
+	if [ "${STRIPPED_LINE}" ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
+	  	echo "${STRIPPED_LINE}" >> "${TEMP_REM_SYS_LIST}"	#Then copy the stripped line to the temp file.
 	fi
 done < "${REM_SYS_LIST}"
 
