@@ -39,6 +39,7 @@ if [ -n "${CITY}" ];		then echo -e "${BOLD}City:${RESET}---------- ${CITY}";		fi
 if [ -n "${REGION}" ];		then echo -e "${BOLD}Region:${RESET}-------- ${REGION}";	fi
 if [ -n "${COUNTRY}" ];		then echo -e "${BOLD}Country:${RESET}------- ${COUNTRY}";	fi
 if [ -n "${LOC}" ];		then echo -e "${BOLD}Co-ordinates:${RESET}-- ${LOC}";		fi
+if [ -n "${ORG}" ];		then echo -e "${BOLD}Organisation:${RESET}-- ${ORG}";		fi
 echo
 
 rm "${TEMP_FILE}"
