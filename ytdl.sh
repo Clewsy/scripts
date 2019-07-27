@@ -21,30 +21,40 @@ RESET="\033[0m"
 ##Defaults
 DEFAULT_DOWNLOAD_DIR=/storage/emulated/0/Download/
 
+##Exit Codes
+SUCCESS=0
+NO_DL_DIR=1
+NO_TERMUXAPI=2
+NO_URL=3
+
 echo "---Entering \"Download\" directory"
 if ! cd ${DEFAULT_DOWNLOAD_DIR}; then	#change dir or quit on failure.
 	echo
-	echo -e "${RED}---error accessing specified download directory.${RESET}  has \"termux-setup-storage\" been run?"
-	exit -1
+	echo -e "${RED}---error accessing specified download directory.${RESET}  Has \"termux-setup-storage\" been run?"
+	exit $NO_DL_DIR
 fi
 
 echo "current directory= $(pwd)"
 
-if [ -z "$(which termux-clipboard-get)" ]; then	#if the termux-clipboard-get command is absent then termux-api has not been installed
+if ! command -v termux-clipboard-get; then	#if the termux-clipboard-get command is absent then termux-api has not been installed
 	echo
 	echo "---termux-api not installed. Installing now:"
-	apt install termux-api
+	if ! apt install termux-api; then
+		echo
+		echo -e "---${RED}Unable to install termux-api.${RESET}  Quitting."
+		exit $NO_TERMUXAPI
+	fi
 fi
 
 echo
 echo "---Fetching url from clipboard:"
-echo "	(if this hangs, ctrl-c to exit then install termux-api from f-droid)"
-echo "	(alternatively, try updating youtube-dl with \"sudo pip install --upgrade youtube-dl\")"
-url=$(termux-clipboard-get)
+echo "(if this hangs, ctrl-c to exit then install termux-api from f-droid)"
+echo "(alternatively, try updating youtube-dl with \"sudo pip install --upgrade youtube-dl\")"
+URL=$(termux-clipboard-get)
 
-if [ -z "$url" ]; then
-	echo "---Nothing in clipboard, quitting."
-	exit -1
+if [ -z "${URL}" ]; then
+	echo "---${RED}Nothing in clipboard.${RESET}  Quitting."
+	exit $NO_URL
 fi
 
 echo "----------"
@@ -52,14 +62,14 @@ echo "----------"
 while true	#loop until download is successful
 do
 	echo
-	echo "url= $url"
+	echo "url= ${URL}"
 	echo "---Executing youtube-dl and selecting best video quality"
-	if youtube-dl -c --mark-watched -f best "$url"; then	#execute youtube-dl and check for success on exit.
+	if youtube-dl -c --mark-watched -f best "${URL}"; then		#execute youtube-dl and check for success on exit.
 		echo
 		echo -e "${GREEN}---all done!${RESET}"
 		termux-notification -i "ytdl" -c "Download complete" -t "$(basename "$0")"
 		termux-toast "Download complete ($(basename "$0"))"
-		exit 129
+		exit $SUCCESS
 	else
 		echo
 		echo -e "${RED}---download failed or incomplete.${RESET}"
@@ -67,4 +77,3 @@ do
 		echo
 	fi
 done
-
