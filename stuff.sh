@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Set main heading colour from options above.
+## Set main text colour.
 #COL="\\033[00;30m"		#BLACK
 #COL="\\033[00;31m"		#RED
 #COL="\\033[00;32m"		#GREEN
@@ -14,6 +14,11 @@ COL="\\033[00;36m"		#CYAN
 BOLD="\\033[1m"
 DIM="\\033[2m"
 RESET="\\033[0m"
+
+## Exit codes.
+SUCCESS=0
+BAD_OPTION=1
+BAD_ARGUMENT=2
 
 USAGE="
 Usage: $(basename $0) [option]
@@ -41,11 +46,11 @@ while getopts 'pcmavdonh' OPTION; do			## Call getopts to identify selected opti
 		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag - operating system (inc. kernel)
 		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag - network
 		h)	echo -e "$USAGE"		## Print help (usage).
-			exit 0				## Exit successfully.
+			exit $SUCCESS			## Exit successfully.
 			;;
 		?)
 			echo -e "$USAGE"		## Invalid option, show usage.
-			exit 1				## Exit.
+			exit $BAD_OPTION		## Exit.
 			;;
 	esac
 done
@@ -58,7 +63,7 @@ fi
 if (( $# > 0 )); then			## Check if an argument was entered.
 	echo -e "Invalid argument."	## If so, show usage and exit.
 	echo -e "$USAGE"
-	exit 2
+	exit $BAD_ARGUMENT
 fi
 
 echo
@@ -232,9 +237,9 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 		NUM_DISKS=$(lsblk -ndo NAME | wc -l)
 		for (( c=1; c<=NUM_DISKS; c++ ))		## Loop through output for each of the disks/partitions
 		do
-
 			WORKING_DEVICE=$(lsblk -idno NAME | sed -n "${c}p" | cut -d "-" -f 2-10)	## Define device name
 			DEVICE_TYPE=$(lsblk -dno TYPE /dev/${WORKING_DEVICE})				## Define device type
+			if [ "${DEVICE_TYPE}" = "loop" ]; then continue; fi				## Skip output if it's a "loop" (created by a snap install).
 			DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEVICE}")			## Define device model
 			DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEVICE}")				## Define device capacity
 			echo -e "${COL}--Device:${RESET} ${WORKING_DEVICE}"				## Print device name
@@ -410,4 +415,4 @@ fi
 
 echo -e "${COL}==================${RESET}"
 echo
-exit 0
+exit $SUCCESS
