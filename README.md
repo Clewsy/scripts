@@ -25,3 +25,5 @@ pong.sh - Runs through a list of servers, pings each once for a second then retu
 whodis.sh - Grabs the contents of the /tmp/dhcp.leases file on a remote router, pretties it up and prints it to stdout.
 
 cal_backup.sh - Generates an *.ics file from a nextcloud calendar and archives it.  Intended to be used as a cronjob.
+
+roll_out.sh - Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.
