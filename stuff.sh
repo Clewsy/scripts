@@ -23,6 +23,7 @@ BAD_ARGUMENT=2
 USAGE="
 Usage: $(basename $0) [option]
 Valid options:
+-A	All info
 -p	Product info
 -c 	CPU info
 -m	Memory info
@@ -34,9 +35,10 @@ Valid options:
 -h	Print this help
 "
 
-while getopts 'pcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'Apcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
+		A)	GET_ALL_INFO="TRUE" ;;		## Set ALL flag - same output as selecting no options.
 		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag - product info (inc. motherboard, chassis, bios)
 		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag - cpu
 		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag - memory
