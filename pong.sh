@@ -10,10 +10,11 @@ RESET="\033[0m"
 SUCCESS=0		#I guess it worked?
 BAD_LIST_FILE=1		#specified or default file list not readable
 
-TEMP_SUMMARY_FILE="$(dirname "$0")/summary"		#Define the temp file location so that the script will work even if run from a directory without write access
-if [ -e "${TEMP_SUMMARY_FILE}" ]; then
-	rm "${TEMP_SUMMARY_FILE}"			# If it exists, delete the temporary file (in case script failed previously before deleting it).
-fi
+TEMP_SUMMARY_FILE="$(dirname "$0")/summary"				#Define the temp file location so that the script will work even if run from a directory without write access
+if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	#If it exists, delete the temporary file (in case script failed previously before deleting it).
+
+TEMP_REM_SYS_LIST="$(dirname "$0")/temp_rem_sys_list"			#Create the temporary rem_sys_list file.
+if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	#If it exists, delete it.
 
 REM_SYS_LIST=${1-"$(dirname "$0")/my_hosts.list"}	#First argument is the file name of the list of remote systems.
 							#If argument not provided, set default (ball.list in same dir as script).
@@ -28,7 +29,6 @@ fi
 echo -e "${GREEN}Remote system list \"${REM_SYS_LIST}\" validated.${RESET}"	#Tell user the file list looks okay.
 
 #Create a working system list from the original file list but with #comments stripped.
-TEMP_REM_SYS_LIST="$(dirname "$0")/temp_rem_sys_list"		#Create the temporary file.
 while read -r LINE ; do						#Iterate for every line in the system list.
 	STRIPPED_LINE="$(echo "${LINE}" | cut -d "#" -f 1)"	#Strip the content of the line after (and including) the first '#'.
 	if [ "${STRIPPED_LINE}" ] ; then				#If there is anything left in the string (i.e. if entire row is NOT a comment)
@@ -48,7 +48,7 @@ while read -r REM_SYS; do	##Loop to repeat commands for each file name entry in 
 
 	echo -e "Pinging ${REM_HOST}..."		#Print current ping - keep the user updared on progress or stall point.
 
-	if ! ping -c 1 -W 1 "${REM_HOST}" >> /dev/null; then	#Attempt to ping the current host machine.  Ping once (-c 1), wait for 1 second max (-w 1).
+	if ! ping -c 1 -W 2 "${REM_HOST}" >> /dev/null; then	#Attempt to ping the current host machine.  Ping once (-c 1), wait for 1 second max (-w 1).
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${COLUMN_SPACER}${RED}Miss${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record failure.
 	else
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${COLUMN_SPACER}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record success.
