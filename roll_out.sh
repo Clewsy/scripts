@@ -35,7 +35,7 @@ If no [host/list] argument is provided, a list file of the name my_hosts.list wi
 Options:	-v	- Verbose output.
 		-h	- Print this help then exit.
 
-Example:	$(basename "0") ~/bin/stuff.sh bin/. mh_hosts.list
+Example:	$(basename "${0}") ~/bin/stuff.sh bin/. mh_hosts.list
 "
 
 DEST="/dev/null"	##Default output destination is /dev/null - option -v (verbose) changes destination to stdout.
