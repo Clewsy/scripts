@@ -5,8 +5,8 @@
 
 ##########Configurable settings
 BU_USER="b4t"
-BU_SERVER_LOCAL="seymour.local"
-BU_SERVER_REMOTE="b4t.site"
+BU_SERVER_LOCAL="seymour"
+BU_SERVER_REMOTE="clews.pro"
 BU_REMOTE_DIR="/home/$BU_USER/file_cache/$HOSTNAME"
 
 ##########Colours
