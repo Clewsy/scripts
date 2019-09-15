@@ -90,7 +90,7 @@ fi
 echo -e "\nChecking for rsync (preferred) or scp:" > ${DEST}
 if ! command -v rsync >> /dev/null; then		#If rsync not installed (send to /dev/null to suppress stdout)
 	echo -e "${ORANGE}Warning: rsync not installed.${RESET}  Defaulting to scp for backup operations" > ${DEST}
-	if ! command -v scp >> /dev/null; then	#if scp not installed (send to /dev/null to suppress stdout)
+	if ! command -v scp >> /dev/null; then		#if scp not installed (send to /dev/null to suppress stdout)
 		echo -e "${RED}Error: neither rsync nor scp is installed.${RESET}  Quitting."
 		exit ${NO_SERVICE}
 	fi
@@ -102,11 +102,11 @@ fi
 
 ##########Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-if ping -c 1 -W 1 -q "${BU_SERVER_LOCAL}" > ${DEST} 2>&1; then	#If a ping to the local server is successful... (suppress stderr)
-	BU_SERVER="${BU_SERVER_LOCAL}"				#Use the local server.
+if ping -c 1 -W 1 -q "${BU_SERVER_LOCAL}" | grep -e "192.168" -e "127.0"  > ${DEST} 2>&1; then	#If a ping to the local server is successful...
+	BU_SERVER="${BU_SERVER_LOCAL}"								#Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
 else
-	BU_SERVER="${BU_SERVER_REMOTE}"				#Otherwise, use the remote server.
+	BU_SERVER="${BU_SERVER_REMOTE}"								#Otherwise, use the remote server.
 	echo "Using remote server (${BU_SERVER})." > ${DEST}
 fi
 
@@ -124,7 +124,7 @@ TEMP_BU_SUMMARY="$(dirname "$0")/temp_bu_summary"			#Define the temp summary fil
 if [ -e "${TEMP_BU_SUMMARY}" ]; then rm "${TEMP_BU_SUMMARY}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
 TEMP_BU_FILE_LIST="$(dirname "$0")/temp_bu_file_list"			#Define the temporary file which will contain a list of file/s to be backed up..
-if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BALL_FILE_LIST}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
+if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BU_FILE_LIST}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
 ##########Fill the temp list file.
 if [ "${ARGUMENT_TYPE}" == "FILE" ]; then					#If provided argument is a specific file to be backed up (option -f)
