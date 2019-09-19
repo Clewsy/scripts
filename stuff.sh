@@ -3,12 +3,14 @@
 ## Set main text colour.
 #COL="\\033[00;30m"		#BLACK
 #COL="\\033[00;31m"		#RED
+#COL="\\033[00;38;5;214m"	#ORANGE
 #COL="\\033[00;32m"		#GREEN
 #COL="\\033[00;33m"		#YELLOW
 #COL="\\033[00;34m"		#BLUE
 #COL="\\033[00;35m"		#MAGENTA
 COL="\\033[00;36m"		#CYAN
 #COL="\\033[00;37m"		#GRAY
+#COL="\\033[00;40m"		#GRAY
 #COL="\\033[01;37m"		#WHITE
 
 BOLD="\\033[1m"
@@ -102,6 +104,7 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 		echo -e "${COL}├─Product:${RESET} Information not found"
 	fi
 
+	###############################
 	###############################
 	## Print available chassis info
 	if [ -s /sys/devices/virtual/dmi/id/chassis_type ]; then
@@ -485,4 +488,3 @@ fi
 
 echo -e "${COL}──────────────────────────────────────────────────${RESET}"
 echo
-exit $SUCCESS
