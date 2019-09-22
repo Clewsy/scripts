@@ -12,37 +12,37 @@ RESET="\033[0m"
 ##########Exit codes
 SUCCESS=0	#Noice.
 BAD_USAGE=1	#Incorrect usage.
+BAD_HOST=2	#Ping to specified host failed.
 
 #########Usage
 USAGE="
 $(basename "$0") is used to copy a specified file to the home directory on a list of remote systems.
 
-Usage: $(basename "$0") <options> [source] [target] [hosts]
+Usage: $(basename "$0") <options> [source] [target] [host/s]
 Where:
-
-[source]:	file		- a specific file to be copied to the remote host/s.
-		directory	- a directory to be recursively copied to the remote host/s.
-
-[target]:	file		- a specific file (relative to remote home directory) to be created or replaced by the source on the remote host/s.
-		directory	- a directory (relative to remote home directory) to be created or replaced by the source on the remote host/s.
-
-[host/list]:	host		- a specific remote host to which [file/directory] will be copied (e.g. \"hostname\" or \"user@host\").
-		list		- a text file containing a list of hosts to which the [file/directory] will be copied.
+[source]:	a specific file/directory to be copied to the remote host/s.
+[target]:	a file/directory to be created/replaced by [source] on the remote host/s.
+		note: [target] shall be relative to the remote home directory
+[host/s]:	either a specific remote host to which [source] will be copied (e.g. \"user@host\"), OR
+		a text file containing a list of hosts to which [source] will be copied.
 
 The [source] and [target] arguments are mandatory.
 If no [host/list] argument is provided, a list file of the name my_hosts.list will be used (if present).
 
-Options:	-v	- Verbose output.
-		-h	- Print this help then exit.
+Options:
+-v	- Verbose output.
+-h	- Print this help then exit.
 
-Example:	$(basename "${0}") ~/bin/stuff.sh bin/. mh_hosts.list
+Example: $(basename "${0}") ~/bin/stuff.sh bin/. my_hosts.list
 "
 
+FORCE=""			##Default setting, FORCE is false
 DEST="/dev/null"	##Default output destination is /dev/null - option -v (verbose) changes destination to stdout.
 
 ##########Interpret options
-while getopts 'vh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
+while getopts 'fvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
+		f)	FORCE="TRUE" ;;			## -f forces the script to continue without requesting verification.
 		v)	DEST="/dev/stdout" ;;		## -v activates verbose mode by sending output to /dev/stdout (instead of /ev/null).
 		h)	echo -e "$USAGE"		## -l option just prints the usage then quits.
 			exit 0				## Exit successfully.
@@ -64,11 +64,11 @@ if [ $# -lt 2 ] || [ $# -gt 3 ]; then	##Check if less than two or more than thre
 fi
 
 ##########Define the source and target arguments.
-SOURCE=${1}	#First argumet. File/directory to be copied.
-TARGET=${2}	#Second argument. Destination within the remote home directory.
+SOURCE=${1}	#First argument. File/directory to be copied.
+TARGET=${2}	#Second argument. Destination relative to the remote home directory.
 
 ##########Define the hosts argument (user input or default).
-HOSTS=${3-"$(dirname "$0")/my_hosts.list"}	#Second argument is the remote system or the file name of the list of remote systems.
+HOSTS=${3-"$(dirname "$0")/my_hosts.list"}	#Third argument is the remote system or the file name of the list of remote systems.
 						#If argument not provided, set default (by_hosts.list in same dir as script).
 						#Syntax: parameter=${parameter-default}.
 
@@ -81,9 +81,18 @@ if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi		#If it exi
 
 ##########Validate the hosts argument and thus define the remote host/s.
 ##HOSTS is a single remote system.
-if [ ! -f "${HOSTS}" ] || [ ! -r "${HOSTS}" ]; then				#If argument is not (!) a normal file (-f) or (||) in is not (!) readable (-r).
-	echo -e "\nRemote system is \"${HOSTS}\"." > ${DEST}			#Then assume provided argument is a single host (either [host] or [user@host]).
-	echo "${HOSTS}" > "${TEMP_REM_SYS_LIST}" > ${DEST}			#Create the temp list file which will just contain the single entry.
+if [ ! -f "${HOSTS}" ] || [ ! -r "${HOSTS}" ]; then				#If argument is not (!) a normal file (-f) or (||) it is not (!) readable (-r).
+	if echo "${HOSTS}" | grep "@" > ${DEST} 2>&1; then
+		HOST_NAME=$(echo ${HOSTS} | cut -d "@" -f 2)
+	else	HOST_NAME="${HOSTS}"; fi
+	if ping -c 1 -W 1 -q "${HOST_NAME}" > ${DEST} 2>&1; then		#If a ping to the host is successful...
+		echo -e "\nRemote system is \"${HOSTS}\"." > ${DEST}		#Provided argument is probably a single host (either [host] or [user@host]).
+		echo "${HOSTS}" > "${TEMP_REM_SYS_LIST}"			#Create the temp list file which will just contain the single entry.
+		cat "${TEMP_REM_SYS_LIST}" > ${DEST}
+	else
+		echo -e "Specified host \"${HOSTS}\" appears invalid.  Quitting...\n"
+		exit ${BAD_HOST}
+	fi
 ##HOSTS specifies a list of remote hosts.
 else
 	echo -e "\nRemote system list is \"${HOSTS}\"." > ${DEST}		#Tell the user the list looks okay.
@@ -95,7 +104,30 @@ else
 	done < "${HOSTS}"
 fi
 
-##Loop through the remote system list.
+##########Print to screen what the entered command will attempt then request verification.  Will be skipped if option -f is used.
+if [ ! "${FORCE}" ]; then
+	echo -e "\nIt appears you intend to sync the following:"
+	echo -e "Source file/directory: ${BOLD}${SOURCE}${RESET}"
+	echo -e "Target file/directory: ${BOLD}~/${TARGET}${RESET}"
+	echo -e "Target host/s:${BOLD}"
+	cat ${TEMP_REM_SYS_LIST}
+	echo -e "${RESET}"
+
+	read -p "Continue? (y/n) " CHOICE
+	case "${CHOICE}" in 
+		y|Y)	;;	##Continue
+		n|N)	echo -e "No.  Quittinq...\n"
+			rm "${TEMP_REM_SYS_LIST}"	##Delete the temporary files.
+			exit ${SUCCESS}
+			;;
+		*)	echo -e "Invalid, assume no.  Quitting...\n"
+			rm "${TEMP_REM_SYS_LIST}"	##Delete the temporary files.
+			exit ${SUCCESS}
+			;;
+	esac
+fi
+
+##########Loop through the remote system list.
 while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 
 	echo -e "\n--------------------------------------------------------------------" > ${DEST}
@@ -122,7 +154,7 @@ while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry
 done 2< "${TEMP_REM_SYS_LIST}"	##File read by the while loop which includes a list of files to be backed up.
 echo -e "\n--------------------------------------------------------------------" > ${DEST}
 
-##Print out in a pretty format a table indicating the success or failure for each host in the list.
+##########Print out in a pretty format a table indicating the success or failure for each host in the list.
 echo -e "${BOLD}\n╔════════Summary:════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
