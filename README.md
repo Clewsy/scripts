@@ -1,10 +1,8 @@
 # scripts
 
+## active:
+
 bu.sh - Uses rsync to back up files and directories listed in a specified file to a remote server.  Falls back to scp if rsync is not installed.
-
-grab.sh - Uses rsync (to allow resume after interruption) to download a specified file from a remote server.
-
-chuck.sh - Very similar to grab.sh, but used to upload to the remote server.
 
 stuff.sh - Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 
@@ -24,8 +22,14 @@ pong.sh - Runs through a list of servers, pings each once for a second then retu
 
 whodis.sh - Grabs the contents of the /tmp/dhcp.leases file on a remote router, pretties it up and prints it to stdout.
 
-cal_backup.sh - Generates an \*.ics file from a nextcloud calendar and archives it.  Intended to be used as a cronjob.
-
 roll_out.sh - Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.
 
-nc_backup.sh - A script to create a local backup of a nextcloud instance including the database, data files and config files.  To be called as a cronjob.  (A separate cronjob on a remote system syncs this local backup to create a remote backup.)
+## archived:
+
+grab.sh - Uses rsync (to allow resume after interruption) to download a specified file from a remote server.  No longer used.
+
+chuck.sh - Very similar to grab.sh, but used to upload to the remote server.  No longer used.
+
+cal_backup.sh - Generates an \*.ics file from a nextcloud calendar and archives it.  Intended to be used as a cronjob.  No longer used since moving nextcloud to a docker container.
+
+nc_backup.sh - A script to create a local backup of a nextcloud instance including the database, data files and config files.  To be called as a cronjob.  (A separate cronjob on a remote system syncs this local backup to create a remote backup.)  No longer used since moving nextcloud to a docker container.
