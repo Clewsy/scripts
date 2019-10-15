@@ -430,8 +430,8 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 		STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)				## Status of interface up, down or unknown
 		MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)				## MAC address of the inteface.
 
-		if (( c==NUM_DEVS )); then	echo -e "${COL}└─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}${BOLD}  "	## If it's the last interfac
-		else				echo -e "${COL}├─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}${BOLD}│ "; fi
+		if (( c==NUM_DEVS )); then	echo -e "${COL}└─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}  "	## If it's the last interfac
+		else				echo -e "${COL}├─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}│ "; fi
 
 		## Determine the IP address assigned o the interface
 		## Check if the status of the inteface is "up" or "unkown" (not "down")
