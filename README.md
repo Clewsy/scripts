@@ -24,6 +24,8 @@ whodis.sh - Grabs the contents of the /tmp/dhcp.leases file on a remote router, 
 
 roll_out.sh - Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.
 
+polly.sh - Called as a cronjob to regularly poll a web site.  Logs site status to file and uses a [blink(1)](https://blink1.thingm.com/) as a visual status indicator.
+
 ## archived:
 
 grab.sh - Uses rsync (to allow resume after interruption) to download a specified file from a remote server.  No longer used.
