@@ -45,20 +45,6 @@ Valid options:
 Note, must be run as root.
 "
 
-## Verify that script was called with superuser permissions.
-echo -e "\nChecking for superuser access..." > ${DEST}
-if [[ $EUID -ne 0 ]]; then
-	echo -e "Permission denied.\n $USAGE" 
-	exit $NO_ROOT
-fi
-
-## Verify that curl is installed.
-echo -e "\nChecking for curl..." > ${DEST}
-if ! command -v curl > ${DEST}; then
-	echo -e "Error, curl is not installed.  Quitting..."
-	exit $NO_CURL
-fi
-
 ## Parse selected options.
 while getopts 'rlvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"				## Used to determine if a valid or invalid option was entered
@@ -87,6 +73,22 @@ if (( $# > 0 )); then			## Check if an argument was entered.
 	echo -e "$USAGE"
 	exit $BAD_ARGUMENT
 fi
+
+## Verify that script was called with superuser permissions.
+echo -e "\nChecking for superuser access..." > ${DEST}
+if [[ $EUID -ne 0 ]]; then
+	echo -e "Permission denied.\n $USAGE" 
+	exit $NO_ROOT
+fi
+
+## Verify that curl is installed.
+echo -e "\nChecking for curl..." > ${DEST}
+if ! command -v curl > ${DEST}; then
+	echo -e "Error, curl is not installed.  Quitting..."
+	exit $NO_CURL
+fi
+
+############ Main script functionality.
 
 ## Run a command to indicate the script is initiating.
 ${NOTIFICATION_START} > ${DEST}
