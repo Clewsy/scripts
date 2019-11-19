@@ -12,7 +12,7 @@ HOST_STRING="work-in-progress"		## String that should result in a successful gre
 
 LOG_FILE="/var/log/polly.log"		## Log file location.
 
-DEST="/dev/null"			#Default output destination.  Option -v sets to /dev/stdout for verbose output.
+DEST="/dev/null"			## Default output destination.  Option -v sets to /dev/stdout for verbose output.
 
 ## Colour codes for the blink1-tool
 BLINK_RED="--red"
@@ -42,7 +42,7 @@ Valid options:
 -v 	Verbose output.
 -h	Show help.
 
-Note, must be run as root.
+Note, must be run with root privileges.
 "
 
 ## Parse selected options.
@@ -91,21 +91,25 @@ fi
 ############ Main script functionality.
 
 ## Run a command to indicate the script is initiating.
+echo -e "Running script-start notification command..." > ${DEST}
 ${NOTIFICATION_START} > ${DEST}
 
 ## Attempt to curl the url and grep the string.
 if ! curl --silent --connect-timeout 5 --max-time 10 ${HOST_URL} | grep "${HOST_STRING}" >> ${DEST}; then	## Site is down.
 	echo -e "\nSite down!\n"
 	echo -e "$(date) - FAILURE - Site not available." >> $LOG_FILE
+	echo -e "Running failure notification command..." > ${DEST}
 	${NOTIFICATION_FAILED} > ${DEST}
 else
 	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING"; then					## Site is up but was down.
 		echo -e "\nSite has recovered from downtime, but everything seems okay now.\n"
 		echo -e "$(date) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
+		echo -e "Running recovered notification command..." > ${DEST}
 		${NOTIFICATION_RECOVERED} > ${DEST}
 	else													## Site is up.
 		echo -e "\nEverything seems okay.\n"
 		echo -e "$(date) - OK - Site is up, everything seems okay." >> $LOG_FILE
+		echo -e "Running success notification command..." > ${DEST}
 		${NOTIFICATION_OK} > ${DEST}
 	fi
 fi
