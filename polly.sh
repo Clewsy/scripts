@@ -35,7 +35,7 @@ NO_CURL=4
 
 ## Script usage.
 USAGE="
-Usage: $(basename $0) [option]
+Usage: $(basename "$0") [option]
 Valid options:
 -r	Reset the recovered flag.
 -l	Show the log.
@@ -47,7 +47,6 @@ Note, must be run with root privileges.
 
 ## Parse selected options.
 while getopts 'rlvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
-	OPTIONS="TRUE"				## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
 		r)	echo -e "Resetting site poll status."			## Note, no exit.  After reset, the script will still run.
 			echo -e "$(date) - Site status reset." >> $LOG_FILE
@@ -65,7 +64,7 @@ while getopts 'rlvh' OPTION; do			## Call getopts to identify selected options a
 			;;
 	esac
 done
-shift $(($OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 ## No arguments are expected, so ensure not have been given.
 if (( $# > 0 )); then			## Check if an argument was entered.
