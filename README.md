@@ -12,7 +12,7 @@ wami.sh - Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - us
 
 ytdl.sh - Written for use with termux (android) to download a youtube video direct to the device.
 
-power_switch.sh - Written for use with termux (android) to connect to a server that can control wireless mains outlets via p0wer (https://gitlab.com/Clewsy/p0wer).
+power_switch.sh - Written for use with termux (android) to connect to a server that can control wireless mains outlets via [p0wer](https://gitlab.com/Clewsy/p0wer).
 
 ball.sh - Runs bu.sh on a bunch of remote systems defined in a list file.
 
@@ -35,3 +35,5 @@ chuck.sh - Very similar to grab.sh, but used to upload to the remote server.  No
 cal_backup.sh - Generates an \*.ics file from a nextcloud calendar and archives it.  Intended to be used as a cronjob.  No longer used since moving nextcloud to a docker container.
 
 nc_backup.sh - A script to create a local backup of a nextcloud instance including the database, data files and config files.  To be called as a cronjob.  (A separate cronjob on a remote system syncs this local backup to create a remote backup.)  No longer used since moving nextcloud to a docker container.
+
+ytdl.sh - Written for use with termux (android) to download a youtube video direct to the device.  Archived as I no longer use this since switching to [LineageOS](https://lineageos.org/) and running [NewPipe](https://newpipe.schabi.org/) instead of the youtube app.  Newpipe has direct download capability.
