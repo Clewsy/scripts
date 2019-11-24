@@ -10,8 +10,6 @@ vpn.sh - Kills current openvpn service then reconnects and confirms.  Useful for
 
 wami.sh - Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - useful to verify vpn operation.
 
-ytdl.sh - Written for use with termux (android) to download a youtube video direct to the device.
-
 power_switch.sh - Written for use with termux (android) to connect to a server that can control wireless mains outlets via [p0wer](https://gitlab.com/Clewsy/p0wer).
 
 ball.sh - Runs bu.sh on a bunch of remote systems defined in a list file.
