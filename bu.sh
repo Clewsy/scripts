@@ -120,10 +120,10 @@ echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}
 
 
 ##########Set up the temp files
-TEMP_BU_SUMMARY="$(dirname "$0")/temp_bu_summary"			#Define the temp summary file location.
+TEMP_BU_SUMMARY="/tmp/temp_bu_summary"					#Define the temp summary file location.
 if [ -e "${TEMP_BU_SUMMARY}" ]; then rm "${TEMP_BU_SUMMARY}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
-TEMP_BU_FILE_LIST="$(dirname "$0")/temp_bu_file_list"			#Define the temporary file which will contain a list of file/s to be backed up..
+TEMP_BU_FILE_LIST="/tmp/temp_bu_file_list"				#Define the temporary file which will contain a list of file/s to be backed up..
 if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BU_FILE_LIST}"; fi	#If it exists, delete the temp file (in case script failed previously before deleting).
 
 ##########Fill the temp list file.
