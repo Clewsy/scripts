@@ -30,6 +30,7 @@ The [source] and [target] arguments are mandatory.
 If no [host/list] argument is provided, a list file of the name my_hosts.list will be used (if present).
 
 Options:
+-f	- Force script.  I.e. do not request confirmation of provided arguments.
 -v	- Verbose output.
 -h	- Print this help then exit.
 
