@@ -208,11 +208,11 @@ if [[ -n "$GET_M_MEMORY_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${BOLD}├─RAM:${RESET}"
 	echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Total:    ${RESET} $(free -h | grep "Mem:" | awk '{print $2}')"	## Print total physical RAM
 	echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Used:     ${RESET} $(free -h | grep "Mem:" | awk '{print $3}')"	## Print used physical RAM
-	echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} $(free -h | grep "Mem:" | awk '{print $7}')"	## Print physical physical RAM
+	echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} $(free -h | grep "Mem:" | awk '{print $7}')"	## Print available physical RAM
 	echo -e "${COL}${BOLD}└─SWAP:${RESET}"
 	echo -e "${COL}  ├─Total:    ${RESET} $(free -h | grep "Swap" | awk '{print $2}')"	## Print total allocated swap file size
 	echo -e "${COL}  ├─Used:     ${RESET} $(free -h | grep "Swap" | awk '{print $3}')"	## Print used swap file size
-	echo -e "${COL}  └─Available:${RESET} $(free -h | grep "Swap" | awk '{print $7}')"	## Print free swap file size
+	echo -e "${COL}  └─Free:     ${RESET} $(free -h | grep "Swap" | awk '{print $4}')"	## Print free swap file size
 fi
 
 ###############################################################################################################################################################
