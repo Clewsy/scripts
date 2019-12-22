@@ -388,12 +388,12 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${BOLD}Network:${RESET}"
 
 	## Show external IP
-	if ! command -v curl >> /dev/null ; then							## If curl not installed
-		EXT_IP="Cannot determine - curl not installed."			## Print a "no curl" error
+	if ! command -v curl >> /dev/null ; then					## If curl not installed
+		EXT_IP="Cannot determine - curl not installed."				## Print a "no curl" error
 	else
-		EXT_IP=$(curl --silent --max-time 5 ipinfo.io | grep -m 1 "ip" | cut -d "\"" -f4)	## Grep external IP
-		if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi				## If no data exists for ext_ip, create error message.
-		echo -e "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}"					## Print EXT_IP
+		EXT_IP=$(curl --silent --max-time 5 ipecho.net/plain)			## Determine external IP
+		if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi		## If no data exists for ext_ip, create error message.
+		echo -e "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}"			## Print EXT_IP
 	fi
 
 	## Show primary dns address
