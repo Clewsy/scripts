@@ -37,8 +37,9 @@ NO_CURL=4
 USAGE="
 Usage: $(basename "$0") [option]
 Valid options:
+-s	Show the current status (i.e. result of last poll).
+-l	Show the full log.
 -r	Reset the recovered flag.
--l	Show the log.
 -v 	Verbose output.
 -h	Show help.
 
@@ -46,14 +47,18 @@ Note, must be run with root privileges.
 "
 
 ## Parse selected options.
-while getopts 'rlvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
-		r)	echo -e "Resetting site poll status."			## Note, no exit.  After reset, the script will still run.
-			echo -e "$(date) - Site status reset." >> $LOG_FILE
+		s)	echo -e "Fetching current status:"			## Print the last line of the log file then exit.
+			tail -n -1 ${LOG_FILE}
+			exit $SUCCESS
 			;;
-		l)	echo -e "Printing log file (${LOG_FILE}):\n" 		## Simply dump the log file to stdout then exit.
+		l)	echo -e "Printing log file (${LOG_FILE}):" 		## Simply dump the log file to stdout then exit.
 			cat ${LOG_FILE}
 			exit $SUCCESS
+			;;
+		r)	echo -e "Resetting site poll status."			## Note, no exit.  After reset, the script will still run.
+			echo -e "$(date) - Site status reset." >> $LOG_FILE
 			;;
 		v)	DEST="/dev/stdout" ;;					## Change DEST from /dev/null to /dev/stdout for verbose output.
 		h)	echo -e "$USAGE"					## Print help (usage) and exit.
@@ -112,4 +117,3 @@ else
 		${NOTIFICATION_OK} > ${DEST}
 	fi
 fi
-
