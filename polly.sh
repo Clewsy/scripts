@@ -8,7 +8,7 @@
 ## Note, the script requires curl.
 
 HOST_URL="https://clews.pro/index.html"	## Host url or ip address to test for connectivity
-HOST_STRING="work-in-progress"		## String that should result in a successful grep when cURL-ing the host.
+HOST_STRING="<title>clews.pro</title>"	## String that should result in a successful grep when cURL-ing the host.
 
 LOG_FILE="/var/log/polly.log"		## Log file location.
 
