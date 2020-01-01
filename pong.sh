@@ -43,7 +43,7 @@ while read -r REM_SYS; do	##Loop to repeat commands for each file name entry in 
 
 	REM_HOST=$(echo "${REM_SYS}" | cut -d "@" -f 2)	#Strip the "user@" from the current entry in the hosts file.
 
-	let NUM_BUFF=22-${#REM_HOST}			#Set the padding size based on the number of characters in the hostname.
+	let NUM_BUFF=23-${#REM_HOST}			#Set the padding size based on the number of characters in the hostname.
 	COLUMN_SPACER=""
 	for (( i=1; i<$NUM_BUFF; i++ ))
 	do
@@ -56,18 +56,20 @@ while read -r REM_SYS; do	##Loop to repeat commands for each file name entry in 
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${RED}Miss${RESET}" >> "$TEMP_SUMMARY_FILE"		#Record failure.
 	else
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record success.
+		let TALLY=$TALLY+1
 	fi
 
 done < "${TEMP_REM_SYS_LIST}"		##File read by the while loop which includes a list of files to be backed up.
 
-
 #Print out in a pretty format a table indicating the success or failure of ppinging each host in the list.
 echo
-echo -e "${BOLD}╔═════Summary:═════════════════╗${RESET}"
+echo -e "${BOLD}╔═════Summary:══════════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
 done < "${TEMP_SUMMARY_FILE}"
-echo -e "${BOLD}╚══════════════════════════════╝${RESET}"
+echo -e "${BOLD}╠═══════════════════════════════╣${RESET}"
+echo -e "${BOLD}║ ${TALLY}${RESET} out of ${BOLD}$(wc -l ${TEMP_REM_SYS_LIST} | cut -d " " -f 1)${RESET} hosts online.\t${BOLD}║${RESET}"
+echo -e "${BOLD}╚═══════════════════════════════╝${RESET}"
 echo
 
 rm "${TEMP_SUMMARY_FILE}"	#Delete the temporary summary file.
