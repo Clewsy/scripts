@@ -4,6 +4,7 @@
 RED="\033[02;31m"
 GREEN="\033[02;32m"
 BOLD="\033[01;37m"
+DIM="\\033[2m"
 RESET="\033[0m"
 
 #Exit codes
@@ -41,17 +42,20 @@ echo "-----------------------------------------------"
 while read -r REM_SYS; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 
 	REM_HOST=$(echo "${REM_SYS}" | cut -d "@" -f 2)	#Strip the "user@" from the current entry in the hosts file.
-	if [ ${#REM_HOST} -gt 9 ]			#If the host name is a string greater than 9 characters
-		then COLUMN_SPACER="\t"			#Then long hostname so only want a single tab spacer
-		else COLUMN_SPACER="\t\t"		#Else short hostname so want two tab spacers.
-	fi						#Note formatting as above will keep things neat for host names from 1 to 16 characters
+
+	let NUM_BUFF=22-${#REM_HOST}			#Set the padding size based on the number of characters in the hostname.
+	COLUMN_SPACER=""
+	for (( i=1; i<$NUM_BUFF; i++ ))
+	do
+		COLUMN_SPACER="${COLUMN_SPACER}-"
+	done
 
 	echo -e "Pinging ${REM_HOST}..."		#Print current ping - keep the user updared on progress or stall point.
 
 	if ! ping -c 1 -W 2 "${REM_HOST}" >> /dev/null; then	#Attempt to ping the current host machine.  Ping once (-c 1), wait for 1 second max (-w 1).
-		echo "${GREEN}Ping${RESET} ${REM_HOST}${COLUMN_SPACER}${RED}Miss${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record failure.
+		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${RED}Miss${RESET}" >> "$TEMP_SUMMARY_FILE"		#Record failure.
 	else
-		echo "${GREEN}Ping${RESET} ${REM_HOST}${COLUMN_SPACER}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record success.
+		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	#Record success.
 	fi
 
 done < "${TEMP_REM_SYS_LIST}"		##File read by the while loop which includes a list of files to be backed up.
@@ -59,11 +63,11 @@ done < "${TEMP_REM_SYS_LIST}"		##File read by the while loop which includes a li
 
 #Print out in a pretty format a table indicating the success or failure of ppinging each host in the list.
 echo
-echo -e "${BOLD}╔═════Summary:══════════════╗${RESET}"
+echo -e "${BOLD}╔═════Summary:═════════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
 done < "${TEMP_SUMMARY_FILE}"
-echo -e "${BOLD}╚═══════════════════════════╝${RESET}"
+echo -e "${BOLD}╚══════════════════════════════╝${RESET}"
 echo
 
 rm "${TEMP_SUMMARY_FILE}"	#Delete the temporary summary file.
