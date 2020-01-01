@@ -9,7 +9,6 @@
 #COL="\\033[00;34m"		#BLUE
 #COL="\\033[00;35m"		#MAGENTA
 COL="\\033[00;36m"		#CYAN
-#COL="\\033[00;37m"		#GRAY
 #COL="\\033[00;40m"		#GRAY
 #COL="\\033[00;37m"		#WHITE
 
@@ -218,8 +217,8 @@ fi
 ###############################################################################################################################################################
 ## Print audio and video info (note only first result of each if multiple video or audio devices exist)
 if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]]; then
-	if ! command -v lspci >> /dev/null ; then		#If lspci not installed (send to /dev/null to suppress stdout)
-		echo -e "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed)"
+	if ! command -v lspci >> /dev/null || ! lspci &> /dev/null; then		#If lspci not installed or fails (send to /dev/null to suppress stdout)
+		echo -e "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed or failed)"
 	else
                 echo -e "${COL}${BOLD}Audio/Video:${RESET}"
 		if [[ -n "$GET_ALL_INFO" || ( -n "$GET_A_AUDIO_INFO" && -n "$GET_V_VIDEO_INFO" ) ]]; then	## If we want both audio and vie info
