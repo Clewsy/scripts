@@ -56,12 +56,12 @@ echo
 while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST).
 				##<&2 needed as descriptor for nested while read loops (while read loop within called script).
 
-	##Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-	case ${#REM_SYS} in
-		[1-6])		COLUMN_SPACER="\t\t\t\t";;	##1-6 characters
-		[7-9] | 1[0-4])	COLUMN_SPACER="\t\t\t";;	##7-14 characters
-		*)		COLUMN_SPACER="\t\t"		##>14 characters
-	esac
+	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
+	let NUM_BUFF=32-${#REM_SYS}			## Total buffer = 32 minus number of chars in "user@host"
+	COLUMN_SPACER=""
+	for (( i=1; i<$NUM_BUFF; i++ )); do
+		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
+	done
 
 	echo "${BOLD}║${REM_SYS}${COLUMN_SPACER}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	#Record current system
 	echo "------------------------------------------------------"
@@ -85,7 +85,7 @@ while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry
 	######Attempt update
 	if ! ssh "${REM_SYS}" "sudo apt-get -y update"; then	#If attempt failed
 		{
-			echo -E "${BOLD}║${RESET}apt-get --show-progress update\t\t${RED}Failure.${RESET}${BOLD}║${RESET}"
+			echo -E "${BOLD}║${RESET}apt-get update\t\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	#Record failure
 		continue			#Skip to the next system in the list.
