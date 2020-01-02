@@ -102,11 +102,11 @@ fi
 
 ##########Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-if ping -c 1 -W 1 -q "${BU_SERVER_LOCAL}" | grep -e "192.168" -e "127.0"  > ${DEST} 2>&1; then	#If a ping to the local server is successful...
-	BU_SERVER="${BU_SERVER_LOCAL}"								#Use the local server.
+if ssh -o "BatchMode=yes" -o "ConnectTimeout=3" "${BU_SERVER_LOgCAL}" "exit" > ${DEST} 2>&1; then	#If an ssh connection to the local server is successful...
+	BU_SERVER="${BU_SERVER_LOCAL}"									#Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
 else
-	BU_SERVER="${BU_SERVER_REMOTE}"								#Otherwise, use the remote server.
+	BU_SERVER="${BU_SERVER_REMOTE}"									#Otherwise, use the remote server.
 	echo "Using remote server (${BU_SERVER})." > ${DEST}
 fi
 
