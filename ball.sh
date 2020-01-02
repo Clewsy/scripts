@@ -90,12 +90,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 	echo -e "Attempting to run on \"${REM_SYS}\""
 
-	## Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-	case ${#REM_SYS} in
-		[1-6])		COLUMN_SPACER="\t\t";;	## 1-6 characters
-		[7-9] | 1[0-4])	COLUMN_SPACER="\t";;	## 7-14 characters
-		*)		COLUMN_SPACER=""	## >14 characters
-	esac
+	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
+	let NUM_BUFF=24-${#REM_SYS}			## Total buffer = 24 minus number of chars in "user@host"
+	COLUMN_SPACER=""
+	for (( i=1; i<$NUM_BUFF; i++ )); do
+		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
+	done
 
 	if ! ssh -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then					## Attempt to connect via ssh and run the backup script "bu.sh"
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"	## Record if the above fails for the current host.
@@ -110,11 +110,11 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
 ## Print out in a pretty format a table indicating the success or failure for each host in the list.
-echo -e "${BOLD}\n╔════════Summary:════════╗${RESET}"
+echo -e "${BOLD}\n╔════════════Summary:════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
 done < "${TEMP_BALL_SUMMARY}"
-echo -e "${BOLD}╚════════════════════════╝${RESET}"
+echo -e "${BOLD}╚════════════════════════════════╝${RESET}"
 echo
 
 rm "${TEMP_BALL_SUMMARY}" "${TEMP_REM_SYS_LIST}"	## Delete the temporary files.
