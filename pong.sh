@@ -10,8 +10,8 @@ RESET="\033[0m"
 ## Exit codes
 SUCCESS=0		## I guess it worked?
 BAD_USAGE=1		## Bad option/s entered.
-BAD_LIST_FILE=1		## Specified or default file list not readable
-NO_PING=2		## ping is not installed/available.
+BAD_LIST_FILE=2		## Specified or default file list not readable
+NO_PING=3		## ping is not installed/available.
 
 DEST="/dev/null"	## Default destination for command output.  I.e. don't display on screen.  -v (verbose) option changes this.
 
