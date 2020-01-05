@@ -104,9 +104,9 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 
 	REM_HOST=$(echo "${REM_SYS}" | cut -d "@" -f 2)	## Strip the "user@" from the current entry in the hosts file.
 
-	let NUM_BUFF=23-${#REM_HOST}			## Set the padding size based on the number of characters in the hostname.
+	(( NUM_BUFF=23-${#REM_HOST} ))			## Set the padding size based on the number of characters in the hostname.
 	COLUMN_SPACER=""
-	for (( i=1; i<$NUM_BUFF; i++ ))
+	for (( i=1; i<NUM_BUFF; i++ ))
 	do
 		COLUMN_SPACER="${COLUMN_SPACER}-"
 	done
@@ -118,7 +118,7 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${RED}Miss${RESET}" >> "$TEMP_SUMMARY_FILE"		## Record failure.
 	else
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	## Record success.
-		let TALLY=$TALLY+1
+		(( TALLY++ ))
 	fi
 
 done < "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
