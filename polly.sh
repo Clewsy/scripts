@@ -7,12 +7,12 @@
 ## The script can be run as a user cronjob, for example to run every 5 minutes:	*/5 * * * * sudo /usr/local/sbin/polly.sh
 ## Note, the script requires curl.
 
-HOST_URL="https://clews.pro/index.html"	## Host url or ip address to test for connectivity
-HOST_STRING="<title>clews.pro</title>"	## String that should result in a successful grep when cURL-ing the host.
+HOST_URL="https://clews.pro"	## Host url or ip address to test for connectivity
 
-LOG_FILE="/var/log/polly.log"		## Log file location.
+LOG_FILE="/var/log/polly.log"	## Log file location.
 
-DEST="/dev/null"			## Default output destination.  Option -v sets to /dev/stdout for verbose output.
+DEST="/dev/null"		## Default output destination.  Option -v sets to /dev/stdout for verbose output.
+CURL_VERBOSITY="--silent"	## Default option for use with curl command.  Option -v removes this.
 
 ## Colour codes for the blink1-tool
 BLINK_RED="--red"
@@ -60,7 +60,9 @@ while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options 
 		r)	echo -e "Resetting site poll status."			## Note, no exit.  After reset, the script will still run.
 			echo -e "$(date) - Site status reset." >> $LOG_FILE
 			;;
-		v)	DEST="/dev/stdout" ;;					## Change DEST from /dev/null to /dev/stdout for verbose output.
+		v)	DEST="/dev/stdout"					## Change DEST from /dev/null to /dev/stdout for verbose output.
+			CURL_VERBOSITY=""						## Remove the "--silent" option (used when calling curl command).
+			;;
 		h)	echo -e "$USAGE"					## Print help (usage) and exit.
 			exit $SUCCESS
 			;;
@@ -69,7 +71,7 @@ while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options 
 			;;
 	esac
 done
-shift $((OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 ## No arguments are expected, so ensure not have been given.
 if (( $# > 0 )); then			## Check if an argument was entered.
@@ -92,20 +94,25 @@ if ! command -v curl > ${DEST}; then
 	exit $NO_CURL
 fi
 
+
 ############ Main script functionality.
 
 ## Run a command to indicate the script is initiating.
 echo -e "Running script-start notification command..." > ${DEST}
 ${NOTIFICATION_START} > ${DEST}
 
-## Attempt to curl the url and grep the string.
-if ! curl --silent --connect-timeout 5 --max-time 10 ${HOST_URL} | grep "${HOST_STRING}" >> ${DEST}; then	## Site is down.
+## Attempt to curl the url and obtain the response code for $HOST_URL.
+TEST_RESULT=$(curl ${CURL_VERBOSITY} --output /dev/stdout --write-out '%{http_code}' ${HOST_URL} | tail -n 1)
+echo -e "Site response code: ${TEST_RESULT}\n" > ${DEST}
+
+## A site response code of 200 indicates everything is okay.
+if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
 	echo -e "\nSite down!\n"
-	echo -e "$(date) - FAILURE - Site not available." >> $LOG_FILE
+	echo -e "$(date) - FAILURE - Site not available. Curl returned ${TEST_RESULT}" >> $LOG_FILE
 	echo -e "Running failure notification command..." > ${DEST}
 	${NOTIFICATION_FAILED} > ${DEST}
 else
-	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING"; then					## Site is up but was down.
+	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
 		echo -e "\nSite has recovered from downtime, but everything seems okay now.\n"
 		echo -e "$(date) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
 		echo -e "Running recovered notification command..." > ${DEST}
