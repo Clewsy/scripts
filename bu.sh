@@ -49,7 +49,7 @@ while getopts 'fdlvh' OPTION; do			## Call getopts to identify selected options 
 		l)	ARGUMENT_TYPE="LIST" ;;		## -l identifies the argument as a list of files to be backed up.
 		v)	DEST="/dev/stdout" ;;		## -v activates verbose mode by sending output to /dev/stdout (instead of /dev/null).
 		h)	echo -e "$USAGE"		## -h option just prints the usage then quits.
-			exit 0				## Exit successfully.
+			exit ${SUCCESS}			## Exit successfully.
 			;;
 		?)
 			echo -e "Invalid option/s."
