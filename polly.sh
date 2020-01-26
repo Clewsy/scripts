@@ -102,8 +102,8 @@ echo -e "Running script-start notification command..." > ${DEST}
 ${NOTIFICATION_START} > ${DEST}
 
 ## Attempt to curl the url and obtain the response code for $HOST_URL.
-TEST_RESULT=$(curl ${CURL_VERBOSITY} --output /dev/stdout --write-out '%{http_code}' ${HOST_URL} | tail -n 1)
-echo -e "Site response code: ${TEST_RESULT}\n" > ${DEST}
+TEST_RESULT=$(curl "${CURL_VERBOSITY}" --output /dev/stdout --write-out '%{http_code}' ${HOST_URL} | tail --lines 1)
+echo -e "\nSite response code: ${TEST_RESULT}" > ${DEST}
 
 ## A site response code of 200 indicates everything is okay.
 if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
