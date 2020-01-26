@@ -2,19 +2,19 @@
 
 ## active:
 
-bu.sh - Uses rsync to back up files and directories listed in a specified file to a remote server.  Falls back to scp if rsync is not installed.
+bu.sh - Uses rsync to back up files and directories in a list file to a remote server.  Falls back to scp if rsync is not installed.
 
 stuff.sh - Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 
-vpn.sh - Kills current openvpn service then reconnects and confirms.  Useful for re-establishing connection if it goes bad.
+vpn.sh - Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
 
 wami.sh - Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - useful to verify vpn operation.
 
 power_switch.sh - Written for use with termux (android) to connect to a server that can control wireless mains outlets via [p0wer](https://gitlab.com/Clewsy/p0wer).
 
-ball.sh - Runs bu.sh on a bunch of remote systems defined in a list file.
+ball.sh - Runs bu.sh on a bunch of remote host or list of hosts.
 
-apt_all.sh - Runs apt-get update, dist-upgrade, autoremove and autoclean on a bunch of machines in a list file.
+apt_all.sh - Runs apt-get update, apt-get dist-upgrade, apt-get autoremove and apt-get autoclean on a provided host or list of hosts.
 
 pong.sh - Runs through a list of servers, pings each once for a second then returns a success or fail result.
 
@@ -22,7 +22,7 @@ whodis.sh - Grabs the contents of the /tmp/dhcp.leases file on a remote router, 
 
 roll_out.sh - Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.
 
-polly.sh - Called as a cronjob to regularly poll a web site.  Logs site status to file and uses a [blink(1)](https://blink1.thingm.com/) as a visual status indicator.
+polly.sh - Called as a cronjob to regularly poll a web site and check the return code.  Logs site status to file and uses a [blink(1)](https://blink1.thingm.com/) as a visual status indicator.
 
 ## archived:
 
