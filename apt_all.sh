@@ -24,7 +24,7 @@ Where [hosts] can be:
 	- ommitted	(script will look for host.list file of the name \"my_hosts.list\")
 Valid options:
 	-q	Quiet mode - only print the current host and the final summary.
-	-v	Verbose mode - print additional info to stdout.  Overrides Quiet mode ("-q").
+	-v	Verbose mode - print additional info to stdout.  Overrides Quiet mode (\"-q\").
 	-h	Print this usage and exit.
 "
 
@@ -96,9 +96,9 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script).
 
 	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-	let NUM_BUFF=32-${#REM_SYS}			## Total buffer = 32 minus number of chars in "user@host"
+	(( NUM_BUFF=32-${#REM_SYS} ))			## Total buffer = 32 minus number of chars in "user@host"
 	COLUMN_SPACER=""
-	for (( i=1; i<$NUM_BUFF; i++ )); do
+	for (( i=1; i<NUM_BUFF; i++ )); do
 		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
 	done
 
