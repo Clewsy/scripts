@@ -175,7 +175,7 @@ fi
 echo > ${DEST}
 while read -r BU_FILE; do		## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
         echo -e "--------" > ${DEST}
-	echo -e "${BLUE}Backing up \"${BU_FILE}\" to \"${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${RESET}"	## Run copy command (rsync or scp)
+	echo -e "${BLUE}Backing up \"${RESET}${BU_FILE}${BLUE}\" to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"	## Run copy command (rsync or scp)
 	if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure will be retained within backup dir)
 		if ! rsync -r --relative -v --human-readable --progress --archive "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}" >> "${TEMP_BU_SUMMARY}"	## If rsync failed
