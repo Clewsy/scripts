@@ -33,6 +33,12 @@ BAD_ARGUMENT=2
 NO_ROOT=3
 NO_CURL=4
 
+## stdout output text colours
+RED="\033[02;31m"
+ORANGE="\033[02;33m"
+GREEN="\033[02;32m"
+RESET="\033[0m"
+
 ## Script usage.
 USAGE="
 Usage: $(basename "$0") [option]
@@ -49,7 +55,7 @@ Note, must be run with root privileges.
 ## Parse selected options.
 while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
-		s)	echo -e "Fetching current status:"			## Print the last line of the log file then exit.
+		s)	echo -e "Fetching current status (last poll result):"	## Print the last line of the log file then exit.
 			tail -n -1 ${LOG_FILE}
 			exit $SUCCESS
 			;;
@@ -57,11 +63,11 @@ while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options 
 			cat ${LOG_FILE}
 			exit $SUCCESS
 			;;
-		r)	echo -e "Resetting site poll status."			## Note, no exit.  After reset, the script will still run.
+		r)	echo -e "Clearing warning to reset site poll status."	## Note, no exit.  After reset, the script will still run.
 			echo -e "$(date) - Site status reset." >> $LOG_FILE
 			;;
 		v)	DEST="/dev/stdout"					## Change DEST from /dev/null to /dev/stdout for verbose output.
-			CURL_VERBOSITY=""						## Remove the "--silent" option (used when calling curl command).
+			CURL_VERBOSITY=""					## Remove the "--silent" option (used when calling curl command).
 			;;
 		h)	echo -e "$USAGE"					## Print help (usage) and exit.
 			exit $SUCCESS
@@ -74,23 +80,23 @@ done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 ## No arguments are expected, so ensure not have been given.
-if (( $# > 0 )); then			## Check if an argument was entered.
-	echo -e "Invalid argument."	## If so, show usage and exit.
-	echo -e "$USAGE"
+echo -e "\nEnsuring no arguments were provided..." > ${DEST}
+if (( $# > 0 )); then						## Check if an argument was entered.
+	echo -e "${RED}Invalid argument.${RESET}\n ${USAGE}"	## If so, show usage and exit.
 	exit $BAD_ARGUMENT
 fi
 
 ## Verify that script was called with superuser permissions.
 echo -e "\nChecking for superuser access..." > ${DEST}
 if [[ $EUID -ne 0 ]]; then
-	echo -e "Permission denied.\n $USAGE" 
+	echo -e "${RED}Permission denied.${RESET}\n ${USAGE}" 
 	exit $NO_ROOT
 fi
 
 ## Verify that curl is installed.
 echo -e "\nChecking for curl..." > ${DEST}
 if ! command -v curl > ${DEST}; then
-	echo -e "Error, curl is not installed.  Quitting..."
+	echo -e "${RED}Error${RESET}, curl is not installed.  Quitting..."
 	exit $NO_CURL
 fi
 
@@ -107,19 +113,19 @@ echo -e "\nSite response code: ${TEST_RESULT}" > ${DEST}
 
 ## A site response code of 200 indicates everything is okay.
 if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
-	echo -e "\nSite down!\n"
+	echo -e "\n${RED}FAILURE${RESET} - Site down!\n"
 	echo -e "$(date) - FAILURE - Site not available. Curl returned ${TEST_RESULT}" >> $LOG_FILE
 	echo -e "Running failure notification command..." > ${DEST}
 	${NOTIFICATION_FAILED} > ${DEST}
 else
 	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
-		echo -e "\nSite has recovered from downtime, but everything seems okay now.\n"
+		echo -e "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n"
 		echo -e "$(date) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
 		echo -e "Running recovered notification command..." > ${DEST}
 		${NOTIFICATION_RECOVERED} > ${DEST}
 	else													## Site is up.
-		echo -e "\nEverything seems okay.\n"
-		echo -e "$(date) - OK - Site is up, everything seems okay." >> $LOG_FILE
+		echo -e "\n${GREEN}SUCCESS${RESET} - Everything seems okay.\n"
+		echo -e "$(date) - SUCCESS - Site is up, everything seems okay." >> $LOG_FILE
 		echo -e "Running success notification command..." > ${DEST}
 		${NOTIFICATION_OK} > ${DEST}
 	fi
