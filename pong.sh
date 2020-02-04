@@ -83,11 +83,13 @@ fi
 ## Define temporary  output summary file.
 echo -e "\nCreating temp summary file." > ${DEST}
 TEMP_SUMMARY_FILE="/tmp/pong_summary"					## Define the temp file location so that the script will work even if run from a directory without write access
+echo -e "${TEMP_SUMMARY_FILE}" > ${DEST}
 if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	## If it exists, delete the temporary file (in case script failed previously before deleting it).
 
 ## Define temporary remote system list.
 echo -e "\nCreating temp host list file." > ${DEST}
 TEMP_REM_SYS_LIST="/tmp/pong_temp_rem_sys_list"				## Create the temporary rem_sys_list file.
+echo -e "${TEMP_REM_SYS_LIST}" > ${DEST}
 if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	## If it exists, delete it.
 
 ## Create a working system list from the original file list but with #comments stripped.
