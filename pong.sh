@@ -116,7 +116,7 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 	echo -en "\nPinging ${REM_HOST}.." > ${DEST}	## Print current ping - keep the user updated on progress or stall point.
 	echo -en "."					## Always print a period for every ping, verbose or standard mode.
 
-	if ! ping -c 1 -W 2 "${REM_HOST}" >> /dev/null; then	## Attempt to ping the current host machine.  Ping once (-c 1), wait for 1 second max (-w 1).
+	if ! ping -4 -c 1 -W 2 "${REM_HOST}" >> /dev/null; then	## Attempt to ping the current host machine.  Ping once (-c 1), wait for 1 second max (-w 1).
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${RED}Miss${RESET}" >> "$TEMP_SUMMARY_FILE"		## Record failure.
 	else
 		echo "${GREEN}Ping${RESET} ${REM_HOST}${DIM}${COLUMN_SPACER}${RESET}${GREEN}Pong${RESET}" >> "$TEMP_SUMMARY_FILE"	## Record success.
