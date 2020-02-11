@@ -132,35 +132,42 @@ fi
 while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 
 	echo -e "\n--------------------------------------------------------------------" > ${DEST}
-	echo -e "${BLUE}Attempting to sync \"${SOURCE}\" to \"${REM_SYS}:~/${TARGET}\"${RESET}"
+	echo -e "${BLUE}Attempting to sync \"${RESET}${SOURCE}${BLUE}\" to \"${RESET}${REM_SYS}:~/${TARGET}${BLUE}\"${RESET}"
 
-	##Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-	case ${#REM_SYS} in
-		[1-6])		COLUMN_SPACER="\t\t";;	##1-6 characters
-		[7-9] | 1[0-4])	COLUMN_SPACER="\t";;	##7-14 characters
-		*)		COLUMN_SPACER=""	##>14 characters
-	esac
+#	##Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
+#	case ${#REM_SYS} in
+#		[1-6])		COLUMN_SPACER="\t\t";;	##1-6 characters
+#		[7-9] | 1[0-4])	COLUMN_SPACER="\t";;	##7-14 characters
+#		*)		COLUMN_SPACER=""	##>14 characters
+#	esac
+
+	(( NUM_BUFF=27-${#REM_SYS} ))			## Set the padding size based on the number of characters in the hostname.
+	COLUMN_SPACER=""
+	for (( i=1; i<NUM_BUFF; i++ ))
+	do
+		COLUMN_SPACER="${COLUMN_SPACER}-"
+	done
 
 	##Attempt the file copy - if rsync fails, try scp.
 	if ! rsync --progress --recursive --verbose "${SOURCE}" "${REM_SYS}":~/"${TARGET}" > ${DEST}; then		##If rsync fails
 		echo -e "rsync unsuccessful.  Attempting to copy with scp..." > ${DEST}
 		if ! scp -v -r "${SOURCE}" "${REM_SYS}":~/"${TARGET}" > ${DEST}; then					##If scp fails
-			echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_ROLL_OUT_SUMMARY}"	##Record the failure for the current host.
+			echo -E "${REM_SYS}${COLUMN_SPACER}${RED}Failure.${RESET}" >> "${TEMP_ROLL_OUT_SUMMARY}"	##Record the failure for the current host.
 			echo -e "Both rsync and scp were ${RED}unsuccessful${RESET}.  Skipping to next host." > ${DEST}
 			continue											##Skip to the next remote system.
 		else 	echo -e "Copying with scp was ${GREEN}successful${RESET}." > ${DEST}; fi
 	else 	echo -e "Copying with rsync was ${GREEN}successful${RESET}." > ${DEST}; fi
-	echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_ROLL_OUT_SUMMARY}"	##At this point, either rsync or scp were successful.
+	echo -E "${REM_SYS}${COLUMN_SPACER}${GREEN}Success.${RESET}" >> "${TEMP_ROLL_OUT_SUMMARY}"	##At this point, either rsync or scp were successful.
 
 done 2< "${TEMP_REM_SYS_LIST}"	##File read by the while loop which includes a list of files to be backed up.
 echo -e "\n--------------------------------------------------------------------" > ${DEST}
 
 ##########Print out in a pretty format a table indicating the success or failure for each host in the list.
-echo -e "${BOLD}\n╔════════Summary:════════╗${RESET}"
+echo -e "${BOLD}\n╔═════════════Summary:═════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
 done < "${TEMP_ROLL_OUT_SUMMARY}"
-echo -e "${BOLD}╚════════════════════════╝${RESET}"
+echo -e "${BOLD}╚══════════════════════════════════╝${RESET}"
 echo
 
 rm "${TEMP_ROLL_OUT_SUMMARY}" "${TEMP_REM_SYS_LIST}"	##Delete the temporary files.
