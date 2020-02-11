@@ -134,14 +134,7 @@ while read -r REM_SYS <&2; do	##Loop to repeat commands for each file name entry
 	echo -e "\n--------------------------------------------------------------------" > ${DEST}
 	echo -e "${BLUE}Attempting to sync \"${RESET}${SOURCE}${BLUE}\" to \"${RESET}${REM_SYS}:~/${TARGET}${BLUE}\"${RESET}"
 
-#	##Switch to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-#	case ${#REM_SYS} in
-#		[1-6])		COLUMN_SPACER="\t\t";;	##1-6 characters
-#		[7-9] | 1[0-4])	COLUMN_SPACER="\t";;	##7-14 characters
-#		*)		COLUMN_SPACER=""	##>14 characters
-#	esac
-
-	(( NUM_BUFF=27-${#REM_SYS} ))			## Set the padding size based on the number of characters in the hostname.
+	(( NUM_BUFF=27-${#REM_SYS} ))			## Set the padding size based on the number of characters in the remote system hostname.
 	COLUMN_SPACER=""
 	for (( i=1; i<NUM_BUFF; i++ ))
 	do
