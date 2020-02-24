@@ -29,7 +29,7 @@ Valid options:
 "
 
 DEST="/dev/null"			## Default destination for command output.  I.e. don't display on screen.  -v (verbose) option changes this.
-APT_GET_VERBOSITY="--quiet --quiet"	## Default verbosity setting for apt-get commands.  Removed by "-v" option.
+APT_GET_VERBOSITY="--quiet=3"		## Default verbosity setting for apt-get commands.  Removed by "-v" option.
 QUIET=false
 
 ##########Interpret options
@@ -139,51 +139,61 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
 	fi
 
-	###### Attempt dist-upgrade.
-	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}dist-upgrade... \t${RESET}"; fi
-	if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade"; then
+	###### Use apt to check if any packages can be upgraded.
+	NEW=$(ssh -o "BatchMode=yes" "${REM_SYS}" sudo apt list --upgradable --quiet=2)
+	if [[ ! ${NEW} ]]; then														## There are no new packages to update.
 		{
-			echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${RED}Failure.${RESET}${BOLD}║${RESET}"
-			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
-		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
-		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-		continue			## Skip to the next system in the list.
-	else
-		echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
-		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-	fi
-
-	###### Attempt autoremove.
-	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoremove... \t\t${RESET}"; fi
-	if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove"; then
-		{
-			echo -E "${BOLD}║${RESET}apt-get autoremove\t${RED}Failure.${RESET}${BOLD}║${RESET}"
-			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
-		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
-		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-		continue			## Skip to the next system in the list.
-	else
-		echo -E "${BOLD}║${RESET}apt-get autoremove\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
-		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-	fi
-
-	###### Attempt autoclean.
-	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoclean... \t\t${RESET}"; fi
-	if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean"; then
-		{
-			echo -E "${BOLD}║${RESET}apt-get autoclean\t${RED}Failure.${RESET}${BOLD}║${RESET}"
-			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
-		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
-		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-		continue			## Skip to the next system in the list.
-	else
-		{
-			echo -E "${BOLD}║${RESET}apt-get autoclean\t${GREEN}Success.${RESET}${BOLD}║${RESET}"
+			echo -E "${BOLD}║${RESET}Up-to-date\t\t${GREEN}Skipping${RESET}${BOLD}║${RESET}"
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record success.
-		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-	fi
+		if [ ${QUIET} = false ]; then echo -e "${BOLD}Up-to-date.\t\t${RESET}${GREEN}Skipping...${RESET}"; fi			## Skip to the next remote system.
+		continue
+	else																## There are new packages to update.
+		###### Attempt dist-upgrade.
+		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}dist-upgrade... \t${RESET}"; fi
+		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" >> ${DEST}; then
+			{
+				echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${RED}Failure.${RESET}${BOLD}║${RESET}"
+				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
+			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
+			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+			continue			## Skip to the next system in the list.
+		else
+			echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
+			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+		fi
 
+		###### Attempt autoremove.
+		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoremove... \t\t${RESET}"; fi
+		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove"; then
+			{
+				echo -E "${BOLD}║${RESET}apt-get autoremove\t${RED}Failure.${RESET}${BOLD}║${RESET}"
+				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
+			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
+			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+			continue			## Skip to the next system in the list.
+		else
+			echo -E "${BOLD}║${RESET}apt-get autoremove\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
+			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+		fi
+
+		###### Attempt autoclean.
+		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoclean... \t\t${RESET}"; fi
+		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean"; then
+			{
+				echo -E "${BOLD}║${RESET}apt-get autoclean\t${RED}Failure.${RESET}${BOLD}║${RESET}"
+				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
+			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
+			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+			continue			## Skip to the next system in the list.
+		else
+			{
+				echo -E "${BOLD}║${RESET}apt-get autoclean\t${GREEN}Success.${RESET}${BOLD}║${RESET}"
+				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
+			} >> "${TEMP_SUMMARY_FILE}"	## Record success.
+			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+		fi
+	fi
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
 ## Print out in a pretty format a table indicating the success or failure for each host in the list.
@@ -195,7 +205,6 @@ echo -e "${BOLD}║${RESET}Script complete.\t\t${BOLD}║${RESET}"
 echo -e "${BOLD}╚═══════════════════════════════╝${RESET}"
 echo
 
-rm "${TEMP_SUMMARY_FILE}"	## Delete the temporary summary file.
-rm "${TEMP_REM_SYS_LIST}"	## Delete the temporary system list file.
+rm "${TEMP_SUMMARY_FILE}" "${TEMP_REM_SYS_LIST}"	## Delete the temporary files.
 
 exit ${SUCCESS}
