@@ -66,7 +66,7 @@ ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	## First argument is the file name
 TEMP_SUMMARY_FILE="/tmp/temp_apt_summary"				## Define temp summary file location.
 if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	## If it exists, delete the temporary file (in case script failed previously).
 
-TEMP_REM_SYS_LIST="/tmp/temp_apt_rem_sys_list"		## Define a working system list
+TEMP_REM_SYS_LIST="/tmp/temp_apt_rem_sys_list"				## Define a working system list
 if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	## If it exists, delete the temporary file (in case script failed previously).
 
 ## Determine the content of the specified option - i.e. a specific host or a lfile containing a list of hosts.
@@ -127,7 +127,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 	###### Attempt update.
 	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}update... \t\t${RESET}"; fi
-	if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes update"; then
+	if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes update" > ${DEST}; then
 		{
 			echo -E "${BOLD}║${RESET}apt-get update\t\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -143,7 +143,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	NEW=$(ssh -o "BatchMode=yes" "${REM_SYS}" sudo apt list --upgradable --quiet=2)
 	if [[ ! ${NEW} ]]; then														## There are no new packages to update.
 		{
-			echo -E "${BOLD}║${RESET}Up-to-date\t\t${GREEN}Skipping${RESET}${BOLD}║${RESET}"
+			echo -E "${BOLD}║${RESET}Up-to-date\t\t${GREEN}Skipped.${RESET}${BOLD}║${RESET}"
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${BOLD}Up-to-date.\t\t${RESET}${GREEN}Skipping...${RESET}"; fi			## Skip to the next remote system.
@@ -151,7 +151,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	else																## There are new packages to update.
 		###### Attempt dist-upgrade.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}dist-upgrade... \t${RESET}"; fi
-		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" >> ${DEST}; then
+		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
