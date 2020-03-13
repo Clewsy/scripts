@@ -103,8 +103,8 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	done
 
 	echo -E "${BOLD}║${REM_SYS}${COLUMN_SPACER}║${RESET}" >> "${TEMP_SUMMARY_FILE}"			## Record current system.
-	echo -e "\n------------------------------------------------------" > ${DEST}
-	echo -e "\nCurrent host: \t\t${BLUE}${REM_SYS}${RESET}"						## Print current system to stdout.
+	echo -e "\n------------------------------------------------------\n" > ${DEST}
+	echo -e "Current host:\t\t${BLUE}${REM_SYS}${RESET}"					## Print current system to stdout (always, regardles of -v or -q).
 
 	###### Attempt connection.
 	echo -e "Testing ssh connection to ${BLUE}${REM_SYS}${RESET}" > ${DEST}
@@ -165,7 +165,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 		###### Attempt autoremove.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoremove... \t\t${RESET}"; fi
-		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove"; then
+		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get autoremove\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -179,7 +179,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 		###### Attempt autoclean.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoclean... \t\t${RESET}"; fi
-		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean"; then
+		if ! ssh -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get autoclean\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
