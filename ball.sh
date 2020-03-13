@@ -99,13 +99,13 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 	if ! ssh -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then					## Attempt to connect via ssh and run the backup script "bu.sh"
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"	## Record if the above fails for the current host.
+		echo -e "--------------------------------------------------------------------"
 		continue										##  then try the next host in the list.
 	else
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_BALL_SUMMARY}"	## If the above succeeds, record the success.
-													## Note a "success" means the ssh session was created and exited.
+		echo -e "--------------------------------------------------------------------"		## Note a "success" means the ssh session was created and exited.
 													##  gracefully.  Failures with the called script are not checcked.
 	fi
-	echo -e "--------------------------------------------------------------------"
 
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
