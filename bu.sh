@@ -100,7 +100,7 @@ fi
 
 ##########Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-if ssh -o "BatchMode=yes" -o "ConnectTimeout=3" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
+if ssh -o "BatchMode=yes" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
 	BU_SERVER="${BU_SERVER_LOCAL}"									## Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
 else
@@ -116,15 +116,11 @@ if ! ssh -t ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; 
 fi
 echo -e "${GREEN}Remote backup directory \"${BU_REMOTE_DIR}\" validated.${RESET}" > ${DEST}
 
-
-##########Set up the temp files
-TEMP_BU_SUMMARY="/tmp/temp_bu_summary"					## Define the temp summary file location.
-if [ -e "${TEMP_BU_SUMMARY}" ]; then rm "${TEMP_BU_SUMMARY}"; fi	## If it exists, delete the temp file (in case script failed previously before deleting).
-
+##########Create the temp list file.
 TEMP_BU_FILE_LIST="/tmp/temp_bu_file_list"				## Define the temporary file which will contain a list of file/s to be backed up..
 if [ -e "${TEMP_BU_FILE_LIST}" ]; then rm "${TEMP_BU_FILE_LIST}"; fi	## If it exists, delete the temp file (in case script failed previously before deleting).
 
-##########Fill the temp list file.
+##########Fill the temp list file (i.e. validate, strip comments).
 if [ "${ARGUMENT_TYPE}" == "FILE" ]; then						## If provided argument is a specific file to be backed up (option -f)
 	ARGUMENT="$(readlink -f "${ARGUMENT}")"						## Convert to full path (readlink -f will convert from relative path.)
 	echo -e "\nBackup the following file: ${ARGUMENT}" > ${DEST}			## Print the file to be backed up.
@@ -140,8 +136,8 @@ else											## Else if argument is not a specific file, assume it is a list o
 		echo -e "\nBackup list is \"$ARGUMENT\". Checking files..." > ${DEST}	## Else the argument is assumed a list of files (option -l or no option).
 		while read -r LINE ; do							## Iterate for every line in the backup file list.
 			STRIPPED_LINE=$(echo "${LINE}" | tr -s " " | tr -d "\t" | cut -d "#" -f 1)	## Strip the comments.
-													## 1) Squash and repeated spaces into a single space.
-														#(Can'd delete in case filename has spaces)
+													## 1) Squash any repeated spaces into a single space.
+														#(Can't delete in case filename has spaces)
 													## 2) Delete any tabs.
 													## 3) Delete content of the line from the first '#'.
 			if [ "${STRIPPED_LINE}" ]; then 						## If there is anything left of the stripped line.
@@ -152,54 +148,47 @@ else											## Else if argument is not a specific file, assume it is a list o
 				FULL_PATH=${FULL_PATH/\$HOME/$HOME}				## These two commands evaluate first "~" and then "$HOME"
 												## then substitute either for the actual variable $HOME
 												## Syntax: ${variable/string_match/replacement}
-				if [ -e "${FULL_PATH}" ]; then					## If thestripped and expanded line exists as a file
-					echo -e "Adding ${GREEN}${FULL_PATH}${RESET}" > ${DEST}		#Say so and then
-					echo "${FULL_PATH}" >> "${TEMP_BU_FILE_LIST}"			#copy the stripped/expanded line to the temp file.
+				if [ -e "${FULL_PATH}" ]; then					## If the stripped and expanded line exists as a file
+					echo -e "Adding: ${GREEN}${FULL_PATH}${RESET}" > ${DEST}		## Say so and then
+					echo "${FULL_PATH}" >> "${TEMP_BU_FILE_LIST}"			## copy the stripped/expanded line to the temp file.
 				else
-					echo -e "${RED}${FULL_PATH}${RESET} does not exist and will be skipped" > ${DEST}	## Else skip the line.
-					echo -E "${RED}Failed:  ${RESET}Backup of ${FULL_PATH}" >> "${TEMP_BU_SUMMARY}"		## Record failure in the summary file.
+					echo -e "Failed: ${RED}${FULL_PATH}${RESET} does not exist and will be skipped"	## Else skip the line.
 				fi
 			fi
 		done < "${ARGUMENT}"
 		if [ ! -e "${TEMP_BU_FILE_LIST}" ]; then							## If the temp list file was not created
-			rm "${TEMP_BU_SUMMARY}"									## Delete the summary file.
-			echo -e "${RED}The list file did not contain any valid files to back up.${RESET}"	## Then id didn't contain any valid files.
+			echo -e "${RED}The list file did not contain any valid files to back up.${RESET}"	## Then it didn't contain any valid files.
 			echo -e "${USAGE}"									## So print usage and exit.
 			exit ${BAD_LIST_FILE}
 		fi
 	fi
 fi
 
-##########Loop through the file list and run backup command
-##########(Actually using the temp file list which is the same as the file list but with comments stripped and filenames expanded).
+##########Run the sync.
 echo > ${DEST}
-while read -r BU_FILE; do		## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
-        echo -e "--------" > ${DEST}
-	echo -e "${BLUE}Backing up \"${RESET}${BU_FILE}${BLUE}\" to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"	## Run copy command (rsync or scp)
-	if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure will be retained within backup dir)
-		if ! rsync -r --relative -v --human-readable --progress --archive "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
-			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}" >> "${TEMP_BU_SUMMARY}"	## If rsync failed
-			continue	## Proceed to the next file in the list.
-		fi
-	else						## Use scp (dir structure will not be retained)
-		if ! scp -r -B "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then		## Execute scp, check for exit error
-			echo -e "${RED}Failed to copy ${BU_FILE} to remote directory.${RESET}" >> "${TEMP_BU_SUMMARY}"	## If scp failed
-			continue	## Proceed to the next file in the list.
-		fi
+if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure will be retained within backup dir).
+	echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"
+	if ! rsync --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+		echo -e "${RED}Failure.${RESET}"	## If rsync failed
+		#continue	## Proceed to the next file in the list.
+	else	
+		echo -e "${GREEN}Success.${RESET}"			
 	fi
-	echo -E "${GREEN}Success: ${RESET}Backup of ${BU_FILE}" >> "${TEMP_BU_SUMMARY}"
-done < "${TEMP_BU_FILE_LIST}"	## File read by the while loop which includes a list of files to be backed up.
+else						## Use scp (dir structure will not be retained)
+	echo -e "${BLUE}Using scp to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"
+	while read -r BU_FILE; do		## Must loop to run scp for every entry in list file.
+		if ! scp -r -B "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+			echo -e "${RED}Failure:${RESET} ${BU_FILE}"		## If scp failed
+			continue					## Proceed to the next file in the list.
+		else
+			echo -e "${GREEN}Success.${RESET} ${BU_FILE}"			
+		fi
+	done < "${TEMP_BU_FILE_LIST}"
+	fi
 
-##########Display summary of results
-echo -e "\nBackup summary:"
-while read -r SUMMARY_LINE; do
-	echo -e "${SUMMARY_LINE}"
-done < "${TEMP_BU_SUMMARY}"
+##########Delete the temp file.
+rm "${TEMP_BU_FILE_LIST}"
 
-##########Delete the temp files
-rm "${TEMP_BU_FILE_LIST}" "${TEMP_BU_SUMMARY}"
-
-##########All done
+##########All done.
 echo -e "\nScript complete.\n" > ${DEST}
-echo
 exit ${SUCCESS}
