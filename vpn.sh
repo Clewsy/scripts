@@ -21,7 +21,7 @@ OPENVPN_FAIL=5
 DEFAULT_CONF="/home/jc/openvpn/Windscribe-Australia_UDP.ovpn"
 
 #Define a temp file into which ipinfo.io data will be entered and then parsed
-TEMP_FILE=$(dirname "$0")/temp	#using $dirname of $0 will create temp in the current working directory
+TEMP_FILE=/tmp/vpn_tempfile
 
 USAGE="
 Usage: $(basename "${0}") <option> [openvpn config file]
@@ -40,8 +40,7 @@ while getopts 'ckh' OPTION; do			## Call getopts to identify selected options an
 		h)	echo -e "${USAGE}"		## -h option just prints the usage then quits.
 			exit ${SUCCESS}			## Exit successfully.
 			;;
-		?)
-			echo -e "Invalid option/s."
+		?)	echo -e "Invalid option/s."
 			echo -e "$USAGE"		## Invalid option, show usage.
 			exit ${BAD_USAGE}		## Exit.
 			;;
@@ -56,11 +55,12 @@ if [ $# -gt 1 ]; then								## Check if more than one argument was entered.
 	exit ${BAD_USAGE}
 fi
 
-##########Define openvpn config filr.
+##########Define openvpn config file.
 VPN_FILE=${1-"${DEFAULT_CONF}"}	## First argument is the openvpn config file.
 				## If argument not provided, set default (defined at top of script).
 				## Syntax: parameter=${parameter-default}
-##########Validate config file.
+
+##########Validate openvpn config file.
 if [ ! -f "${VPN_FILE}" ]; then	## If file is not a regular file or is missing.
 	echo -e "\n${RED}Error${RESET}: Invalid openvpn config file.  Quitting."
 	echo -e "${USAGE}"
@@ -84,12 +84,12 @@ if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinf
 fi
 
 ##########Parse specific details from the temp file.
-current_ip=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-current_city=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+CURRENT_IP=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+CURRENT_CITY=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 
 ##########Print out the current ip and city (without vpn).
-echo -e "\nCurrent ip:   $current_ip"
-echo -e  "Current city: $current_city"
+echo -e "\nCurrent ip:   ${CURRENT_IP}"
+echo -e  "Current city: ${CURRENT_CITY}"
 
 ##########Connect to the vpn.
 echo -e "\nRunning openvpn using config file at \"$VPN_FILE\""
@@ -101,22 +101,22 @@ if ! sudo openvpn --config "${VPN_FILE}" --daemon ; then	## Execute openvpn then
 fi
 
 ##########Loop until the vpn is active - determined by a change in the ip.
-new_ip=${current_ip}
-while [ "${new_ip}" == "${current_ip}" ]
+NEW_IP=${CURRENT_IP}
+while [ "${NEW_IP}" == "${CURRENT_IP}" ]
 do
 	if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinfo.io ; then	#Execute curl command but exit if it fails
 		rm "$TEMP_FILE"
 		echo -e "\n${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 		exit ${NO_IPINFO}
 	fi
-	new_ip=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+	NEW_IP=$(grep -m 1 "ip" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 done
-new_city=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+NEW_CITY=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
 
 ##########Print out the new apparent ip & city.
 echo -e "\n${GREEN}Connected.${RESET}"
-echo -e "New ip:   $new_ip"
-echo -e "New city: $new_city\n"
+echo -e "New ip:   ${NEW_IP}"
+echo -e "New city: ${NEW_CITY}\n"
 
 ##########Delete the temp file.
 rm "$TEMP_FILE"
