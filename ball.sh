@@ -8,6 +8,7 @@ COMMAND="~/bin/bu.sh"	## The command to run on the remote host/s.  Note using "~
 ##########Colours.
 RED="\033[02;31m"
 GREEN="\033[02;32m"
+BLUE="\033[01;34m"
 BOLD="\033[01;37m"
 RESET="\033[0m"
 
@@ -84,11 +85,11 @@ else
 fi
 
 ## Loop through the remote system list.
-echo -e "\n--------------------------------------------------------------------"
+echo -e "\n----------------------------------------------------------------------------------"
 while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
 
-	echo -e "Attempting to run on \"${REM_SYS}\""
+	echo -e "${BLUE}Attempting to run \"${RESET}${COMMAND}${BLUE}\" on \"${RESET}${REM_SYS}${BLUE}\"${RESET}"
 
 	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
 	let NUM_BUFF=24-${#REM_SYS}			## Total buffer = 24 minus number of chars in "user@host"
@@ -97,14 +98,15 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
 	done
 
-	if ! ssh -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then					## Attempt to connect via ssh and run the backup script "bu.sh"
-		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"	## Record if the above fails for the current host.
-		echo -e "--------------------------------------------------------------------"
-		continue										##  then try the next host in the list.
+	if ! ssh -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then						## Attempt to connect via ssh and run the backup script "bu.sh"
+		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## Record if the above fails for the current host.
+		echo -e "${RED}Failure.${RESET}"								## Also show failure on stdio.
+		echo -e "----------------------------------------------------------------------------------"
+		continue											## Then try the next host in the list.
 	else
-		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_BALL_SUMMARY}"	## If the above succeeds, record the success.
-		echo -e "--------------------------------------------------------------------"		## Note a "success" means the ssh session was created and exited.
-													##  gracefully.  Failures with the called script are not checcked.
+		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## If the above succeeds, record the success.
+		echo -e "----------------------------------------------------------------------------------"	## Note a "success" means the ssh session was created and exited.
+														##  gracefully.  Failures with the called script are not checcked.
 	fi
 
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
