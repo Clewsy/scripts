@@ -170,7 +170,6 @@ if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure
 	echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"
 	if ! rsync --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 		echo -e "${RED}Failure.${RESET}"	## If rsync failed
-		#continue	## Proceed to the next file in the list.
 	else	
 		echo -e "${GREEN}Success.${RESET}"			
 	fi
