@@ -40,15 +40,13 @@ Options:
 ############################## Input/syntax/error/dependency checking.
 
 ## Interpret options
-while getopts 'vh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
+while getopts 'vh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
-		v)	DEST="/dev/stdout" ;;		## -v activates verbose mode by sending output to /dev/stdout (instead of /dev/null).
-		h)	echo -e "$USAGE"		## -h option just prints the usage then quits.
-			exit 0				## Exit successfully.
-			;;
-		?)	echo -e "$USAGE"		## Invalid option, show usage.
-			exit ${BAD_USAGE}		## Exit.
-			;;
+		v)	DEST="/dev/stdout" ;;	## -v activates verbose mode by sending output to /dev/stdout (instead of /dev/null).
+		h)	echo -e "$USAGE"	## -h option just prints the usage then quits.
+			exit ${SUCCESS} ;;	## Exit successfully.
+		?)	echo -e "$USAGE"	## Invalid option, show usage.
+			exit ${BAD_USAGE} ;;	## Exit.
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
@@ -126,17 +124,15 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 done < "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
 ## Print out in a pretty format a table indicating the success or failure of ppinging each host in the list.
-echo -e "\n"
-echo -e "${BOLD}╔═════Summary:══════════════════╗${RESET}"
+echo -e "\n\n${BOLD}╔═════Summary:══════════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
 done < "${TEMP_SUMMARY_FILE}"
 echo -e "${BOLD}╠═══════════════════════════════╣${RESET}"
 echo -e "${BOLD}║ ${TALLY}${RESET} out of ${BOLD}$(wc -l ${TEMP_REM_SYS_LIST} | cut -d " " -f 1)${RESET} hosts online.\t${BOLD}║${RESET}"
-echo -e "${BOLD}╚═══════════════════════════════╝${RESET}"
-echo
+echo -e "${BOLD}╚═══════════════════════════════╝${RESET}\n"
 
+## Finish up.
 rm "${TEMP_SUMMARY_FILE}"	## Delete the temporary summary file.
 rm "${TEMP_REM_SYS_LIST}"	## Delete the temporary system list file.
-
 exit ${SUCCESS}
