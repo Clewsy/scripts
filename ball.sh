@@ -29,20 +29,19 @@ Options:	-v	Verbose output.
 		-h	Show this help.
 "
 
-VERBOSITY=""	## Define the default verbosity (i.e. none).  Can be changed with otion -v.
+VERBOSITY=""		## Define the default verbosity (i.e. none).  Can be changed with option -v.
+DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with option -v.
 
 ##########Interpret options
 while getopts 'fvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
-		v)	VERBOSITY="-v" ;;		## -v activates verbose mode by iadding the -v flag to the bu.sh command.
+		v)	VERBOSITY="-v"			## -v activates verbose mode by iadding the -v flag to the bu.sh command.
+			DEST="/dev/stdout" ;;
 		h)	echo -e "${USAGE}"		## -h option just prints the usage then quits.
-			exit ${SUCCESS}			## Exit successfully.
-			;;
-		?)
-			echo -e "Invalid option/s."
+			exit ${SUCCESS} ;;		## Exit successfully.
+		?)	echo -e "Invalid option/s."
 			echo -e "${USAGE}"		## Invalid option, show usage.
-			exit ${BAD_USAGE}		## Exit.
-			;;
+			exit ${BAD_USAGE} ;;		## Exit.
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
@@ -71,20 +70,22 @@ if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	## If it ex
 ##########Validate the argument and thus define the remote host/s.
 ## Arg specifies a remote host.
 if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	## If argument is not (!) a normal file (-f) or (||) in is not (!) readable (-r).
-	echo -e "\nRemote system is \"${ARGUMENT}\"."		## Then assume provided argument is a single host (either [host] or [user@host]).
+	echo -e "\n${BLUE}Remote system is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"		## Then assume provided argument is a single host (either [host] or [user@host]).
 	echo "${ARGUMENT}" > "${TEMP_REM_SYS_LIST}"		## Create the temp list file which will just contain the single entry.
 ## Arg specifies a list of remote hosts.
 else
-	echo -e "\nRemote system list is \"${ARGUMENT}\"."			## Tell the user the list looks okay.
+	echo -e "\n${BLUE}Remote system list is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"			## Tell the user the list looks okay.
 	while read -r LINE ; do							## Iterate for every line in the system list.
 		STRIPPED_LINE="$(echo "${LINE}" | cut -d "#" -f 1)"		## Strip the content of the line after (and including) the first '#'.
 		if [ "${STRIPPED_LINE}" ]; then					## If there is anything left in the string (i.e. if entire row is NOT a comment).
 	  		echo "${STRIPPED_LINE}" >> "${TEMP_REM_SYS_LIST}"	## Then copy the stripped line to the temp file.
 		fi
 	done < "${ARGUMENT}"
+	echo -e "\n${BLUE}Target systems:${RESET}" >> ${DEST}
+	cat "${TEMP_REM_SYS_LIST}" >> ${DEST}	## Show the intended target systems (when verbose option is used).
 fi
 
-## Loop through the remote system list.
+########## Loop through the remote system list.
 echo -e "\n----------------------------------------------------------------------------------"
 while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
@@ -111,14 +112,13 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
-## Print out in a pretty format a table indicating the success or failure for each host in the list.
+########### Print out in a pretty format a table indicating the success or failure for each host in the list.
 echo -e "${BOLD}\n╔════════════Summary:════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
 done < "${TEMP_BALL_SUMMARY}"
-echo -e "${BOLD}╚════════════════════════════════╝${RESET}"
-echo
+echo -e "${BOLD}╚════════════════════════════════╝${RESET}\n"
 
+########## All done.
 rm "${TEMP_BALL_SUMMARY}" "${TEMP_REM_SYS_LIST}"	## Delete the temporary files.
-
 exit ${SUCCESS}
