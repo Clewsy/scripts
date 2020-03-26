@@ -99,6 +99,7 @@ while read -r LINE ; do							## Iterate for every line in the system list.
 done < "${REM_SYS_LIST}"
 
 ## Loop through the remote system list.
+TALLY=0	## Initialise the tally of successful pings.
 echo -e "\n────────────────────Pinging────────────────────" > ${DEST}
 while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 
