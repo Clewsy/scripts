@@ -93,9 +93,9 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	echo -e "${BLUE}Attempting to run \"${RESET}${COMMAND}${BLUE}\" on \"${RESET}${REM_SYS}${BLUE}\"${RESET}"
 
 	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-	let NUM_BUFF=24-${#REM_SYS}			## Total buffer = 24 minus number of chars in "user@host"
+	(( NUM_BUFF=24-${#REM_SYS} ))			## Total buffer = 24 minus number of chars in "user@host"
 	COLUMN_SPACER=""
-	for (( i=1; i<$NUM_BUFF; i++ )); do
+	for (( i=1; i<NUM_BUFF; i++ )); do
 		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
 	done
 
