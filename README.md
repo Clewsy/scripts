@@ -18,7 +18,7 @@ Uses rsync to back up files and directories in a list file to a remote server.  
 
 ---
 
-[**p0wer_switch.sh**][link_repo_p0wer_switch]
+[**p0wer\_switch.sh**][link_repo_p0wer_switch.sh]
 
 Written for use with termux (android) to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
 
@@ -35,7 +35,7 @@ Runs through a list of servers, pings each once for a second then returns a succ
 
 ---
 
-[**rollout.sh**][link_repo_rollout.sh]
+[**roll_out.sh**][link_repo_roll_out.sh]
 
 Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.
 
@@ -65,7 +65,7 @@ Grabs the contents of the /tmp/dhcp.leases file on a remote router, pretties it 
 
 ---
 
-## archived:
+# archived:
 
 [**cal\_backup.sh**][link_repo_archive_cal_backup.sh]
 
@@ -79,7 +79,7 @@ Very similar to grab.sh, but used to upload to the remote server.  No longer use
 
 ---
 
-[**grab.sh**][link_repo_archive_grap.sh]
+[**grab.sh**][link_repo_archive_grab.sh]
 
 Uses rsync (to allow resume after interruption) to download a specified file from a remote server.  No longer used.
 
@@ -103,13 +103,14 @@ Written for use with termux (android) to download a youtube video direct to the 
 [link_repo_p0wer_switch.sh]:p0wer_switch.sh
 [link_repo_polly.sh]:polly.sh
 [link_repo_pong.sh]:pong.sh
-[link_repo_rollout.sh]:rollout.sh
+[link_repo_roll_out.sh]:roll_out.sh
 [link_repo_stuff.sh]:stuff.sh
 [link_repo_vpn.sh]:vpn.sh
+[link_repo_wami.sh]:wami.sh
 [link_repo_whodis.sh]:whodis.sh
 [link_repo_archive_cal_backup.sh]:archive/cal_backup.sh
 [link_repo_archive_chuck.sh]:archive/chuck.sh
-[link_repo_archive_grab.sh]:archive/grap.sh
+[link_repo_archive_grab.sh]:archive/grab.sh
 [link_repo_archive_nc_backup.sh]:archive/nc_backup.sh
 [link_repo_archive_ytdl.sh]:archive/ytdl.sh
 [link_gitlab_clewsy_p0wer]:https://gitlab.com/clewsy/p0wer
