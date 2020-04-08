@@ -75,3 +75,7 @@ A script to create a local backup of a nextcloud instance including the database
 ### ytdl.sh
 
 Written for use with termux (android) to download a youtube video direct to the device.  Archived as I no longer use this since switching to [LineageOS](https://lineageos.org/) and running [NewPipe](https://newpipe.schabi.org/) instead of the youtube app.  Newpipe has direct download capability.
+
+[link_repo_bu.sh]:bu.sh
+[link_repo_stuff.sh]:stuff.sh
+[link_repo_vpn.sh]:vpn.sh
