@@ -2,21 +2,29 @@
 
 ## active:
 
-### bu.sh
+[**bu.sh**][link_repo_bu.sh]
 
 Uses rsync to back up files and directories in a list file to a remote server.  Falls back to scp if rsync is not installed.
 
-### stuff.sh
+---
+
+[**stuff.sh**][link_repo_stuff.sh]
 
 Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 
-### vpn.sh
+---
+
+[**vpn.sh**][link_repo_vpn.sh]
 
 Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
+
+---
 
 ### wami.sh
 
 Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - useful to verify vpn operation.
+
+---
 
 ### power_switch.sh
 
