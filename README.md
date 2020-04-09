@@ -20,7 +20,7 @@ Uses rsync to back up files and directories in a list file to a remote server.  
 
 [**p0wer\_switch.sh**][link_repo_p0wer_switch.sh]
 
-Written for use with termux (android) to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
+Written for use with [Termux][link_web_termux] to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
 
 ---
 [**polly.sh**][link_repo_polly.sh]
@@ -55,13 +55,13 @@ Kills current openvpn service then reconnects and confirms.  Useful for quickly 
 
 [**wami.sh**][link_repo_wami.sh]
 
-Pulls and displays info (IP, country, city, etc) from "ipinfo.io" - useful to verify vpn operation.
+Pulls and displays info (IP, country, city, etc) from [ipinfo.io][link_web_ipinfo] - useful to verify vpn operation.
 
 ---
 
 [**whodis.sh**][link_repo_whodis.sh]
 
-Grabs the contents of the /tmp/dhcp.leases file on a remote router, pretties it up and prints it to stdout.
+Grabs the contents of the /tmp/dhcp.leases file on a remote router, does some basic formatting and prints it to stdout.
 
 ---
 
@@ -93,7 +93,7 @@ A script to create a local backup of a nextcloud instance including the database
 
 [**ytdl.sh**][link_repo_Archive_ytdl.sh]
 
-Written for use with termux (android) to download a youtube video direct to the device.  Archived as I no longer use this since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
+Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Archived as I no longer use this since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
 
 ---
 
@@ -114,6 +114,8 @@ Written for use with termux (android) to download a youtube video direct to the 
 [link_repo_archive_nc_backup.sh]:archive/nc_backup.sh
 [link_repo_archive_ytdl.sh]:archive/ytdl.sh
 [link_gitlab_clewsy_p0wer]:https://gitlab.com/clewsy/p0wer
+[link_web_termux]:https://termux.com/
 [link_web_blink1]:https://blink1.thingm.com/
+[link_web_ipinfo]:https://ipinfo.io/
 [link_web_lineageos]:https://lineageos.org/
 [link_web_newpipe]:https://newpipe.schabi.org/
