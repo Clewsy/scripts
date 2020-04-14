@@ -43,18 +43,21 @@ RESET="\033[0m"
 USAGE="
 Usage: $(basename "$0") [option]
 Valid options:
+-p	Standard poll: check site status, show & log the result. (requires root)
 -s	Show the current status (i.e. result of last poll).
 -l	Show the full log.
--r	Reset the recovered flag.
+-r	Reset the recovered flag. (requires root)
 -v 	Verbose output.
 -h	Show help.
+<none>	Same as -p, standard poll. (requires root)
 
-Note, must be run with root privileges.
+Note, some options must be run with root/superuser privileges.
 "
 
 ## Parse selected options.
-while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'pslrvh' OPTION; do						## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
+		p)	;;							## Run the standard poll commands - default option (same as no options).
 		s)	echo -e "Fetching current status (last poll result):"	## Print the last line of the log file then exit.
 			tail -n -1 ${LOG_FILE}
 			exit $SUCCESS
@@ -63,8 +66,7 @@ while getopts 'slrvh' OPTION; do			## Call getopts to identify selected options 
 			cat ${LOG_FILE}
 			exit $SUCCESS
 			;;
-		r)	echo -e "Clearing warning to reset site poll status."	## Note, no exit.  After reset, the script will still run.
-			echo -e "$(date) - Site status reset." >> $LOG_FILE
+		r)	POLLY_RESET="true"					## Set flag to reset poll status.  Note, no exit.  After reset, the script will still run.
 			;;
 		v)	DEST="/dev/stdout"					## Change DEST from /dev/null to /dev/stdout for verbose output.
 			CURL_VERBOSITY=""					## Remove the "--silent" option (used when calling curl command).
@@ -106,6 +108,12 @@ fi
 ## Run a command to indicate the script is initiating.
 echo -e "Running script-start notification command..." > ${DEST}
 ${NOTIFICATION_START} > ${DEST}
+
+## Check for the RESET flag.  If set, reset the poll result then proceed with normal poll (use to clear "Warning" poll result).
+if [[ -n "$POLLY_RESET" ]]; then
+	echo -e "Clearing warning to reset site poll status."
+	echo -e "$(date) - Site status reset." >> $LOG_FILE
+fi
 
 ## Attempt to curl the url and obtain the response code for $HOST_URL.
 TEST_RESULT=$(curl "${CURL_VERBOSITY}" --output /dev/stdout --write-out '%{http_code}' ${HOST_URL} | tail --lines 1)
