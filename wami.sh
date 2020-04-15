@@ -23,7 +23,7 @@ fi
 echo -e "\nPulling data from \"ipinfo.io\"..."
 if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ipinfo.io; then	#Run curl command and check if it exited with a failure.
 	echo -e "\n${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting...\n"
-	if [ -f "$TEMP_FILE"} ]; then rm "${TEMP_FILE}"; fi					#Delete partial/incomplete ipinfo dump if it exists.
+	if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi					#Delete partial/incomplete ipinfo dump if it exists.
 	exit $CURL_FAIL
 fi
 
