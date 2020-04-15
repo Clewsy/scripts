@@ -84,7 +84,7 @@ if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi		#If it exi
 ##HOSTS is a single remote system.
 if [ ! -f "${HOSTS}" ] || [ ! -r "${HOSTS}" ]; then				#If argument is not (!) a normal file (-f) or (||) it is not (!) readable (-r).
 	if echo "${HOSTS}" | grep "@" > ${DEST} 2>&1; then
-		HOST_NAME=$(echo ${HOSTS} | cut -d "@" -f 2)
+		HOST_NAME=$(echo "${HOSTS}" | cut -d "@" -f 2)
 	else	HOST_NAME="${HOSTS}"; fi
 	if ping -c 1 -W 1 -q "${HOST_NAME}" > ${DEST} 2>&1; then		#If a ping to the host is successful...
 		echo -e "\nRemote system is \"${HOSTS}\"." > ${DEST}		#Provided argument is probably a single host (either [host] or [user@host]).
@@ -111,10 +111,10 @@ if [ ! "${FORCE}" ]; then
 	echo -e "Source file/directory: ${BOLD}${SOURCE}${RESET}"
 	echo -e "Target file/directory: ${BOLD}~/${TARGET}${RESET}"
 	echo -e "Target host/s:${BOLD}"
-	cat ${TEMP_REM_SYS_LIST}
+	cat "${TEMP_REM_SYS_LIST}"
 	echo -e "${RESET}"
 
-	read -p "Continue? (y/n) " CHOICE
+	read -r -p "Continue? (y/n) " CHOICE
 	case "${CHOICE}" in 
 		y|Y)	;;	##Continue
 		n|N)	echo -e "No.  Quittinq...\n"
