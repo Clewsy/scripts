@@ -71,10 +71,10 @@ while getopts 'pslrvh' OPTION; do						## Call getopts to identify selected opti
 		v)	DEST="/dev/stdout"					## Change DEST from /dev/null to /dev/stdout for verbose output.
 			CURL_VERBOSITY=""					## Remove the "--silent" option (used when calling curl command).
 			;;
-		h)	echo -e "$USAGE"					## Print help (usage) and exit.
+		h)	echo -e "${USAGE}"					## Print help (usage) and exit.
 			exit $SUCCESS
 			;;
-		?)	echo -e "$USAGE"					## Invalid option, show usage and exit.
+		?)	echo -e "${USAGE}"					## Invalid option, show usage and exit.
 			exit $BAD_OPTION
 			;;
 	esac
@@ -90,7 +90,7 @@ fi
 
 ## Verify that script was called with superuser permissions.
 echo -e "\nChecking for superuser access..." > ${DEST}
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]]; then					## If userid is not that of root.
 	echo -e "${RED}Permission denied.${RESET}\n ${USAGE}" 
 	exit $NO_ROOT
 fi
