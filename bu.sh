@@ -28,12 +28,13 @@ NO_REM_DIR=5	## ssh command to create remote directory failed
 USAGE="
 Usage: $(basename "$0") [option] [file/list]
 Where [file/list] is either:
-	file	-	a specific file/directory to be backed up (requires option \"-f\").
+	file	-	a specific file/directory to be backed up (requires option \"-f\" or \"-d\").
 	list	-	a text list of files/directories to be backed up.
 Valid options:
-	-f	-	Argument is a specific file/directory to be backed up.
-	-d	-	Argument is a specific file/directory to be backed up.
+	-f	-	Argument is a specific file to be backed up.
+	-d	-	Argument is a specific directory to be backed up.
 	-l	-	Argument is a text file containing a list of file/directories to be backed up.
+	-q	-	Quiet - suppress most output.
 	-v	- 	Verbose - print additional info to stdout.
 	-h	-	Print this usage and exit.
 	none	-	No option entered - Default assumes \"-l\".
@@ -42,11 +43,12 @@ Valid options:
 DEST="/dev/null"	## Default destination for command output.  I.e. don't display on screen.  -v (verbose) option changes this.
 
 ##########Interpret options
-while getopts 'fdlvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'fdlqvh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
 		f)	ARGUMENT_TYPE="FILE" ;;		## -f identifies the provided argument as a directory/file to be backed up.
 		d)	ARGUMENT_TYPE="FILE" ;;		## -d identifies the provided argument as a directory/file to be backed up.
 		l)	ARGUMENT_TYPE="LIST" ;;		## -l identifies the argument as a list of files to be backed up.
+		q)	QUIET_MODE="TRUE" ;;		## -q flag to suppress some output that would otherwise go to /dev/stdout.
 		v)	DEST="/dev/stdout" ;;		## -v activates verbose mode by sending output to /dev/stdout (instead of /dev/null).
 		h)	echo -e "$USAGE"		## -h option just prints the usage then quits.
 			exit ${SUCCESS}			## Exit successfully.
@@ -167,17 +169,17 @@ fi
 ##########Run the sync.
 echo > ${DEST}
 if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure will be retained within backup dir).
-	echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"
+	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
 	if ! rsync --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 		echo -e "${RED}Failure.${RESET}"	## If rsync failed
 	else	
 		echo -e "${GREEN}Success.${RESET}"			
 	fi
 else						## Use scp (dir structure will not be retained)
-	echo -e "${BLUE}Using scp to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"
+	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using scp to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
 	while read -r BU_FILE; do		## Must loop to run scp for every entry in list file.
 		if ! scp -r -B "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
-			echo -e "${RED}Failure:${RESET} ${BU_FILE}"		## If scp failed
+			echo -e "${RED}Failure:${RESET} ${BU_FILE}"	## If scp failed
 			continue					## Proceed to the next file in the list.
 		else
 			echo -e "${GREEN}Success.${RESET} ${BU_FILE}"			

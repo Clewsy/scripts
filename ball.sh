@@ -25,7 +25,8 @@ Where [host/list] is either:
 
 If no argument is provided, a list file of the name my_hosts.list will be used (if present).
 
-Options:	-v	Verbose output.
+Options:	-q	Quiet mode - suppress most output.
+		-v	Verbose output.
 		-h	Show this help.
 "
 
@@ -33,8 +34,10 @@ VERBOSITY=""		## Define the default verbosity (i.e. none).  Can be changed with 
 DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with option -v.
 
 ##########Interpret options
-while getopts 'fvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
+while getopts 'qvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
+		q)	QUIET_MODE="TRUE"		## -q sets flag that will suppress some output otherwise destined for /dev/stdout.
+			VERBOSITY="-q" ;;
 		v)	VERBOSITY="-v"			## -v activates verbose mode by iadding the -v flag to the bu.sh command.
 			DEST="/dev/stdout" ;;
 		h)	echo -e "${USAGE}"		## -h option just prints the usage then quits.
@@ -70,11 +73,11 @@ if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	## If it ex
 ##########Validate the argument and thus define the remote host/s.
 ## Arg specifies a remote host.
 if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	## If argument is not (!) a normal file (-f) or (||) in is not (!) readable (-r).
-	echo -e "\n${BLUE}Remote system is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"		## Then assume provided argument is a single host (either [host] or [user@host]).
+	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "\n${BLUE}Remote system is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"; fi	## Then assume provided argument is a single host (either [host] or [user@host]).
 	echo "${ARGUMENT}" > "${TEMP_REM_SYS_LIST}"		## Create the temp list file which will just contain the single entry.
 ## Arg specifies a list of remote hosts.
 else
-	echo -e "\n${BLUE}Remote system list is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"			## Tell the user the list looks okay.
+	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "\n${BLUE}Remote system list is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"; fi	## Tell the user the list looks okay.
 	while read -r LINE ; do							## Iterate for every line in the system list.
 		STRIPPED_LINE="$(echo "${LINE}" | cut -d "#" -f 1)"		## Strip the content of the line after (and including) the first '#'.
 		if [ "${STRIPPED_LINE}" ]; then					## If there is anything left in the string (i.e. if entire row is NOT a comment).
@@ -86,11 +89,11 @@ else
 fi
 
 ########## Loop through the remote system list.
-echo -e "\n----------------------------------------------------------------------------------"
+if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "\n----------------------------------------------------------------------------------"; fi
 while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
 
-	echo -e "${BLUE}Attempting to run \"${RESET}${COMMAND}${BLUE}\" on \"${RESET}${REM_SYS}${BLUE}\"${RESET}"
+	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Attempting to run \"${RESET}${COMMAND}${BLUE}\" on \"${RESET}${REM_SYS}${BLUE}\"${RESET}"; fi
 
 	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
 	(( NUM_BUFF=24-${#REM_SYS} ))			## Total buffer = 24 minus number of chars in "user@host"
@@ -102,11 +105,11 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	if ! ssh -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then						## Attempt to connect via ssh and run the backup script "bu.sh"
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## Record if the above fails for the current host.
 		echo -e "${RED}Failure.${RESET}"								## Also show failure on stdio.
-		echo -e "----------------------------------------------------------------------------------"
+		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi
 		continue											## Then try the next host in the list.
 	else
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## If the above succeeds, record the success.
-		echo -e "----------------------------------------------------------------------------------"	## Note a "success" means the ssh session was created and exited.
+		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi	## Note a "success" means the ssh session was created and exited.
 														##  gracefully.  Failures with the called script are not checcked.
 	fi
 
