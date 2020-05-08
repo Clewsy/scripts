@@ -35,12 +35,6 @@ Runs through a list of servers, pings each once for a second then returns a succ
 
 ---
 
-[**roll_out.sh**][link_repo_roll_out.sh]
-
-Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.
-
----
-
 [**stuff.sh**][link_repo_stuff.sh]
 
 Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
@@ -91,6 +85,12 @@ A script to create a local backup of a nextcloud instance including the database
 
 ---
 
+[**roll_out.sh**][link_repo_archive_roll_out.sh]
+
+Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.  I used this to sync my custom scripts to a list of hosts.  Now deprecated as I manage this task with [Ansible][link_web_ansible].
+
+---
+
 [**ytdl.sh**][link_repo_Archive_ytdl.sh]
 
 Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Archived as I no longer use this since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
@@ -103,7 +103,6 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_p0wer_switch.sh]:p0wer_switch.sh
 [link_repo_polly.sh]:polly.sh
 [link_repo_pong.sh]:pong.sh
-[link_repo_roll_out.sh]:roll_out.sh
 [link_repo_stuff.sh]:stuff.sh
 [link_repo_vpn.sh]:vpn.sh
 [link_repo_wami.sh]:wami.sh
@@ -112,6 +111,7 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_archive_chuck.sh]:archive/chuck.sh
 [link_repo_archive_grab.sh]:archive/grab.sh
 [link_repo_archive_nc_backup.sh]:archive/nc_backup.sh
+[link_repo_archive_roll_out.sh]:archive/roll_out.sh
 [link_repo_archive_ytdl.sh]:archive/ytdl.sh
 [link_gitlab_clewsy_p0wer]:https://gitlab.com/clewsy/p0wer
 [link_web_termux]:https://termux.com/
@@ -119,3 +119,4 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_web_ipinfo]:https://ipinfo.io/
 [link_web_lineageos]:https://lineageos.org/
 [link_web_newpipe]:https://newpipe.schabi.org/
+[link_web_ansible]:https://docs.ansible.com/
