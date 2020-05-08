@@ -1,16 +1,16 @@
 #!/bin/bash
 
 ## Set main text colour.
-#COL="\\033[00;30m"		#BLACK
-#COL="\\033[00;31m"		#RED
-#COL="\\033[00;38;5;214m"	#ORANGE
-#COL="\\033[00;32m"		#GREEN
-#COL="\\033[00;33m"		#YELLOW
-#COL="\\033[00;34m"		#BLUE
-#COL="\\033[00;35m"		#MAGENTA
-COL="\\033[00;36m"		#CYAN
-#COL="\\033[00;40m"		#GRAY
-#COL="\\033[00;37m"		#WHITE
+#COL="\\033[00;30m"		#Theme colour: BLACK
+#COL="\\033[00;31m"		#Theme colour: RED
+#COL="\\033[00;38;5;214m"	#Theme colour: ORANGE
+#COL="\\033[00;32m"		#Theme colour: GREEN
+#COL="\\033[00;33m"		#Theme colour: YELLOW
+#COL="\\033[00;34m"		#Theme colour: BLUE
+#COL="\\033[00;35m"		#Theme colour: MAGENTA
+COL="\\033[00;36m"		#Theme colour: CYAN
+#COL="\\033[00;40m"		#Theme colour: GRAY
+#COL="\\033[00;37m"		#Theme colour: WHITE
 
 BOLD="\\033[1m"
 DIM="\\033[2m"
