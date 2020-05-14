@@ -3,7 +3,7 @@
 ## Set main text colour.
 #COL="\\033[00;30m"		#Theme colour: BLACK
 #COL="\\033[00;31m"		#Theme colour: RED
-#COL="\\033[00;38;5;214m"	#Theme colour: ORANGE
+#COL="\\033[00;38;5;214m"		#Theme colour: ORANGE
 #COL="\\033[00;32m"		#Theme colour: GREEN
 #COL="\\033[00;33m"		#Theme colour: YELLOW
 #COL="\\033[00;34m"		#Theme colour: BLUE
@@ -224,22 +224,28 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 	if ! command -v lspci >> /dev/null || ! lspci &> /dev/null; then		#If lspci not installed or fails (send to /dev/null to suppress stdout)
 		echo -e "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed or failed)"
 	else
-                echo -e "${COL}${BOLD}Audio/Video:${RESET}"
 		if [[ -n "$GET_ALL_INFO" || ( -n "$GET_A_AUDIO_INFO" && -n "$GET_V_VIDEO_INFO" ) ]]; then	## If we want both audio and vie info
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
+			if command -v lsblk >> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
-			echo -e "${COL}${BOLD}├─Audio:${RESET} ${AUDIO_INFO}"	## Audio info
-			echo -e "${COL}${BOLD}└─Video:${RESET} ${VIDEO_INFO}"	## Video info
+			echo -e "${COL}${BOLD}Audio/Video:${RESET}"
+			echo -e "${COL}${BOLD}├─Audio Hardware:${RESET} ${AUDIO_INFO}"	## Audio info
+			echo -e "${COL}${BOLD}└─Video Hardware:${RESET} ${VIDEO_INFO}"	## Video info
+			if [ -n "${VIDEO_RES}" ]; then echo -e "${COL}  └─Resolution:${RESET} ${VIDEO_RES}"; fi	## Primary display resolution.
 		elif [ -n "$GET_A_AUDIO_INFO" ]; then						## If we just want audio info
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
-			echo -e "${COL}${BOLD}└─Audio:${RESET} ${AUDIO_INFO}"	## Audio info
+			echo -e "${COL}${BOLD}Audio:${RESET}"
+			echo -e "${COL}${BOLD}└─Hardware:${RESET} ${AUDIO_INFO}"	## Audio info
 		elif [ -n "$GET_V_VIDEO_INFO" ]; then						## If we just want video info
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
+			if	! command -v lsblk >> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
-			echo -e "${COL}${BOLD}└─Video:${RESET} ${VIDEO_INFO}"	## Video info
+			echo -e "${COL}${BOLD}Video:${RESET}"
+			echo -e "${COL}${BOLD}└─Hardware:${RESET} ${VIDEO_INFO}"	## Video info
+			if [ -n "${VIDEO_RES}" ]; then echo -e "${COL}  └─Resolution:${RESET} ${VIDEO_RES}"; fi	## Primary display resolution.
 		fi
 	fi
 fi
