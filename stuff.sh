@@ -248,7 +248,7 @@ fi
 ## Print disk and partition info
 if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if	! command -v lsblk >> /dev/null; then	echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk not installed)."	## lsblk not installed.
-	elif	! lsblk 2&> /dev/null; then		echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk returns error)."	## lsblk errors out.
+	elif	! lsblk &> /dev/null; then		echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk returns error)."	## lsblk errors out.
 	else						echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"								## lsblk ok, continue.
 
 		########First level lsblk tree
