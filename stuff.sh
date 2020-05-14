@@ -187,15 +187,20 @@ if [[ -n "$GET_C_CPU_INFO" || -n "$GET_ALL_INFO" ]]; then
 		CPU_MAX_SPEED=$(lscpu | grep "CPU max" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
 		CPU_MIN_SPEED=$(lscpu | grep "CPU min" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
 		echo -e "${COL}${BOLD}CPU:${RESET}"
-		if [ -n "${CPU_MODEL}" ];	then	echo -e "${COL}${BOLD}├─Model:${RESET} ${CPU_MODEL}"; fi	## CPUModel and vendor
-		if [ -n "${CPU_VENDOR}" ];	then	echo -e "${COL}${BOLD}├─Vendor:${RESET} ${CPU_VENDOR}"; fi	## CPUModel and vendor
-		if [ -n "${CPU_ARCH}" ];	then	echo -e "${COL}${BOLD}├─Architecture:${RESET} ${CPU_ARCH}"; fi	## Architecture
-		if [ -n "${CPU_MODE}" ];	then	echo -e "${COL}${BOLD}├─Mode(s):${RESET} ${CPU_MODE}"; fi	## CPU op-mode(s)
-		if [ -n "${CPU_CORES}" ];	then	echo -e "${COL}${BOLD}├─Cores:${RESET} ${CPU_CORES}"; fi	## CPU(s)
-		if [ -n "${CPU_SPEED}" ];	then	echo -e "${COL}${BOLD}└─Speed:${RESET} ${CPU_SPEED}MHz"		## CPU Speed
+		if [ -n "${CPU_MODEL}" ];	then	echo -e "${COL}${BOLD}├─Model:${RESET} ${CPU_MODEL}"; fi		## CPUModel and vendor
+		if [ -n "${CPU_VENDOR}" ];	then	echo -e "${COL}${BOLD}├─Vendor:${RESET} ${CPU_VENDOR}"; fi		## CPUModel and vendor
+		if [ -n "${CPU_ARCH}" ];	then	echo -e "${COL}${BOLD}├─Architecture:${RESET} ${CPU_ARCH}"; fi		## Architecture
+		if [ -n "${CPU_MODE}" ];	then	echo -e "${COL}${BOLD}├─Mode(s):${RESET} ${CPU_MODE}"; fi		## CPU op-mode(s)
+		if [ -n "${CPU_CORES}" ];	then	echo -e "${COL}${BOLD}├─Cores:${RESET} ${CPU_CORES}"; fi		## CPU(s)
+		if [ -n "${CPU_SPEED}" ];	then	echo -e "${COL}${BOLD}└─Speed:${RESET} ${CPU_SPEED}MHz"			## CPU Speed
 		else					echo -e "${COL}${BOLD}└─Speed"; fi
-		if [ -n "${CPU_MAX_SPEED}" ];	then	echo -e "${COL}  ├─Max:${RESET} ${CPU_MAX_SPEED}MHz"; fi	## Max CPU MHz
-		if [ -n "${CPU_MIN_SPEED}" ];	then	echo -e "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz"; fi		## Min CPU MHz
+		if [ -n "${CPU_MAX_SPEED}" ] && [ -n "${CPU_MIN_SPEED}" ]; then
+			echo -e "${COL}  ├─Max:${RESET} ${CPU_MAX_SPEED}MHz"; 							## Max CPU MHz
+			echo -e "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz";							## Min CPU MHz
+		else
+			if [ -n "${CPU_MAX_SPEED}" ];	then	echo -e "${COL}  └─Max:${RESET} ${CPU_MAX_SPEED}MHz"; fi	## Max CPU MHz
+			if [ -n "${CPU_MIN_SPEED}" ];	then	echo -e "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz"; fi	## Min CPU MHz
+		fi
 	fi
 fi
 
@@ -242,10 +247,9 @@ fi
 ###############################################################################################################################################################
 ## Print disk and partition info
 if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
-	if ! command -v lsblk >> /dev/null ; then	#If lsblk not installed (send to /dev/null to suppress stdout)
-		echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk not installed)"
-	else
-		echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"
+	if	! command -v lsblk >> /dev/null; then	echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk not installed)."	## lsblk not installed.
+	elif	! lsblk 2&> /dev/null; then		echo -e "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk returns error)."	## lsblk errors out.
+	else						echo -e "${COL}${BOLD}Disks and Partitions:${RESET}"								## lsblk ok, continue.
 
 		########First level lsblk tree
 		NUM_DISKS=$(lsblk -ndo NAME | wc -l)
@@ -389,7 +393,7 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if ! command -v curl >> /dev/null ; then					## If curl not installed
 		EXT_IP="Cannot determine - curl not installed."				## Print a "no curl" error
 	else
-		EXT_IP=$(curl --silent --max-time 5 ipecho.net/plain)			## Determine external IP
+		EXT_IP=$(curl --silent --max-time 5 https://ipecho.net/plain)		## Determine external IP
 		if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi		## If no data exists for ext_ip, create error message.
 		echo -e "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}"			## Print EXT_IP
 	fi
@@ -429,9 +433,10 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 		NUM_DEVS=$(find /sys/class/net -type l | wc -w)		## Determine the number of network interfaces.
 		for (( c=1; c<=NUM_DEVS; c++ ))				## Run this loop for each interface.
 		do
-			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)	## Select working interface from the list of interfaces
-			STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)				## Status of interface up, down or unknown
-			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)				## MAC address of the inteface.
+			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)				## Select working interface from the list of interfaces
+			if [ -e /sys/class/net/${WORKING_INTERFACE}/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)		## Status up, down or unknown
+			else								STATUS="unknown"; fi
+			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)										## MAC address of the inteface.
 
 			if (( c==NUM_DEVS )); then	echo -e "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}${BOLD}  ${RESET}"	## If it's the last interfac
 			else				echo -e "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}${BOLD}│ ${RESET}"; fi
