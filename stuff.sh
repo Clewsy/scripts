@@ -227,7 +227,7 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 		if [[ -n "$GET_ALL_INFO" || ( -n "$GET_A_AUDIO_INFO" && -n "$GET_V_VIDEO_INFO" ) ]]; then	## If we want both audio and vie info
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if command -v lsblk >> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
+			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//' &> /dev/null); fi
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Audio/Video:${RESET}"
@@ -241,7 +241,7 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 			echo -e "${COL}${BOLD}└─Hardware:${RESET} ${AUDIO_INFO}"	## Audio info
 		elif [ -n "$GET_V_VIDEO_INFO" ]; then						## If we just want video info
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if	! command -v lsblk >> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
+			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//' &> /dev/null); fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Video:${RESET}"
 			echo -e "${COL}${BOLD}└─Hardware:${RESET} ${VIDEO_INFO}"	## Video info
