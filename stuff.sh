@@ -1,16 +1,16 @@
 #!/bin/bash
 
 ## Set main text colour.
-#COL="\\033[00;30m"		#Theme colour: BLACK
-#COL="\\033[00;31m"		#Theme colour: RED
-#COL="\\033[00;38;5;214m"		#Theme colour: ORANGE
-#COL="\\033[00;32m"		#Theme colour: GREEN
-#COL="\\033[00;33m"		#Theme colour: YELLOW
-#COL="\\033[00;34m"		#Theme colour: BLUE
-#COL="\\033[00;35m"		#Theme colour: MAGENTA
-COL="\\033[00;36m"		#Theme colour: CYAN
-#COL="\\033[00;40m"		#Theme colour: GRAY
-#COL="\\033[00;37m"		#Theme colour: WHITE
+#COL="\\033[00;30m"			#Theme colour: BLACK
+#COL="\\033[00;31m"			#Theme colour: RED
+#COL="\\033[00;38;5;214m"	#Theme colour: ORANGE
+#COL="\\033[00;32m"			#Theme colour: GREEN
+#COL="\\033[00;33m"			#Theme colour: YELLOW
+#COL="\\033[00;34m"			#Theme colour: BLUE
+#COL="\\033[00;35m"			#Theme colour: MAGENTA
+COL="\\033[00;36m"			#Theme colour: CYAN
+#COL="\\033[00;40m"			#Theme colour: GRAY
+#COL="\\033[00;37m"			#Theme colour: WHITE
 
 BOLD="\\033[1m"
 DIM="\\033[2m"
@@ -227,7 +227,7 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 		if [[ -n "$GET_ALL_INFO" || ( -n "$GET_A_AUDIO_INFO" && -n "$GET_V_VIDEO_INFO" ) ]]; then	## If we want both audio and vie info
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//' &> /dev/null); fi
+			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Audio/Video:${RESET}"
@@ -241,7 +241,7 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 			echo -e "${COL}${BOLD}└─Hardware:${RESET} ${AUDIO_INFO}"	## Audio info
 		elif [ -n "$GET_V_VIDEO_INFO" ]; then						## If we just want video info
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//' &> /dev/null); fi
+			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Video:${RESET}"
 			echo -e "${COL}${BOLD}└─Hardware:${RESET} ${VIDEO_INFO}"	## Video info
