@@ -1,16 +1,19 @@
 #!/bin/bash
 
-## Set main text colour.
-#COL="\\033[00;30m"			#Theme colour: BLACK
-#COL="\\033[00;31m"			#Theme colour: RED
-#COL="\\033[00;38;5;214m"	#Theme colour: ORANGE
-#COL="\\033[00;32m"			#Theme colour: GREEN
-#COL="\\033[00;33m"			#Theme colour: YELLOW
-#COL="\\033[00;34m"			#Theme colour: BLUE
-#COL="\\033[00;35m"			#Theme colour: MAGENTA
-COL="\\033[00;36m"			#Theme colour: CYAN
-#COL="\\033[00;40m"			#Theme colour: GRAY
-#COL="\\033[00;37m"			#Theme colour: WHITE
+## Define theme colour options.
+BLACK="\\033[00;30m"
+RED="\\033[00;31m"
+ORANGE="\\033[00;38;5;214m"
+GREEN="\\033[00;32m"
+YELLOW="\\033[00;33m"
+BLUE="\\033[00;34m"
+MAGENTA="\\033[00;35m"
+CYAN="\\033[00;36m"
+GRAY="\\033[00;40m"
+WHITE="\\033[00;37m"
+
+## Set theme colour.
+COL="${CYAN}"
 
 BOLD="\\033[1m"
 DIM="\\033[2m"
@@ -21,6 +24,7 @@ SUCCESS=0
 BAD_OPTION=1
 BAD_ARGUMENT=2
 
+## Define usage/help.
 USAGE="
 Usage: $(basename "$0") [option]
 Valid options:
@@ -36,6 +40,7 @@ Valid options:
 -h	Print this help
 "
 
+## Get command line options and set appropriate flags.
 while getopts 'Apcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
