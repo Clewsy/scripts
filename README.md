@@ -41,6 +41,12 @@ Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/m
 
 ---
 
+[**terbling.sh**][link_repo_terbling.sh]
+
+Prints an ascii-art logo and some basic system info to the command line.
+
+---
+
 [**vpn.sh**][link_repo_vpn.sh]
 
 Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
@@ -104,6 +110,7 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_polly.sh]:polly.sh
 [link_repo_pong.sh]:pong.sh
 [link_repo_stuff.sh]:stuff.sh
+[link_repo_terbling.sh]:terbling.sh
 [link_repo_vpn.sh]:vpn.sh
 [link_repo_wami.sh]:wami.sh
 [link_repo_whodis.sh]:whodis.sh
