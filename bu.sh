@@ -102,7 +102,7 @@ fi
 
 ##########Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-if timeout 6 ssh -o "BatchMode=yes" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
+if timeout 6 ssh -4 -o "BatchMode=yes" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
 	BU_SERVER="${BU_SERVER_LOCAL}"							## Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
 else
@@ -112,7 +112,7 @@ fi
 
 ##########Validate the backup folder or create if absent.
 echo -e "\nChecking for remote backup directory \"${BU_REMOTE_DIR}\" on remote backup server \"${BU_SERVER}\" (will be created if absent)." > ${DEST}
-if ! ssh -t ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	## Connects to the remote server and creates the backup dir.
+if ! ssh -4 -t ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	## Connects to the remote server and creates the backup dir.
 	echo -e "${RED}Failed to create remote directory${RESET}"			## If this fails, print error and exit.
 	exit ${NO_REM_DIR}
 fi
@@ -170,7 +170,7 @@ fi
 echo > ${DEST}
 if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure will be retained within backup dir).
 	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
-	if ! rsync --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+	if ! rsync -4 --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 		echo -e "${RED}Failure.${RESET}"	## If rsync failed
 	else	
 		echo -e "${GREEN}Success.${RESET}"			
@@ -178,7 +178,7 @@ if [ "$RSYNC_INSTALLED" == "TRUE" ]; then	## Use rsync (preferred, dir structure
 else						## Use scp (dir structure will not be retained)
 	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using scp to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
 	while read -r BU_FILE; do		## Must loop to run scp for every entry in list file.
-		if ! scp -r -B "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+		if ! scp -4 -r -B "${BU_FILE}" "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 			echo -e "${RED}Failure:${RESET} ${BU_FILE}"	## If scp failed
 			continue					## Proceed to the next file in the list.
 		else
