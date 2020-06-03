@@ -20,7 +20,7 @@ OPENVPN_FAIL=5
 ## This is ignored if te user provides an argument defining an alternate config file.
 DEFAULT_CONF="/home/jc/openvpn/Windscribe-Australia_UDP.ovpn"
 
-#Define a temp file into which ipinfo.io data will be entered and then parsed
+## Define a temp file into which ipinfo.io data will be entered and then parsed.
 TEMP_FILE=/tmp/vpn_tempfile
 
 USAGE="
@@ -58,7 +58,6 @@ fi
 ##########Define openvpn config file.
 VPN_FILE=${1-"${DEFAULT_CONF}"}	## First argument is the openvpn config file.
 				## If argument not provided, set default (defined at top of script).
-				## Syntax: parameter=${parameter-default}
 
 ##########Validate openvpn config file.
 if [ ! -f "${VPN_FILE}" ]; then	## If file is not a regular file or is missing.
@@ -93,8 +92,8 @@ echo -e  "Current city: ${CURRENT_CITY}"
 
 ##########Connect to the vpn.
 echo -e "\nRunning openvpn using config file at \"$VPN_FILE\""
-echo -e "(\"sudo pkill openvpn\" to disable)"
-if ! sudo openvpn --config "${VPN_FILE}" --daemon ; then	## Execute openvpn then exit script if it fails.
+echo -e "\"$(basename "${0}") -c\" to cancel/kill vpn."
+if ! sudo openvpn --config "${VPN_FILE}" --daemon ; then	## Execute openvpn. Exit script if it fails.
 	rm "${TEMP_FILE}"
 	echo -e "\n${RED}Error:${RESET} openvpn failed. Quitting"
 	exit ${OPENVPN_FAIL}
@@ -104,7 +103,7 @@ fi
 NEW_IP=${CURRENT_IP}
 while [ "${NEW_IP}" == "${CURRENT_IP}" ]
 do
-	if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinfo.io ; then	#Execute curl command but exit if it fails
+	if ! curl --silent --connect-timeout 5 --max-time 10 --output "$TEMP_FILE" ipinfo.io ; then
 		rm "$TEMP_FILE"
 		echo -e "\n${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting..."
 		exit ${NO_IPINFO}
