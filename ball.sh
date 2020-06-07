@@ -35,7 +35,7 @@ QUIT ()
 
 #########Usage
 USAGE="
-Usage: $(basename "$0")[option] [host/list]
+Usage: $(basename "$0") [option] [host/list]
 
 Where [host/list] is either:
 	host	-	a specific remote system on which command \"${COMMAND}\" will be run.
