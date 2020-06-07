@@ -20,16 +20,16 @@ BU_LOG_FILE="${HOME}/.log/bu.log"
 if [ ! -d "$(dirname "${BU_LOG_FILE}")" ]; then mkdir --parents "$(dirname "${BU_LOG_FILE}")"; fi
 
 ##########Exit codes
-SUCCESS=0	## Noice.
-BAD_OPTION=1	## Incorrect usage.
-TOO_MANY_ARGS	## More than one argument was provided.
-MISSING_ARG	## Option -f or -d provided but argument was not provided.
-BAD_ARG=2	## Specified or default file list not readable.
-NO_RSYNC=3	## rsync not installed.
-NO_REM_DIR=4	## ssh command to create remote directory failed.
-BAD_LIST_FILE=5	## List file not identified as ascii text file.
-NO_VALID_FILES	## Parsing list file  found no valid files to back up.
-RSYNC_FAILED=6	## rsync command was reached but failed.
+SUCCESS=0		## Noice.
+BAD_OPTION=1		## Incorrect usage.
+TOO_MANY_ARGS=2		## More than one argument was provided.
+MISSING_ARG=3		## Option -f or -d provided but argument was not provided.
+BAD_ARG=4		## Specified or default file list not readable.
+NO_RSYNC=5		## rsync not installed.
+NO_REM_DIR=6		## ssh command to create remote directory failed.
+BAD_LIST_FILE=7		## List file not identified as ascii text file.
+NO_VALID_FILES=8	## Parsing list file  found no valid files to back up.
+RSYNC_FAILED=9		## rsync command was reached but failed.
 
 ##########Function to print current date and time.  Used for logging.
 TIMESTAMP () { echo -ne "$(date +%Y-%m-%d\ %T)"; }
