@@ -54,12 +54,9 @@ while getopts 'Apcmavdonh' OPTION; do			## Call getopts to identify selected opt
 		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag - operating system (inc. kernel)
 		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag - network
 		h)	echo -e "$USAGE"		## Print help (usage).
-			exit $SUCCESS			## Exit successfully.
-			;;
-		?)
-			echo -e "$USAGE"		## Invalid option, show usage.
-			exit $BAD_OPTION		## Exit.
-			;;
+			exit $SUCCESS ;;		## Exit successfully.
+		?)	echo -e "$USAGE"		## Invalid option, show usage.
+			exit $BAD_OPTION ;;		## Exit.
 	esac
 done
 shift $((OPTIND -1))			## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
@@ -82,98 +79,56 @@ echo -e "${COL}${BOLD}╚══════════════════�
 ## Print available product, chassis, motherboard, bios info
 if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 
-	echo -e "${COL}${BOLD}Product Info:${RESET}"
+	if	[ ! -s /sys/devices/virtual/dmi/id/product_name ] &&
+		[ ! -s /sys/devices/virtual/dmi/id/chassis_type ] &&
+		[ ! -s /sys/devices/virtual/dmi/id/board_name ] &&
+		[ ! -s /sys/devices/virtual/dmi/id/bios_date ] ; then	echo -e "${COL}${BOLD}Product Info:${RESET} Not found"
+	else								echo -e "${COL}${BOLD}Product Info:${RESET}"
 
-	###############################
-	## Print available product info
-	if [ -s /sys/devices/virtual/dmi/id/product_name ]; then
 		PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name)
 		PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version)
 		SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor)
-		if [ -n "${PRODUCT_NAME}" ]; then
-			if [ -n "${PRODUCT_VERSION}" ]; then
-				if [ -n "${SYS_VENDOR}" ]; then
-					echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})"
-				else
-					echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}"
-				fi
-			elif [ -n "${SYS_VENDOR}" ]; then
-				echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})"
-			else
-				echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}"
-			fi
-		fi
-	else
-		echo -e "${COL}${BOLD}├─Product:${RESET} Information not found"
-	fi
-
-	###############################
-	## Print available chassis info
-	if [ -s /sys/devices/virtual/dmi/id/chassis_type ]; then
 		CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type)
 		CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version)
 		CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor)
-		if [ -n "${CHASSIS_TYPE}" ]; then
-	        	if [ -n "${CHASSIS_VERSION}" ]; then
-				if [ -n "${CHASSIS_VENDOR}" ]; then
-					echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})"	## Chassis type, version, vendor
-				else
-					echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}"			## Chassis type, version
-				fi
-			elif [ -n "${CHASSIS_VENDOR}" ]; then
-				echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})"					## Chassis type, vendor
-			fi
-		else
-			echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}"								## Chassis type
-		fi
-	else
-		echo -e "${COL}${BOLD}├─Chassis:${RESET} Information not found"
-	fi
-
-	###############################
-	## Print available motherboard info
-	if [ -s /sys/devices/virtual/dmi/id/board_name ]; then
 		BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name)
 		BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version)
 		BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor)
-		if [ -n "${BOARD_NAME}" ]; then
-			if [ -n "${BOARD_VERSION}" ]; then
-				if [ -n "${BOARD_VENDOR}" ]; then
-					echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})"	## Motherboard model, version, vendor
-				else
-					echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}"			## Motherboard model, version
-				fi
-			elif [ -n "${BOARD_VENDOR}" ]; then
-				echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})"					## Motherboard name, vendor
-			else
-				echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}"							## Motherboard model
-			fi
-		fi
-	else
-		echo -e "${COL}${BOLD}├─Motherboard:${RESET} Information not found"
-	fi
-
-	###############################
-	## Print available bios info
-	if [ -s /sys/devices/virtual/dmi/id/bios_date ]; then
 		BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date)
 		BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version)
 		BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor)
-		if [ -n "${BIOS_DATE}" ]; then
-			if [ -n "${BIOS_VERSION}" ]; then
-				if [ -n "${BIOS_VENDOR}" ]; then
-					echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})"	## Bios date, version, vendor
-				else
-					echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}"			## Bios date, version
-				fi
-			elif [ -n "${BIOS_VENDOR}" ]; then
-				echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})"					## Bios date, vendor
-			else
-				echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}"							## Bios date
-			fi
-		fi
-	else
-		echo -e "${COL}${BOLD}└─BIOS:${RESET} Information not found"
+
+		###############################
+		## Print available product info
+		if	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ] &&	[ -n "${SYS_VENDOR}" ];		then	echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})"
+		elif	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ] ;					then	echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}"
+		elif 	[ -n "${PRODUCT_NAME}" ] &&					[ -n "${SYS_VENDOR}" ];		then	echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})"
+		elif	[ -n "${PRODUCT_NAME}" ];									then	echo -e "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}"
+		else														echo -e "${COL}${BOLD}├─Product:${RESET} Information not found"; fi
+
+		###############################
+		## Print available chassis info
+		if	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ] &&	[ -n "${CHASSIS_VENDOR}" ];	then	echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})"
+		elif	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ];					then	echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}"
+		elif	[ -n "${CHASSIS_TYPE}" ] &&					[ -n "${CHASSIS_VENDOR}" ];	then	echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})"
+		elif	[ -n "${CHASSIS_TYPE}" ];									then	echo -e "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}"
+		else														echo -e "${COL}${BOLD}├─Chassis:${RESET} Information not found"; fi
+
+		###############################
+		## Print available motherboard info
+		if	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ] &&	[ -n "${BOARD_VENDOR}" ];	then	echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})"
+		elif	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ];					then	echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}"
+		elif	[ -n "${BOARD_NAME}" ] &&					[ -n "${BOARD_VENDOR}" ];	then	echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})"
+		elif	[ -n "${BOARD_NAME}" ];										then	echo -e "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}"
+		else														echo -e "${COL}${BOLD}├─Motherboard:${RESET} Information not found"; fi
+
+		###############################
+		## Print available bios info
+		if	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ] &&	[ -n "${BIOS_VENDOR}" ];	then	echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})"
+		elif	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ];					then	echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}"
+		elif	[ -n "${BIOS_DATE}" ] &&					[ -n "${BIOS_VENDOR}" ];	then	echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})"
+		elif	[ -n "${BIOS_DATE}" ];										then	echo -e "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}"
+		else														echo -e "${COL}${BOLD}└─BIOS:${RESET} Information not found"; fi
 	fi
 fi
 
