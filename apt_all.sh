@@ -3,23 +3,40 @@
 ## This script will take an argument or either a single host, or a list of hosts.
 ## It will then run apt-get update, apt-get dist-upgrade, apt-get autoremove and then apt-get autoclean on the provided host/s.
 
-## Colours.
+########## Colours.
 RED="\033[02;31m"
 GREEN="\033[02;32m"
 BOLD="\033[01;37m"
 BLUE="\033[01;34m"
 RESET="\033[0m"
 
-## Exit codes
+########## Define log file and ensure directory exists.
+APT_ALL_LOG_FILE="${HOME}/.log/apt_all.log"
+if [ ! -d "$(dirname "${APT_ALL_LOG_FILE}")" ]; then mkdir --parents "$(dirname "${APT_ALL_LOG_FILE}")"; fi
+
+########## Exit codes
 SUCCESS=0	## Noice.
 BAD_OPTION=1	## Invalid option.
-BAD_USAGE=2	## Incorrect usage.
+TOO_MANY_ARGS=2	## Incorrect usage.
 
+########## Function to print current date and time.  Used for logging.
+TIMESTAMP () { echo -ne "$(date +%Y-%m-%d\ %T)"; }
+
+########## Function for exit conditions.  Log error or success and exit.
+QUIT ()
+{
+	if [ "${1}" -gt 0 ]; then	echo -e "$(TIMESTAMP) - Script failed with error code ${1}." >> "${APT_ALL_LOG_FILE}"
+	else				echo -e "$(TIMESTAMP) - Script completed successfully." >> "${APT_ALL_LOG_FILE}"; fi
+	echo -e "-----------------------------------------------------------" >> "${APT_ALL_LOG_FILE}"
+	exit "${1}"
+}
+
+########## Command help/usage.
 USAGE="
 Usage: $(basename "$0") [hosts]
 Where [hosts] can be:
 	- [user@host]
-	- [host]	(same user as current)
+	- [host]	(same user as current or defined in .ssh/config)
 	- [hosts.list]	(file containing a list of [user@host] or [host]
 	- ommitted	(script will look for host.list file of the name \"my_hosts.list\")
 Valid options:
@@ -28,48 +45,47 @@ Valid options:
 	-h	Print this usage and exit.
 "
 
+######### Default values can be changed with -q or -v options. 
 DEST="/dev/null"			## Default destination for command output.  I.e. don't display on screen.  -v (verbose) option changes this.
 APT_GET_VERBOSITY="--quiet=3"		## Default verbosity setting for apt-get commands.  Removed by "-v" option.
 QUIET=false
 
-##########Interpret options
+########## Interpret options
 while getopts 'vqh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
-		q)	QUIET=true			## Set the quiet flag to suppress certain echo commands.
-			;;
+		q)	QUIET=true ;;			## Set the quiet flag to suppress certain echo commands.
 		v)	DEST="/dev/stdout"		## -v activates verbose mode by sending output to /dev/stdout (instead of /dev/null).
 			APT_GET_VERBOSITY=""		## Verbose mode removes the "--quiet" option when apt-get commands are called.
-			QUIET=false			## Override Quiet mode option.
-			;;
+			QUIET=false ;;			## Override Quiet mode option.
 		h)	echo -e "${USAGE}"		## -h option just prints the usage then quits.
-			exit ${SUCCESS}			## Exit successfully.
-			;;
-		?)
-			echo -e "Invalid option/s."
+			QUIT "${SUCCESS}" ;;		## Exit successfully.
+		?)	echo -e "${RED}Error:${RESET} Invalid option/s."
 			echo -e "${USAGE}"		## Invalid option, show usage.
-			exit ${BAD_OPTION}		## Exit wit error.
-			;;
+			QUIT "${BAD_OPTION}" ;;		## Exit with error.
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
-## Validate provided argument/s.
+######### Validate provided argument/s.
 if [ $# -gt 1 ]; then		## If more than one argument is entered.
+	echo -e "${RED}Error:${RESET} Too many arguments."
 	echo -e "${USAGE}"	## Print the usage.
-	exit ${BAD_USAGE}	## Exit.
+	QUIT "${TOO_MANY_ARGS}"	## Exit.
 fi
 
+######### Define argument or use default.
 ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	## First argument is the file name of the list of remote systems.
 						## If argument not provided, set default (ball.list in same dir as script).
 						## Syntax: parameter=${parameter-default}
 
+######### Define and clear temp files.
 TEMP_SUMMARY_FILE="/tmp/temp_apt_summary"				## Define temp summary file location.
 if [ -e "${TEMP_SUMMARY_FILE}" ]; then rm "${TEMP_SUMMARY_FILE}"; fi	## If it exists, delete the temporary file (in case script failed previously).
 
 TEMP_REM_SYS_LIST="/tmp/temp_apt_rem_sys_list"				## Define a working system list
 if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	## If it exists, delete the temporary file (in case script failed previously).
 
-## Determine the content of the specified option - i.e. a specific host or a lfile containing a list of hosts.
+######### Determine the content of the specified option - i.e. a specific host or a lfile containing a list of hosts.
 echo -e "\nValidating the target/s..." > ${DEST}
 if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then					## If argument is not (!) a normal file (-f) or (||) in is not (!) readable (-r).
 	echo -e "Target is a specific host." > ${DEST}						## Then assume provided argument is a single host (either [host] or [user@host]).
@@ -89,11 +105,19 @@ else
 	cat ${TEMP_REM_SYS_LIST} > ${DEST}
 fi
 
-## Loop through the remote system list.
+######### Loop through the remote system list.
 echo -e "\n------------------------------------------------------" > ${DEST}
+
 echo -e "\nBeginning apt-get commands on remote hosts..." > ${DEST}
+{
+	echo -e "$(TIMESTAMP) - Script initiated.  Will attempt upgrades for the following hosts:"
+	cat "${TEMP_REM_SYS_LIST}"
+} >> "${APT_ALL_LOG_FILE}"	## Log file log header.
+
 while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST).
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script).
+
+	echo -e "-------------------" >> "${APT_ALL_LOG_FILE}"	## Break up each host in the log file.
 
 	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
 	(( NUM_BUFF=32-${#REM_SYS} ))			## Total buffer = 32 minus number of chars in "user@host"
@@ -104,10 +128,11 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 	echo -E "${BOLD}║${REM_SYS}${COLUMN_SPACER}║${RESET}" >> "${TEMP_SUMMARY_FILE}"			## Record current system.
 	echo -e "\n------------------------------------------------------\n" > ${DEST}
-	echo -e "Current host:\t\t${BLUE}${REM_SYS}${RESET}"					## Print current system to stdout (always, regardles of -v or -q).
+	echo -e "Current host:\t\t${BLUE}${REM_SYS}${RESET}"						## Print current system to stdout (always, regardles of -v or -q).
+
 
 	###### Attempt connection.
-	echo -e "Testing ssh connection to ${BLUE}${REM_SYS}${RESET}" > ${DEST}
+	echo -e "Testing ssh connection: ${BLUE}${REM_SYS}${RESET}" > ${DEST}
 	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}ssh connection...\t${RESET}"; fi
 	if ! ssh -o "BatchMode=yes" -o "ConnectTimeout=4" "${REM_SYS}" "exit" > /dev/null 2>&1; then	## Test ssh connection to current host machine.  If it fails...
 		{
@@ -116,6 +141,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping host."; fi
+		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed ssh connection" >> "${APT_ALL_LOG_FILE}"
 		continue			## Skip to the next system in the listi (if any).
 	else												## Else ssh connection was successful.
 		{
@@ -123,6 +149,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}║${RESET}Running apt-get commands:\t${BOLD}║${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful ssh connection." >> "${APT_ALL_LOG_FILE}"
 	fi
 
 	###### Attempt update.
@@ -133,10 +160,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get update." >> "${APT_ALL_LOG_FILE}"
 		continue			## Skip to the next system in the list.
 	else
 		echo -E "${BOLD}║${RESET}apt-get update\t\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"		## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get update." >> "${APT_ALL_LOG_FILE}"
 	fi
 
 	###### Use apt to check if any packages can be upgraded.
@@ -147,6 +176,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${BOLD}Up-to-date.\t\t${RESET}${GREEN}Skipping...${RESET}"; fi			## Skip to the next remote system.
+		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Packages are up-to-date." >> "${APT_ALL_LOG_FILE}"
 		continue
 	else																## There are new packages to update.
 		###### Attempt dist-upgrade.
@@ -157,10 +187,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get dist-upgrade." >> "${APT_ALL_LOG_FILE}"
 			continue			## Skip to the next system in the list.
 		else
 			echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
 			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get dist-upgrade." >> "${APT_ALL_LOG_FILE}"
 		fi
 
 		###### Attempt autoremove.
@@ -171,10 +203,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get autoremove." >> "${APT_ALL_LOG_FILE}"
 			continue			## Skip to the next system in the list.
 		else
 			echo -E "${BOLD}║${RESET}apt-get autoremove\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
 			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get autoremove." >> "${APT_ALL_LOG_FILE}"
 		fi
 
 		###### Attempt autoclean.
@@ -185,6 +219,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
+			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get autoclean." >> "${APT_ALL_LOG_FILE}"
 			continue			## Skip to the next system in the list.
 		else
 			{
@@ -192,11 +227,14 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
+			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get autoclean." >> "${APT_ALL_LOG_FILE}"
 		fi
 	fi
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
-## Print out in a pretty format a table indicating the success or failure for each host in the list.
+echo -e "-------------------" >> "${APT_ALL_LOG_FILE}"
+
+######### Print out in a pretty format a table indicating the success or failure for each host in the list.
 echo -e "\n${BOLD}╔═Summary:══════════════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${RESULT}"
@@ -207,4 +245,4 @@ echo
 
 rm "${TEMP_SUMMARY_FILE}" "${TEMP_REM_SYS_LIST}"	## Delete the temporary files.
 
-exit ${SUCCESS}
+QUIT "${SUCCESS}"
