@@ -21,11 +21,14 @@ if [ ! -d "$(dirname "${BU_LOG_FILE}")" ]; then mkdir --parents "$(dirname "${BU
 
 ##########Exit codes
 SUCCESS=0	## Noice.
-BAD_USAGE=1	## Incorrect usage.
-BAD_ARGUMENT=2	## Specified or default file list not readable.
+BAD_OPTION=1	## Incorrect usage.
+TOO_MANY_ARGS	## More than one argument was provided.
+MISSING_ARG	## Option -f or -d provided but argument was not provided.
+BAD_ARG=2	## Specified or default file list not readable.
 NO_RSYNC=3	## rsync not installed.
 NO_REM_DIR=4	## ssh command to create remote directory failed.
 BAD_LIST_FILE=5	## List file not identified as ascii text file.
+NO_VALID_FILES	## Parsing list file  found no valid files to back up.
 RSYNC_FAILED=6	## rsync command was reached but failed.
 
 ##########Function to print current date and time.  Used for logging.
@@ -69,7 +72,7 @@ while getopts 'fdlqvh' OPTION; do		## Call getopts to identify selected options 
 			QUIT ${SUCCESS}	 ;;	## Exit successfully.
 		?)	echo -e "${RED}Error:${RESET} Invalid option/s."
 			echo -e "$USAGE"	## Invalid option, show usage.
-			QUIT ${BAD_USAGE} ;;	## Exit.
+			QUIT "${BAD_OPTION}" ;;	## Exit.
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
@@ -78,13 +81,13 @@ shift $((OPTIND -1))	## This ensures only non-option arguments are considered ar
 if [ $# -gt 1 ]; then						## Check if more than one argument was entered.
 	echo -e "${RED}Error:${RESET} Too many arguments."	## If so, show usage and exit.
 	echo -e "${USAGE}"
-	QUIT ${BAD_USAGE}
+	QUIT "${TOO_MANY_ARGS}"
 fi
 
 if [ "${ARGUMENT_TYPE}" == "FILE" ] && [ $# -lt 1 ]; then	## Check if expected argument is a file but no argument entered.
 	echo -e "${RED}Error:${RESET} Missing argument."	## If true, show usage and exit.
 	echo -e "${USAGE}"					## (Note, no argument acceptable for -l option as default list file will be assumed).
-	QUIT ${BAD_USAGE}
+	QUIT "${MISSING_ARG}"
 fi
 
 ##########Validate argument
@@ -94,7 +97,7 @@ ARGUMENT=${1-"$(dirname "$0")/bu.list"}		## First argument is the file name of t
 if [ ! -e "${ARGUMENT}" ]; then			## Check the argument exists
 	echo -e	"${RED}Error:${RESET} File \"${ARGUMENT}\" does not exist."
 	echo -e "${USAGE}"
-	QUIT ${BAD_ARGUMENT};
+	QUIT "${BAD_ARG}"
 fi
 
 ##########Verify if rsync is installed.
@@ -167,7 +170,7 @@ else									## Else if argument is not a specific file, assume it is a list of 
 		if [ ! -e "${TEMP_BU_FILE_LIST}" ]; then						## If the temp list file was not created
 			echo -e "${RED}Error: ${RESET}The list file did not list any valid files."	## Then it didn't contain any valid files.
 			echo -e "${USAGE}"								## So print usage and exit.
-			QUIT ${BAD_LIST_FILE}
+			QUIT "${NO_VALID_FILES}"
 		fi
 	fi
 fi
@@ -184,7 +187,7 @@ echo > ${DEST}	## Log file will show rsync was attempted.
 if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
 if ! rsync -4 --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 	echo -e "${RED}Error:${RESET} Sync failed."	## If rsync failed
-	QUIT ${RSYNC_FAILED}
+	QUIT "${RSYNC_FAILED}"
 else	
 	echo -e "${GREEN}Success.${RESET}"			
 fi
@@ -194,4 +197,4 @@ rm "${TEMP_BU_FILE_LIST}"
 
 ##########All done.
 echo -e "\n${GREEN}Success:${RESET} Script complete.\n" > ${DEST}
-QUIT ${SUCCESS}
+QUIT "${SUCCESS}"
