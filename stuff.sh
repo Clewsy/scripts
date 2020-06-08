@@ -84,7 +84,7 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${BOLD}Live statistics:${RESET}"
 
 
-	if command -v sensors >> /dev/null ; then	## If sensors is available, use that to determine core temps and fan speeds.
+	if sensors &> /dev/null >> /dev/null ; then	## If sensors is available, use that to determine core temps and fan speeds.
 		###############################
 		## Print available CPU core temps - lm_sensors
 		FOUND_CORE_TEMP=0
@@ -120,8 +120,9 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 				else					echo -e "${COL}│ ├─Fan #${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}"; fi
 			done
 		fi
+	fi
 
-	elif [ -f /sys/class/thermal/thermal_zone0/temp ]; then			## Sensors is not available, but temp file is (likely raspberry pi) so use that to show temperature.
+	if [ "${FOUND_CORE_TEMP}" = "0" ] && [ -f /sys/class/thermal/thermal_zone0/temp ]; then	## Sensors is not available or returned no temps, but temp file is (likely raspberry pi) so use that to show temperature.
 		###############################
 		## Print available core temp - raspberry pi.
 		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)	## File contains integer value equal to 1000*temperature
