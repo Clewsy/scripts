@@ -41,10 +41,11 @@ Valid options:
 "
 
 ## Get command line options and set appropriate flags.
-while getopts 'Apcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'Alpcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered
 	case "$OPTION" in
 		A)	GET_ALL_INFO="TRUE" ;;		## Set ALL flag - same output as selecting no options.
+		l)	GET_L_LIVE_INFO="TRUE" ;;	## Set L flag - live system statistics (temp, fan speed, uptime)
 		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag - product info (inc. motherboard, chassis, bios)
 		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag - cpu
 		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag - memory
@@ -74,6 +75,64 @@ fi
 echo -e "\n${COL}${BOLD}╔════════════════════╗${RESET}"
 echo -e "${COL}${BOLD}║${RESET} ${BOLD}System Information ${RESET}${COL}${BOLD}║${RESET}"
 echo -e "${COL}${BOLD}╚════════════════════╝${RESET}"
+
+###############################################################################################################################################################
+## Print live statistics - temperature, fan speed, uptime
+if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
+
+	echo -e "${COL}${BOLD}Live statistics:${RESET}"
+
+
+	if command -v sensors >> /dev/null ; then	## If sensors is available, use that to determine core temps and fan speeds.
+		###############################
+		## Print available CPU core temps - lm_sensors
+		FOUND_CORE_TEMP=0
+		for CHECK in {0..11}; do	## Look for up to 12 core temps.
+			CORE_TEMP="$(sensors | grep "Core ${CHECK}" | awk '{print $3}')"
+			if [ -n "${CORE_TEMP}" ] && [ "${CORE_TEMP}" != "0" ]; then
+				(( FOUND_CORE_TEMP++ ))
+				CORE_TEMP_[$FOUND_CORE_TEMP]=${CORE_TEMP}
+			fi
+		done
+		if [ ${FOUND_CORE_TEMP} -gt 0 ]; then
+			echo -e "${COL}${BOLD}├─Core Temperatures:${RESET}"
+			for (( CORE=1; CORE<=${FOUND_CORE_TEMP}; CORE++ )); do	## Loop for each found core.
+				if [ "${CORE}" = "${FOUND_CORE_TEMP}" ]; then	echo -e "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}"	## Last found core.
+				else						echo -e "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}"; fi
+			done
+		fi
+
+		###############################
+		## Print available fan speeds - lm_sensors
+		FOUND_FAN=0
+		for CHECK in {1..9}; do	## Look for up to 9 fans.
+			FAN_SPEED="$(sensors | grep "fan${CHECK}" | awk '{print $2}')"
+			if [ -n "${FAN_SPEED}" ] && [ "${FAN_SPEED}" != "0" ]; then
+				(( FOUND_FAN++ ))
+				FAN_SPEED_[$FOUND_FAN]=${FAN_SPEED}
+			fi
+		done
+		if [ ${FOUND_FAN} -gt 0 ]; then
+			echo -e "${COL}${BOLD}├─Fan Speeds:${RESET}"
+			for (( FAN=1; FAN<=${FOUND_FAN}; FAN++ )); do	## Loop for each found fan.
+				if [ "${FAN}" = "${FOUND_FAN}" ]; then	echo -e "${COL}│ └─Fan #${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}"	## Last found fan.
+				else					echo -e "${COL}│ ├─Fan #${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}"; fi
+			done
+		fi
+
+	elif [ -f /sys/class/thermal/thermal_zone0/temp ]; then			## Sensors is not available, but temp file is (likely raspberry pi) so use that to show temperature.
+		###############################
+		## Print available core temp - raspberry pi.
+		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)	## File contains integer value equal to 1000*temperature
+		CORE_TEMP="$(( ${RAW_CORE_TEMP}/1000 )).$(( ${RAW_CORE_TEMP}%1000 ))°C"
+		echo -e "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}"
+	fi
+
+	###############################
+	## Print uptime and number of logged-in users.
+	echo -e "${COL}${BOLD}├─Uptime:${RESET} $(uptime -p)"
+	echo -e "${COL}${BOLD}└─Total Users:${RESET} $(who | wc -l)"
+fi
 
 ###############################################################################################################################################################
 ## Print available product, chassis, motherboard, bios info
