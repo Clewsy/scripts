@@ -29,6 +29,7 @@ USAGE="
 Usage: $(basename "$0") [option]
 Valid options:
 -A	All info
+-l	Live data (Temps, fan speeds, Users, Uptime)
 -p	Product info
 -c 	CPU info
 -m	Memory info
