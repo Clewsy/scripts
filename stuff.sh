@@ -83,7 +83,8 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 		[ ! -s /sys/devices/virtual/dmi/id/chassis_type ] &&
 		[ ! -s /sys/devices/virtual/dmi/id/board_name ] &&
 		[ ! -s /sys/devices/virtual/dmi/id/bios_date ] ; then	echo -e "${COL}${BOLD}Product Info:${RESET} Not found"
-	else								echo -e "${COL}${BOLD}Product Info:${RESET}"
+	else
+		echo -e "${COL}${BOLD}Product Info:${RESET}"
 
 		PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name)
 		PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version)
@@ -187,7 +188,8 @@ if [[ -n "$GET_A_AUDIO_INFO" || -n "$GET_V_VIDEO_INFO" || -n "$GET_ALL_INFO" ]];
 		if [[ -n "$GET_ALL_INFO" || ( -n "$GET_A_AUDIO_INFO" && -n "$GET_V_VIDEO_INFO" ) ]]; then	## If we want both audio and vie info
 			AUDIO_INFO=$(lspci -k | grep -m 1 Audio | cut -c23-)
 			VIDEO_INFO=$(lspci -k | grep -m 1 VGA | cut -c36-)
-			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
+			if	xdpyinfo &> /dev/null;	then VIDEO_RES=$(xdpyinfo | grep "dimensions" | awk '{print $2}')
+			elif	xrandr &> /dev/null;	then VIDEO_RES=$(xrandr --current | grep "current" | cut -d " " -f 8-10 | sed 's/.$//'); fi
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			echo -e "${COL}${BOLD}Audio/Video:${RESET}"
@@ -329,25 +331,28 @@ fi
 ###############################################################################################################################################################
 ## Print OS kernel and distribution info
 if [[ -n "$GET_O_OS_INFO" || -n "$GET_ALL_INFO" ]]; then
+	OS_NAME=$(uname -o)
+	ARCH=$(uname -m)
+	KERNEL=$(uname -s)
+	KERNEL_VER=$(uname -v)
+	KERNEL_REL=$(uname -r)
+	if command -v lsb_release >> /dev/null; then	DIST=$(lsb_release -i | cut -f2)
+							DIST_REL=$(lsb_release -r | cut -f2)
+							DIST_CODE=$(lsb_release -c | cut -f2); fi
+	SHELL_IN_USE=$(echo $(basename ${SHELL}))
+
 	echo -e "${COL}${BOLD}Operating System:${RESET}"
-	echo -e "${COL}${BOLD}├─OS:${RESET} $(uname -o)"			## Print OS
-	echo -e "${COL}${BOLD}├─Architecture:${RESET} $(uname -m)"		## Print machine
-	echo -e "${COL}${BOLD}├─Kernel:${RESET} $(uname -s)"			## Print kernel
-	echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Version:${RESET} $(uname -v)"	## Print kernel version
-	echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Release:${RESET} $(uname -r)"	## Print kernel release
-	if ! command -v lsb_release >> /dev/null ; then			## If lsb_release not installed (send to /dev/null to suppress stdout)
-		if [ ! -f /etc/os-release ]; then			## If file /etc/os-release does not exist
-			echo -e "${COL}${BOLD}└─Distribution: ${RESET}Cannot determine distribution information (no lsb_release or /etc/os-release)"
-		else	## Determine distribution info by parsing contents of /etc/os-release
-			echo -e "${COL}${BOLD}└─Distribution:${RESET} $(grep "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro
-			echo -e "${COL}  ├─Version:${RESET} $(grep "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"	## Print distro version
-			echo -e "${COL}  └─ID:${RESET} $(grep "^ID=" /etc/os-release | cut -d "=" -f 2)"			## Print distro ID
-		fi
-	else		## Determine distribution info by running command "lsb_release" (preferred)
-		echo -e "${COL}${BOLD}└─Distribution:${RESET} $(lsb_release -i | cut -f2)"		## Print distro
-		echo -e "${COL}  ├─Release:${RESET} $(lsb_release -r | cut -f2)"		## Print distro release
-		echo -e "${COL}  └─Codename:${RESET} $(lsb_release -c | cut -f2)"		## Print distro codename
-	fi
+	echo -e "${COL}${BOLD}├─OS:${RESET} ${OS_NAME}"				## Print OS
+	echo -e "${COL}${BOLD}├─Architecture:${RESET} ${ARCH}"		## Print machine
+	echo -e "${COL}${BOLD}├─Kernel:${RESET} ${KERNEL}"			## Print kernel
+	echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Version:${RESET} ${KERNEL_VER}"	## Print kernel version
+	echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Release:${RESET} ${KERNEL_REL}"	## Print kernel release
+	if [ -z "${DIST}" ]; then	echo -e "${COL}${BOLD}├─Distribution: ${RESET}Cannot determine distribution information (no lsb_release)"
+	else				echo -e "${COL}${BOLD}├─Distribution:${RESET} $(lsb_release -i | cut -f2)"			## Print distro
+					echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} $(lsb_release -r | cut -f2)"		## Print distro release
+					echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} $(lsb_release -c | cut -f2)"; fi	## Print distro codename
+	echo -e "${COL}${BOLD}└─Shell:${RESET} ${SHELL_IN_USE}"										## Print shell name
+	if [ -n "${BASH_VERSION}" ]; then echo -e "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}"; fi			## Print shell version (only works for bash).
 fi
 
 ###############################################################################################################################################################
