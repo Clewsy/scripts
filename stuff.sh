@@ -84,10 +84,11 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${BOLD}Live statistics:${RESET}"
 
 
-	if sensors &> /dev/null >> /dev/null ; then	## If sensors is available, use that to determine core temps and fan speeds.
+	FOUND_CORE_TEMP=0
+	FOUND_FAN=0
+	if sensors &> /dev/null; then	## If sensors is available, use that to determine core temps and fan speeds.
 		###############################
 		## Print available CPU core temps - lm_sensors
-		FOUND_CORE_TEMP=0
 		for CHECK in {0..11}; do	## Look for up to 12 core temps.
 			CORE_TEMP="$(sensors | grep "Core ${CHECK}" | awk '{print $3}')"
 			if [ -n "${CORE_TEMP}" ] && [ "${CORE_TEMP}" != "0" ]; then
@@ -95,9 +96,9 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 				CORE_TEMP_[$FOUND_CORE_TEMP]=${CORE_TEMP}
 			fi
 		done
-		if [ ${FOUND_CORE_TEMP} -gt 0 ]; then
+		if [ "${FOUND_CORE_TEMP}" -gt 0 ]; then
 			echo -e "${COL}${BOLD}├─Core Temperatures:${RESET}"
-			for (( CORE=1; CORE<=${FOUND_CORE_TEMP}; CORE++ )); do	## Loop for each found core.
+			for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do	## Loop for each found core.
 				if [ "${CORE}" = "${FOUND_CORE_TEMP}" ]; then	echo -e "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}"	## Last found core.
 				else						echo -e "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}"; fi
 			done
@@ -105,7 +106,6 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 
 		###############################
 		## Print available fan speeds - lm_sensors
-		FOUND_FAN=0
 		for CHECK in {1..9}; do	## Look for up to 9 fans.
 			FAN_SPEED="$(sensors | grep "fan${CHECK}" | awk '{print $2}')"
 			if [ -n "${FAN_SPEED}" ] && [ "${FAN_SPEED}" != "0" ]; then
@@ -113,9 +113,9 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 				FAN_SPEED_[$FOUND_FAN]=${FAN_SPEED}
 			fi
 		done
-		if [ ${FOUND_FAN} -gt 0 ]; then
+		if [ "${FOUND_FAN}" -gt 0 ]; then
 			echo -e "${COL}${BOLD}├─Fan Speeds:${RESET}"
-			for (( FAN=1; FAN<=${FOUND_FAN}; FAN++ )); do	## Loop for each found fan.
+			for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do	## Loop for each found fan.
 				if [ "${FAN}" = "${FOUND_FAN}" ]; then	echo -e "${COL}│ └─Fan #${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}"	## Last found fan.
 				else					echo -e "${COL}│ ├─Fan #${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}"; fi
 			done
@@ -126,7 +126,7 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 		###############################
 		## Print available core temp - raspberry pi.
 		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)	## File contains integer value equal to 1000*temperature
-		CORE_TEMP="$(( ${RAW_CORE_TEMP}/1000 )).$(( ${RAW_CORE_TEMP}%1000 ))°C"
+		CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
 		echo -e "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}"
 	fi
 
@@ -400,7 +400,7 @@ if [[ -n "$GET_O_OS_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if command -v lsb_release >> /dev/null; then	DIST=$(lsb_release -i | cut -f2)
 							DIST_REL=$(lsb_release -r | cut -f2)
 							DIST_CODE=$(lsb_release -c | cut -f2); fi
-	SHELL_IN_USE=$(echo $(basename ${SHELL}))
+	SHELL_IN_USE=$(basename "${SHELL}")
 
 	echo -e "${COL}${BOLD}Operating System:${RESET}"
 	echo -e "${COL}${BOLD}├─OS:${RESET} ${OS_NAME}"				## Print OS
@@ -409,11 +409,11 @@ if [[ -n "$GET_O_OS_INFO" || -n "$GET_ALL_INFO" ]]; then
 	echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Version:${RESET} ${KERNEL_VER}"	## Print kernel version
 	echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Release:${RESET} ${KERNEL_REL}"	## Print kernel release
 	if [ -z "${DIST}" ]; then	echo -e "${COL}${BOLD}├─Distribution: ${RESET}Cannot determine distribution information (no lsb_release)"
-	else				echo -e "${COL}${BOLD}├─Distribution:${RESET} $(lsb_release -i | cut -f2)"			## Print distro
-					echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} $(lsb_release -r | cut -f2)"		## Print distro release
-					echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} $(lsb_release -c | cut -f2)"; fi	## Print distro codename
-	echo -e "${COL}${BOLD}└─Shell:${RESET} ${SHELL_IN_USE}"										## Print shell name
-	if [ -n "${BASH_VERSION}" ]; then echo -e "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}"; fi			## Print shell version (only works for bash).
+	else				echo -e "${COL}${BOLD}├─Distribution:${RESET} ${DIST}"					## Print distro
+					echo -e "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} ${DIST_REL}"			## Print distro release
+					echo -e "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} ${DIST_CODE}"; fi		## Print distro codename
+	echo -e "${COL}${BOLD}└─Shell:${RESET} ${SHELL_IN_USE}"									## Print shell name
+	if [ -n "${BASH_VERSION}" ]; then echo -e "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}"; fi		## Print shell version (only works for bash).
 fi
 
 ###############################################################################################################################################################
@@ -466,7 +466,7 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 		for (( c=1; c<=NUM_DEVS; c++ ))				## Run this loop for each interface.
 		do
 			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)				## Select working interface from the list of interfaces
-			if [ -e /sys/class/net/${WORKING_INTERFACE}/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)		## Status up, down or unknown
+			if [ -e /sys/class/net/"${WORKING_INTERFACE}"/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)		## Status up, down or unknown
 			else								STATUS="unknown"; fi
 			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)										## MAC address of the inteface.
 
