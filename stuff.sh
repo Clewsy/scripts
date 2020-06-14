@@ -120,8 +120,7 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 			done
 		fi
 	fi
-
-	if [ "${FOUND_CORE_TEMP}" = "0" ] && [ -f /sys/class/thermal/thermal_zone0/temp ]; then	## Sensors is not available or returned no temps, but temp file is present (likely raspberry pi) so use that to show temperature.
+	if [ "${FOUND_CORE_TEMP}" = "0" ] && [ $(cat /sys/class/thermal/thermal_zone0/temp &> /dev/null) ]; then	## Sensors is not available or returned no temps, but temp file is present (likely raspberry pi) so use that to show temperature.
 		###############################
 		## Print available core temp - raspberry pi.
 		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)	## File contains integer value equal to 1000*temperature
@@ -131,8 +130,8 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 
 	###############################
 	## Print uptime and number of logged-in users.
-	echo -e "${COL}${BOLD}├─Uptime:${RESET} $(uptime -p)"
-	echo -e "${COL}${BOLD}└─Total Users:${RESET} $(who | wc -l)"
+	if command -v who > /dev/null ; then	echo -e "${COL}${BOLD}├─Total Users:${RESET} $(who | wc -l)"; fi
+						echo -e "${COL}${BOLD}└─Uptime:${RESET} $(uptime -p)"
 fi
 
 ###############################################################################################################################################################
