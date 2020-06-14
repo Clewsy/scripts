@@ -153,25 +153,24 @@ else									## Else if argument is not a specific file, assume it is a list of 
 													## 3) Delete content of the line from the first '#'.
 			if [ "${STRIPPED_LINE}" ]; then 						## If there is anything left of the stripped line.
 				if [ "$(echo "${STRIPPED_LINE}" | cut -b ${#STRIPPED_LINE})" == " " ]; then			## If there is a trailing space left at the end...
-					STRIPPED_LINE="$(echo "${STRIPPED_LINE}" | cut --complement -b ${#STRIPPED_LINE})";	## Then delete the trailing space.
-				fi
+					STRIPPED_LINE="$(echo "${STRIPPED_LINE}" | cut --complement -b ${#STRIPPED_LINE})"; fi	## Then delete the trailing space.
 				FULL_PATH=${STRIPPED_LINE/#\~/$HOME}					## Expanded variable will be treated as a literal string.
 				FULL_PATH=${FULL_PATH/\$HOME/$HOME}					## These two commands evaluate first "~" and then "$HOME"
 													## then substitute either for the actual variable $HOME
 													## Syntax: ${variable/string_match/replacement}
-				if [ -e "${FULL_PATH}" ]; then						## If the stripped and expanded line exists as a file
-					echo -e "Adding: ${GREEN}${FULL_PATH}${RESET}" > ${DEST}	## Say so and then
-					echo "${FULL_PATH}" >> "${TEMP_BU_FILE_LIST}"			## copy the stripped/expanded line to the temp file.
-				else
-					echo -e "Failed: ${RED}${FULL_PATH}${RESET} does not exist and will be skipped"	## Else skip the line.
-				fi
+
+				for f in ${FULL_PATH}; do						## Loop to capture usecase that includes a wildcard '*' in FULL_PATH
+					if [ -e "${f}" ]; then						## If the stripped and expanded line exists as a file
+						echo -e "Adding: ${GREEN}${f}${RESET}" > ${DEST}	## Say so and then
+						echo "${f}" >> "${TEMP_BU_FILE_LIST}"			## copy the stripped/expanded line to the temp file.
+					else	echo -e "Failed: ${RED}${f}${RESET} does not exist and will be skipped"; fi	## Else skip the line.
+				done
 			fi
 		done < "${ARGUMENT}"
 		if [ ! -e "${TEMP_BU_FILE_LIST}" ]; then						## If the temp list file was not created
 			echo -e "${RED}Error: ${RESET}The list file did not list any valid files."	## Then it didn't contain any valid files.
 			echo -e "${USAGE}"								## So print usage and exit.
-			QUIT "${NO_VALID_FILES}"
-		fi
+			QUIT "${NO_VALID_FILES}"; fi
 	fi
 fi
 
