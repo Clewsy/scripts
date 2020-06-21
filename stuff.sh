@@ -123,9 +123,11 @@ if [[ -n "$GET_L_LIVE_INFO" || -n "$GET_ALL_INFO" ]]; then
 	if [ "${FOUND_CORE_TEMP}" = "0" ] && [ -f /sys/class/thermal/thermal_zone0/temp ]; then	## Sensors is not available or returned no temps, but temp file is present (likely raspberry pi) so use that to show temperature.
 		###############################
 		## Print available core temp - raspberry pi.
-		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)	## File contains integer value equal to 1000*temperature
-		CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
-		echo -e "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}"
+		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)	## File contains integer value equal to 1000*temperature
+		if [ "${RAW_CORE_TEMP}" ]; then						## Successfully read teamp file.
+			CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
+			echo -e "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}"
+		fi
 	fi
 
 	###############################
