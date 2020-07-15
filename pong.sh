@@ -100,7 +100,7 @@ done < "${REM_SYS_LIST}"
 
 ## Loop through the remote system list.
 TALLY=0	## Initialise the tally of successful pings.
-echo -e "\n────────────────────Pinging────────────────────" > ${DEST}
+echo -en "\n────────Pinging────────" > ${DEST}
 while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 
 	REM_HOST=$(echo "${REM_SYS}" | cut -d "@" -f 2)	## Strip the "user@" from the current entry in the hosts file.
@@ -123,8 +123,10 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 	fi
 
 done < "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
+echo -en "\n───────────────────────" > ${DEST}
 
 ## Print out in a pretty format a table indicating the success or failure of ppinging each host in the list.
+echo -en "\n\nPing attempts complete.  Printing summary:" > ${DEST}
 echo -e "\n\n${BOLD}╔═════Summary:══════════════════╗${RESET}"
 while read -r RESULT ; do
 	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
@@ -134,6 +136,9 @@ echo -e "${BOLD}║ ${TALLY}${RESET} out of ${BOLD}$(wc -l ${TEMP_REM_SYS_LIST} 
 echo -e "${BOLD}╚═══════════════════════════════╝${RESET}\n"
 
 ## Finish up.
+echo -e "Deleting temp files.\n" > ${DEST}
 rm "${TEMP_SUMMARY_FILE}"	## Delete the temporary summary file.
 rm "${TEMP_REM_SYS_LIST}"	## Delete the temporary system list file.
+
+echo -e "Script completed ${GREEN}successfully${RESET}.\n" > ${DEST}
 exit ${SUCCESS}
