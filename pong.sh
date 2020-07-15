@@ -125,7 +125,7 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 done < "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 echo -en "\n───────────────────────" > ${DEST}
 
-## Print out in a pretty format a table indicating the success or failure of ppinging each host in the list.
+## Print out in a pretty format a table indicating the success or failure of pinging each host in the list.
 echo -en "\n\nPing attempts complete.  Printing summary:" > ${DEST}
 echo -e "\n\n${BOLD}╔═════Summary:══════════════════╗${RESET}"
 while read -r RESULT ; do
