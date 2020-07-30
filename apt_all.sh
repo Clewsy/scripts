@@ -56,6 +56,11 @@ QUIET=false
 ##		""   : System default.
 PROTOCOL="-4"
 
+######### Define path override used with sudo over ssh.
+## Fixes an error that otherwise arises if sudo default PATH does not include paths of commands needed by apt-get.
+## E.g. Default sudo PATH is negated on an OSMC installation by the /etc/sudoers.d/osmc-no-secure-path file.
+PATH_DEF="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 ########## Interpret options
 while getopts 'vqh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
@@ -160,7 +165,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 	###### Attempt update.
 	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}update... \t\t${RESET}"; fi
-	if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes update" > ${DEST}; then
+	if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "${PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes update" > ${DEST}; then
 		{
 			echo -E "${BOLD}║${RESET}apt-get update\t\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -175,7 +180,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	fi
 
 	###### Use apt to check if any packages can be upgraded.
-	NEW=$(ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" sudo apt list --upgradable --quiet=2)
+	NEW=$(ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "${PATH_DEF} sudo apt list --upgradable --quiet=2")
 	if [[ ! ${NEW} ]]; then														## There are no new packages to update.
 		{
 			echo -E "${BOLD}║${RESET}Up-to-date\t\t${GREEN}Skipped.${RESET}${BOLD}║${RESET}"
@@ -187,7 +192,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	else																## There are new packages to update.
 		###### Attempt dist-upgrade.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}dist-upgrade... \t${RESET}"; fi
-		if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" > ${DEST}; then
+		if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "${PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -203,7 +208,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 		###### Attempt autoremove.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoremove... \t\t${RESET}"; fi
-		if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove" > ${DEST}; then
+		if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "${PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get autoremove\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -219,7 +224,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 		###### Attempt autoclean.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoclean... \t\t${RESET}"; fi
-		if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean" > ${DEST}; then
+		if ! ssh "${PROTOCOL}" -o "BatchMode=yes" "${REM_SYS}" "${PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get autoclean\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
