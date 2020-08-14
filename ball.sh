@@ -27,8 +27,8 @@ TIMESTAMP () { echo -ne "$(date +%Y-%m-%d\ %T)"; }
 ##########Function for exit conditions.  Log error or success and exit.
 QUIT ()
 {
-	if [ "${1}" -gt 0 ]; then	echo -e "$(TIMESTAMP) - Script failed with error code ${1}." >> "${BALL_LOG_FILE}"
-	else				echo -e "$(TIMESTAMP) - Script completed successfully." >> "${BALL_LOG_FILE}"; fi
+	if [ "${1}" -gt 0 ]; then	echo -e "$(TIMESTAMP) [X] Script failed with error code ${1}." >> "${BALL_LOG_FILE}"
+	else				echo -e "$(TIMESTAMP) [√] Script completed successfully." >> "${BALL_LOG_FILE}"; fi
 	echo -e "-----------------------------------------------------------" >> "${BALL_LOG_FILE}"
 	exit "${1}"
 }
@@ -131,12 +131,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	if ! ssh "${PROTOCOL}" -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then					## Attempt to connect via ssh and run the backup script "bu.sh"
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## Record if the above fails for the current host.
 		echo -e "${RED}Failure.${RESET}"								## Also show failure on stdio.
-		echo -e "$(TIMESTAMP) - Failed to run ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"		## Also record to log file.
+		echo -e "$(TIMESTAMP) [X] Failed to run ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"		## Also record to log file.
 		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi
 		continue											## Then try the next host in the list.
 	else
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## If the above succeeds, record the success.
-		echo -e "$(TIMESTAMP) - Successfully ran ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"	## Also record to log file.
+		echo -e "$(TIMESTAMP) [√] Successfully ran ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"	## Also record to log file.
 		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi	## Note a "success" means the ssh session was created and exited.
 														##  gracefully.  Failures with the called script are not checcked.
 	fi
