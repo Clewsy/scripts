@@ -25,8 +25,8 @@ TIMESTAMP () { echo -ne "$(date +%Y-%m-%d\ %T)"; }
 ########## Function for exit conditions.  Log error or success and exit.
 QUIT ()
 {
-	if [ "${1}" -gt 0 ]; then	echo -e "$(TIMESTAMP) - Script failed with error code ${1}." >> "${APT_ALL_LOG_FILE}"
-	else				echo -e "$(TIMESTAMP) - Script completed successfully." >> "${APT_ALL_LOG_FILE}"; fi
+	if [ "${1}" -gt 0 ]; then	echo -e "$(TIMESTAMP) [X] Script failed with error code ${1}." >> "${APT_ALL_LOG_FILE}"
+	else				echo -e "$(TIMESTAMP) [√] Script completed successfully." >> "${APT_ALL_LOG_FILE}"; fi
 	echo -e "-----------------------------------------------------------" >> "${APT_ALL_LOG_FILE}"
 	exit "${1}"
 }
@@ -121,7 +121,7 @@ echo -e "\n------------------------------------------------------" > ${DEST}
 
 echo -e "\nBeginning apt-get commands on remote hosts..." > ${DEST}
 {
-	echo -e "$(TIMESTAMP) - Script initiated.  Will attempt upgrades for the following hosts:"
+	echo -e "$(TIMESTAMP) [√] Script initiated.  Will attempt upgrades for the following hosts:"
 	cat "${TEMP_REM_SYS_LIST}"
 } >> "${APT_ALL_LOG_FILE}"	## Log file log header.
 
@@ -152,7 +152,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping host."; fi
-		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed ssh connection" >> "${APT_ALL_LOG_FILE}"
+		echo -e "$(TIMESTAMP) [X] Host: ${REM_SYS} - Failed ssh connection" >> "${APT_ALL_LOG_FILE}"
 		continue			## Skip to the next system in the listi (if any).
 	else												## Else ssh connection was successful.
 		{
@@ -160,7 +160,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}║${RESET}Running apt-get commands:\t${BOLD}║${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful ssh connection." >> "${APT_ALL_LOG_FILE}"
+		echo -e "$(TIMESTAMP) [√] Host: ${REM_SYS} - Successful ssh connection." >> "${APT_ALL_LOG_FILE}"
 	fi
 
 	###### Attempt update.
@@ -171,12 +171,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 		if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get update." >> "${APT_ALL_LOG_FILE}"
+		echo -e "$(TIMESTAMP) [X] Host: ${REM_SYS} - Failed apt-get update." >> "${APT_ALL_LOG_FILE}"
 		continue			## Skip to the next system in the list.
 	else
 		echo -E "${BOLD}║${RESET}apt-get update\t\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"		## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get update." >> "${APT_ALL_LOG_FILE}"
+		echo -e "$(TIMESTAMP) [√] Host: ${REM_SYS} - Successful apt-get update." >> "${APT_ALL_LOG_FILE}"
 	fi
 
 	###### Use apt to check if any packages can be upgraded.
@@ -187,7 +187,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 		} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 		if [ ${QUIET} = false ]; then echo -e "${BOLD}Up-to-date.\t\t${RESET}${GREEN}Skipping...${RESET}"; fi			## Skip to the next remote system.
-		echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Packages are up-to-date." >> "${APT_ALL_LOG_FILE}"
+		echo -e "$(TIMESTAMP) [√] Host: ${REM_SYS} - Packages are up-to-date." >> "${APT_ALL_LOG_FILE}"
 		continue
 	else																## There are new packages to update.
 		###### Attempt dist-upgrade.
@@ -198,12 +198,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get dist-upgrade." >> "${APT_ALL_LOG_FILE}"
+			echo -e "$(TIMESTAMP) [X] Host: ${REM_SYS} - Failed apt-get dist-upgrade." >> "${APT_ALL_LOG_FILE}"
 			continue			## Skip to the next system in the list.
 		else
 			echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
 			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get dist-upgrade." >> "${APT_ALL_LOG_FILE}"
+			echo -e "$(TIMESTAMP) [√] Host: ${REM_SYS} - Successful apt-get dist-upgrade." >> "${APT_ALL_LOG_FILE}"
 		fi
 
 		###### Attempt autoremove.
@@ -214,12 +214,12 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get autoremove." >> "${APT_ALL_LOG_FILE}"
+			echo -e "$(TIMESTAMP) [X] Host: ${REM_SYS} - Failed apt-get autoremove." >> "${APT_ALL_LOG_FILE}"
 			continue			## Skip to the next system in the list.
 		else
 			echo -E "${BOLD}║${RESET}apt-get autoremove\t${GREEN}Success.${RESET}${BOLD}║${RESET}" >> "${TEMP_SUMMARY_FILE}"	## Record success.
 			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get autoremove." >> "${APT_ALL_LOG_FILE}"
+			echo -e "$(TIMESTAMP) [√] Host: ${REM_SYS} - Successful apt-get autoremove." >> "${APT_ALL_LOG_FILE}"
 		fi
 
 		###### Attempt autoclean.
@@ -230,7 +230,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record failure.
 			if [ ${QUIET} = false ]; then echo -e "${RED}Error.${RESET} Skipping..."; fi
-			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Failed apt-get autoclean." >> "${APT_ALL_LOG_FILE}"
+			echo -e "$(TIMESTAMP) [X] Host: ${REM_SYS} - Failed apt-get autoclean." >> "${APT_ALL_LOG_FILE}"
 			continue			## Skip to the next system in the list.
 		else
 			{
@@ -238,7 +238,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
 			} >> "${TEMP_SUMMARY_FILE}"	## Record success.
 			if [ ${QUIET} = false ]; then echo -e "${GREEN}Success.${RESET}"; fi
-			echo -e "$(TIMESTAMP) - Host: ${REM_SYS} - Successful apt-get autoclean." >> "${APT_ALL_LOG_FILE}"
+			echo -e "$(TIMESTAMP) [√] Host: ${REM_SYS} - Successful apt-get autoclean." >> "${APT_ALL_LOG_FILE}"
 		fi
 	fi
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
