@@ -6,11 +6,11 @@
 ## Once connected, runs $COMMAND
 ## Intended to run p0wer programme on p0wer server to switch on/off a selected mains point.
 
-LOC_USER="b4t"			# User for attempting local network connection (faster).
-LOC_SERVER="p0wer"		# Hostname fo rattempting local network connection.
-REM_USER="b4t"			# User for attempting remote network connection (if local fails)
-REM_SERVER="b4t.site"		# Hostname for remote network connection.
-COMMAND="sudo p0wer a on"	# Command to run on server.
+LOC_USER="b4t"		# User for attempting local network connection (faster).
+LOC_SERVER="p0wer"	# Hostname fo rattempting local network connection.
+REM_USER="b4t"		# User for attempting remote network connection (if local fails)
+REM_SERVER="b4t.site"	# Hostname for remote network connection.
+COMMAND="p0wer a on"	# Command to run on server.
 
 echo "Desired command on target: \"${COMMAND}\""
 echo "Attempting local connection."
