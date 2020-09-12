@@ -19,12 +19,25 @@ BLINK_RED="--red"
 BLINK_ORANGE="--rgb=255,165,0"
 BLINK_GREEN="--green"
 BLINK_BLUE="--blue"
+BLINK_FLASH="--flash 1000"
 
-## Commands for some kind of notifications.  E.g. send email.  Set to "" for nothing.
-NOTIFICATION_START="blink1-tool ${BLINK_BLUE}"
-NOTIFICATION_FAILED="blink1-tool ${BLINK_RED}"
-NOTIFICATION_RECOVERED="blink1-tool ${BLINK_ORANGE}"
-NOTIFICATION_OK="blink1-tool ${BLINK_GREEN}"
+##  Notifications handling function.
+NOTIFICATION_f() {
+
+	## Kill any current running blink routines.
+	pkill blink1-tool
+
+	## Determine desired colour and flashing status.
+	case "$1" in
+		START)		COLOUR=${BLINK_BLUE};	FLASH="" ;;
+		FAILED)		COLOUR=${BLINK_RED};	FLASH=${BLINK_FLASH} ;;
+		RECOVERED)	COLOUR=${BLINK_ORANGE};	FLASH="" ;;
+		OK)		COLOUR=${BLINK_GREEN};	FLASH="" ;;
+	esac
+
+	## Run the blink command.
+	blink1-tool ${COLOUR} ${FLASH} > ${DEST}
+}
 
 ## Exit codes.
 SUCCESS=0
@@ -33,7 +46,7 @@ BAD_ARGUMENT=2
 NO_ROOT=3
 NO_CURL=4
 
-## stdout output text colours
+## stdout output text colours.
 RED="\033[02;31m"
 ORANGE="\033[02;33m"
 GREEN="\033[02;32m"
@@ -106,8 +119,8 @@ fi
 ############ Main script functionality.
 
 ## Run a command to indicate the script is initiating.
-echo -e "Running script-start notification command..." > ${DEST}
-${NOTIFICATION_START} > ${DEST}
+echo -e "Running script-start notification function..." > ${DEST}
+NOTIFICATION_f "START" &
 
 ## Check for the RESET flag.  If set, reset the poll result then proceed with normal poll (use to clear "Warning" poll result).
 if [[ -n "$POLLY_RESET" ]]; then
@@ -123,18 +136,18 @@ echo -e "\nSite response code: ${TEST_RESULT}" > ${DEST}
 if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
 	echo -e "\n${RED}FAILURE${RESET} - Site down!\n"
 	echo -e "$(date) - FAILURE - Site not available. Curl returned ${TEST_RESULT}" >> $LOG_FILE
-	echo -e "Running failure notification command..." > ${DEST}
-	${NOTIFICATION_FAILED} > ${DEST}
+	echo -e "Running failure notification function..." > ${DEST}
+	NOTIFICATION_f "FAILED" &
 else
 	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
 		echo -e "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n"
 		echo -e "$(date) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
-		echo -e "Running recovered notification command..." > ${DEST}
-		${NOTIFICATION_RECOVERED} > ${DEST}
+		echo -e "Running recovered notification function..." > ${DEST}
+		NOTIFICATION_f "RECOVERED" &
 	else													## Site is up.
 		echo -e "\n${GREEN}SUCCESS${RESET} - Everything seems okay.\n"
 		echo -e "$(date) - SUCCESS - Site is up, everything seems okay." >> $LOG_FILE
 		echo -e "Running success notification command..." > ${DEST}
-		${NOTIFICATION_OK} > ${DEST}
+		NOTIFICATION_f "OK" &
 	fi
 fi
