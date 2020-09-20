@@ -284,7 +284,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 		NUM_DISKS=$(lsblk -ndo NAME | wc -l)
 		for (( c=1; c<=NUM_DISKS; c++ ))		## Loop through output for each of the disks/partitions
 		do
-			WORKING_DEVICE=$(lsblk -idno NAME | sed -n "${c}p" | cut -d "-" -f 2-10)	## Define device name
+			WORKING_DEVICE=$(lsblk -idno NAME | sed -n "${c}p" | cut -d "-" -f 2-10)		## Define device name
 			if [ "$(lsblk -dno TYPE /dev/"${WORKING_DEVICE}")" = "loop" ]; then continue; fi	## Skip output if it's a "loop" (created by a snap install).
 
 			if (( c==(NUM_DISKS) )); then	## Last device in the list.
@@ -318,7 +318,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 			do
 				WORKING_CHILD=$(lsblk -ino NAME /dev/"${WORKING_DEVICE}" | sed -n "${d}p" | cut -d "-" -f 2-10)	## Define the name
 
-				if [ -e /dev/"${WORKING_CHILD}" ]; then		## Only proceed for this "working_child" if it is recognised as a discrete device
+				if [ -e /dev/"${WORKING_CHILD}" ]; then				## Only proceed for this "working_child" if it is recognised as a discrete device
 
 					NUM_GRANDCHILDREN=$(lsblk -no NAME /dev/"${WORKING_CHILD}" | wc -l)	## Count the number of grandchildren
 
@@ -330,6 +330,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 						C2="${COL}│ ${RESET}"
 					fi
 
+					CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD}")			## Define the label
 					CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD}")			## Define the type
 					CHILD_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_CHILD}")			## Define size
 					CHILD_USED=$(df -lh | grep -m 1 "${WORKING_CHILD}" | awk '{print $3}')	## Define capacity utilisation
@@ -337,6 +338,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 					CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD}")		## Define mount location
 
 					CHILD_SPECS=()													## Clear then reset the array of child specs
+					if [ -n "${CHILD_LABEL}" ];	then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
 					if [ -n "${CHILD_TYPE}" ];	then CHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${CHILD_TYPE}"); fi
 					if [ -n "${CHILD_SIZE}" ];	then CHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${CHILD_SIZE}"); fi
 					if [ -n "${CHILD_USED}" ];	then CHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${CHILD_USED} (${CHILD_PERC})"); fi
@@ -355,33 +357,36 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 					do
 						WORKING_GRANDCHILD=$(lsblk -ino NAME /dev/"${WORKING_CHILD}" | sed -n "${e}p" | cut -d "-" -f 2-10)
 
-						if (( e==NUM_GRANDCHILDREN )); then							## Last grandchild for this child.
-							echo -e "${C1}${C2}${COL}${DIM}└─Grandchild:${RESET} ${WORKING_GRANDCHILD}"	## Print name
-							C3="${COL}${DIM}  ${RESET}"
-						else
-							echo -e "${C1}${C2}${COL}${DIM}├─Grandchild:${RESET} ${WORKING_GRANDCHILD}"	## Print name
-							C3="${COL}${DIM}│ ${RESET}"
-						fi
-	
-						GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $6}')	## Type
-						GRANDCHILD_SIZE=$(lsblk -no SIZE /dev/"${WORKING_CHILD}" | sed -n "${e}p")		## Size
-						GRANDCHILD_USED=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $3}')	## Capacity used
-						GRANDCHILD_PERC=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $5}')	## Percentage used
-						GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $7}')	## Mountpoint
+							if (( e==NUM_GRANDCHILDREN )); then							## Last grandchild for this child.
+								echo -e "${C1}${C2}${COL}${DIM}└─Grandchild:${RESET} ${WORKING_GRANDCHILD}"	## Print name
+								C3="${COL}${DIM}  ${RESET}"
+							else
+								echo -e "${C1}${C2}${COL}${DIM}├─Grandchild:${RESET} ${WORKING_GRANDCHILD}"	## Print name
+								C3="${COL}${DIM}│ ${RESET}"
+							fi
 
-						GRANDCHILD_SPECS=()									## Clear then reset the array of child specs
-						if [ -n "${GRANDCHILD_TYPE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
-						if [ -n "${GRANDCHILD_SIZE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
-						if [ -n "${GRANDCHILD_USED}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
-						if [ -n "${GRANDCHILD_MOUNT}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
+							if [ -e /dev/"${WORKING_GRANDCHILD}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD}"); fi	## Label
+							GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $6}')	## Type
+							GRANDCHILD_SIZE=$(lsblk -no SIZE /dev/"${WORKING_CHILD}" | sed -n "${e}p")			## Size
+							GRANDCHILD_USED=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $3}')		## Capacity used
+							GRANDCHILD_PERC=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $5}')		## Percentage used
+							GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $7}')	## Mountpoint
 
-						for (( gcspec=0; gcspec<${#GRANDCHILD_SPECS[@]}; gcspec++ ))					## Loop for ech grandchild spec
-						do
-							if (( gcspec==(${#GRANDCHILD_SPECS[@]}-1) )); then	C4="${COL}${DIM}└─${RESET}"	## If last spec in array
-							else							C4="${COL}${DIM}├─${RESET}"; fi
+							GRANDCHILD_SPECS=()									## Clear then reset the array of child specs
+							if [ -n "${GRANDCHILD_LABEL}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${GRANDCHILD_LABEL}"); fi
+							if [ -n "${GRANDCHILD_TYPE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
+							if [ -n "${GRANDCHILD_SIZE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
+							if [ -n "${GRANDCHILD_USED}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
+							if [ -n "${GRANDCHILD_MOUNT}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
 
-							echo -e "${C1}${C2}${C3}${C4}${GRANDCHILD_SPECS[gcspec]}"				## Print the spec
-						done
+							for (( gcspec=0; gcspec<${#GRANDCHILD_SPECS[@]}; gcspec++ ))					## Loop for ech grandchild spec
+							do
+								if (( gcspec==(${#GRANDCHILD_SPECS[@]}-1) )); then	C4="${COL}${DIM}└─${RESET}"	## If last spec in array
+								else							C4="${COL}${DIM}├─${RESET}"; fi
+
+								echo -e "${C1}${C2}${C3}${C4}${GRANDCHILD_SPECS[gcspec]}"				## Print the spec
+							done
+							(( d++ ));	## Manually increment d in for loop (counting children) so grandchild isn't printed like a child.
 					done
 				fi
 			done
