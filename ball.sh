@@ -52,11 +52,12 @@ Options:	-q	Quiet mode - suppress most output.
 VERBOSITY=""		## Define the default verbosity (i.e. none).  Can be changed with option -v.
 DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with option -v.
 
-######### Define protocol to be used by ssh.
-## Options are:	"-4" : IPV4
-##		"-6" : IPV6
-##		""   : System default.
-PROTOCOL="-4"
+######### Define options to be used by ssh.
+## Options are:	"-4"					: IPV4
+##		"-6"					: IPV6
+##		"-o StrictHostKeyChecking=no"		: Disable user verification for connecting to unknown (not yet authenticated) host.
+##		"-o UserKnownHostsFile=/dev/null"	: Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 ##########Interpret options
 while getopts 'qvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
@@ -128,10 +129,11 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
 	done
 
-	if ! ssh "${PROTOCOL}" -t "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then					## Attempt to connect via ssh and run the backup script "bu.sh"
+	echo -e "Attempting to run command: ssh ${SSH_OPTIONS} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"" >> ${DEST}
+	if ! ssh ${SSH_OPTIONS} ${REM_SYS} "$COMMAND $VERBOSITY"; then						## Attempt to connect via ssh and run the backup script "bu.sh"
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## Record if the above fails for the current host.
 		echo -e "${RED}Failure.${RESET}"								## Also show failure on stdio.
-		echo -e "$(TIMESTAMP) [X] Failed to run ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"		## Also record to log file.
+		echo -e "$(TIMESTAMP) [X] Failed to run ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"	## Also record to log file.
 		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi
 		continue											## Then try the next host in the list.
 	else
