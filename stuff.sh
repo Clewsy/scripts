@@ -331,6 +331,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 					fi
 
 					CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD}")			## Define the label
+					CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD}")			## Define the UUID
 					CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD}")			## Define the type
 					CHILD_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_CHILD}")			## Define size
 					CHILD_USED=$(df -lh | grep -m 1 "${WORKING_CHILD}" | awk '{print $3}')	## Define capacity utilisation
@@ -339,6 +340,7 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 
 					CHILD_SPECS=()													## Clear then reset the array of child specs
 					if [ -n "${CHILD_LABEL}" ];	then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
+					if [ -n "${CHILD_UUID}" ];	then CHILD_SPECS+=("${COL}${DIM}UUID:${RESET} ${CHILD_UUID}"); fi
 					if [ -n "${CHILD_TYPE}" ];	then CHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${CHILD_TYPE}"); fi
 					if [ -n "${CHILD_SIZE}" ];	then CHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${CHILD_SIZE}"); fi
 					if [ -n "${CHILD_USED}" ];	then CHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${CHILD_USED} (${CHILD_PERC})"); fi
