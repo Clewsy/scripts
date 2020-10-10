@@ -57,7 +57,8 @@ DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with 
 ##		"-6"					: IPV6
 ##		"-o StrictHostKeyChecking=no"		: Disable user verification for connecting to unknown (not yet authenticated) host.
 ##		"-o UserKnownHostsFile=/dev/null"	: Disable automatically saving "newly discovered" hosts to the default knownhosts file.
-SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+##		"-0 BatchMode=yes"			: Disable password prompts and host key confirmation requests.
+SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes"
 
 ##########Interpret options
 while getopts 'qvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
