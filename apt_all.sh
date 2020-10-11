@@ -55,7 +55,8 @@ QUIET=false
 ##		"-6"					: IPV6
 ##		"-o StrictHostKeyChecking=no"		: Disable user verification for connecting to unknown (not yet authenticated) host.
 ##		"-o UserKnownHostsFile=/dev/null"	: Disable automatically saving "newly discovered" hosts to the default knownhosts file.
-##		"-0 BatchMode=yes"			: Disable password prompts and host key confirmation requests.
+##		"-o BatchMode=yes"			: Disable password prompts and host key confirmation requests.
+##		"-o ConnectTimeout=#"			: Stop attempting the connection after # seconds.
 SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=4"
 
 ######### Define remote path override used with sudo over ssh.
@@ -147,7 +148,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	###### Attempt connection.
 	echo -e "Testing ssh connection: ${BLUE}${REM_SYS}${RESET}" > ${DEST}
 	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}ssh connection...\t${RESET}"; fi
-	if ! ssh "${SSH_OPTIONS}" ${REM_SYS} "exit" > /dev/null 2>&1; then	## Test ssh connection to current host machine.  If it fails...
+	if ! ssh ${SSH_OPTIONS} ${REM_SYS} "exit" > /dev/null 2>&1; then	## Test ssh connection to current host machine.  If it fails...
 		{
 			echo -E "${BOLD}║${RED}System not found.${RESET}\t\t${BOLD}║${RESET}"
 			echo -E "${BOLD}║${RESET}Skipped.\t\t\t${BOLD}║${RESET}"
