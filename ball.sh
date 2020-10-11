@@ -52,20 +52,13 @@ Options:	-q	Quiet mode - suppress most output.
 VERBOSITY=""		## Define the default verbosity (i.e. none).  Can be changed with option -v.
 DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with option -v.
 
-######### Define options to be used by ssh.
-## Options are:	"-4"					: IPV4
-##		"-6"					: IPV6
-##		"-o StrictHostKeyChecking=no"		: Disable user verification for connecting to unknown (not yet authenticated) host.
-##		"-o UserKnownHostsFile=/dev/null"	: Disable automatically saving "newly discovered" hosts to the default knownhosts file.
-##		"-o BatchMode=yes"			: Disable password prompts and host key confirmation requests.
-##		"-o ConnectTimeout=#"			: Stop attempting the connection after # seconds.
-#SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=4"
+######### Define array of options to be used by ssh.
 SSH_OPTIONS=(
-		-4
-		"-o StrictHostKeyChecking=no"
-		"-o UserKnownHostsFile=/dev/null"
-		"-o BatchMode=yes"
-		"-o ConnectTimeout=4"
+	-4					## Use IPV4 (alternatively, -6 for IPV6).
+	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
+	"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
+	"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
 )
 
 ##########Interpret options

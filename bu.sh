@@ -62,21 +62,21 @@ DEST="/dev/null"	## Default destination for command output.  I.e. don't display 
 
 ######### Define array of options to be used by ssh.
 SSH_OPTIONS=(	
-			-4					## Use IPV4 (alternatively, -6 for IPV6).
-			"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
-			"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
-			"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
-			"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
+	-4					## Use IPV4 (alternatively, -6 for IPV6).
+	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
+	"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
+	"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
 )
 
 ######### Define array of options to be used by rsync.
 RSYNC_OPTIONS=(
-			-4			## Use IPV4 (alternatively, -6 for IPV6).
-			--archive		## Archive mode, equivalent to -rlptgoD (no -H, -A, -X)
-			--relative
-			--verbose
-			--human-readable
-			--progress
+	-4		## Use IPV4 (alternatively, -6 for IPV6).
+	--archive	## Archive mode, equivalent to -rlptgoD (no -H, -A, -X)
+	--relative
+	--verbose
+	--human-readable
+	--progress
 )
 ## Note using --archive is equivalent to:
 ##	-r --recursive
