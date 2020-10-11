@@ -60,6 +60,33 @@ Valid options:
 
 DEST="/dev/null"	## Default destination for command output.  I.e. don't display on screen.  -v (verbose) option changes this.
 
+######### Define array of options to be used by ssh.
+SSH_OPTIONS=(	
+			-4					## Use IPV4 (alternatively, -6 for IPV6).
+			"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
+			"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+			"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
+			"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
+)
+
+######### Define array of options to be used by rsync.
+RSYNC_OPTIONS=(
+			-4			## Use IPV4 (alternatively, -6 for IPV6).
+			--archive		## Archive mode, equivalent to -rlptgoD (no -H, -A, -X)
+			--relative
+			--verbose
+			--human-readable
+			--progress
+)
+## Note using --archive is equivalent to:
+##	-r --recursive
+##	-l --links (copy symlinks as symlinks)
+##	-p --perms (preserve permissions)
+##	-t --times (preserve modification times)
+##	-g --group (preserve group)
+##	-o --owner (preserve owner when run as superuser)
+##	-D --devices preserve device files when run as superuser)
+
 ##########Interpret options
 while getopts 'fdlqvh' OPTION; do		## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
@@ -111,7 +138,8 @@ fi
 
 ##########Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-if timeout 6 ssh -4 -o "BatchMode=yes" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
+#if timeout 6 ssh -4 -o "BatchMode=yes" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
+if ssh "${SSH_OPTIONS[@]}" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
 	BU_SERVER="${BU_SERVER_LOCAL}"							## Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
 else
@@ -121,7 +149,7 @@ fi
 
 ##########Validate the backup folder or create if absent.
 echo -e "\nChecking for remote backup directory \"${BU_REMOTE_DIR}\" on remote backup server \"${BU_SERVER}\" (will be created if absent)." > ${DEST}
-if ! ssh -4 -t ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	## Connects to the remote server and creates the backup dir.
+if ! ssh "${SSH_OPTIONS[@]}" ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	## Connects to the remote server and creates the backup dir.
 	echo -e "${RED}Error:${RESET} Failed to create remote directory."			## If this fails, print error and exit.
 	QUIT ${NO_REM_DIR}
 fi
@@ -184,7 +212,7 @@ echo > ${DEST}	## Log file will show rsync was attempted.
  } >> "${BU_LOG_FILE}"
 
 if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
-if ! rsync -4 --recursive --relative --verbose --human-readable --progress --archive --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+if ! rsync "${RSYNC_OPTIONS[@]}" --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
 	echo -e "${RED}Error:${RESET} Sync failed."	## If rsync failed
 	QUIT "${RSYNC_FAILED}"
 else	
