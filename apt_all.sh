@@ -50,14 +50,14 @@ DEST="/dev/null"			## Default destination for command output.  I.e. don't displa
 APT_GET_VERBOSITY="--quiet=3"		## Default verbosity setting for apt-get commands.  Removed by "-v" option.
 QUIET=false
 
-######### Define options to be used by ssh.
-## Options are:	"-4"					: IPV4
-##		"-6"					: IPV6
-##		"-o StrictHostKeyChecking=no"		: Disable user verification for connecting to unknown (not yet authenticated) host.
-##		"-o UserKnownHostsFile=/dev/null"	: Disable automatically saving "newly discovered" hosts to the default knownhosts file.
-##		"-o BatchMode=yes"			: Disable password prompts and host key confirmation requests.
-##		"-o ConnectTimeout=#"			: Stop attempting the connection after # seconds.
-SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=4"
+######### Define array of options to be used by ssh.
+SSH_OPTIONS=(	
+	-4					## Use IPV4 (alternatively, -6 for IPV6).
+	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
+	"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
+	"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
+)
 
 ######### Define remote path override used with sudo over ssh.
 ## Fixes an error that otherwise arises if sudo default PATH does not include paths of commands needed by apt-get.
@@ -148,7 +148,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	###### Attempt connection.
 	echo -e "Testing ssh connection: ${BLUE}${REM_SYS}${RESET}" > ${DEST}
 	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}ssh connection...\t${RESET}"; fi
-	if ! ssh ${SSH_OPTIONS} ${REM_SYS} "exit" > /dev/null 2>&1; then	## Test ssh connection to current host machine.  If it fails...
+	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "exit" > /dev/null 2>&1; then	## Test ssh connection to current host machine.  If it fails...
 		{
 			echo -E "${BOLD}║${RED}System not found.${RESET}\t\t${BOLD}║${RESET}"
 			echo -E "${BOLD}║${RESET}Skipped.\t\t\t${BOLD}║${RESET}"
@@ -168,7 +168,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 	###### Attempt update.
 	if [ ${QUIET} = false ]; then echo -e -n "${BOLD}update... \t\t${RESET}"; fi
-	if ! ssh ${SSH_OPTIONS} ${REM_SYS} "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes update" > ${DEST}; then
+	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes update" > ${DEST}; then
 		{
 			echo -E "${BOLD}║${RESET}apt-get update\t\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 			echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -183,7 +183,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	fi
 
 	###### Use apt to check if any packages can be upgraded.
-	NEW=$(ssh ${SSH_OPTIONS} ${REM_SYS} "${REM_PATH_DEF} sudo apt list --upgradable --quiet=2")
+	NEW=$(ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${REM_PATH_DEF} sudo apt list --upgradable --quiet=2")
 	if [[ ! ${NEW} ]]; then														## There are no new packages to update.
 		{
 			echo -E "${BOLD}║${RESET}Up-to-date\t\t${GREEN}Skipped.${RESET}${BOLD}║${RESET}"
@@ -195,7 +195,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	else																## There are new packages to update.
 		###### Attempt dist-upgrade.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}dist-upgrade... \t${RESET}"; fi
-		if ! ssh ${SSH_OPTIONS} ${REM_SYS} "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" > ${DEST}; then
+		if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress dist-upgrade" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get dist-upgrade\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -211,7 +211,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 		###### Attempt autoremove.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoremove... \t\t${RESET}"; fi
-		if ! ssh ${SSH_OPTIONS} ${REM_SYS} "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove" > ${DEST}; then
+		if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes --show-progress autoremove" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get autoremove\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
@@ -227,7 +227,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 
 		###### Attempt autoclean.
 		if [ ${QUIET} = false ]; then echo -e -n "${BOLD}autoclean... \t\t${RESET}"; fi
-		if ! ssh ${SSH_OPTIONS} ${REM_SYS} "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean" > ${DEST}; then
+		if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${REM_PATH_DEF} sudo apt-get ${APT_GET_VERBOSITY} --assume-yes autoclean" > ${DEST}; then
 			{
 				echo -E "${BOLD}║${RESET}apt-get autoclean\t${RED}Failure.${RESET}${BOLD}║${RESET}"
 				echo -E "${BOLD}╠═══════════════════════════════╣${RESET}"
