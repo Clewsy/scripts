@@ -59,7 +59,14 @@ DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with 
 ##		"-o UserKnownHostsFile=/dev/null"	: Disable automatically saving "newly discovered" hosts to the default knownhosts file.
 ##		"-o BatchMode=yes"			: Disable password prompts and host key confirmation requests.
 ##		"-o ConnectTimeout=#"			: Stop attempting the connection after # seconds.
-SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=4"
+#SSH_OPTIONS="-4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=4"
+SSH_OPTIONS=(
+		-4
+		"-o StrictHostKeyChecking=no"
+		"-o UserKnownHostsFile=/dev/null"
+		"-o BatchMode=yes"
+		"-o ConnectTimeout=4"
+)
 
 ##########Interpret options
 while getopts 'qvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
@@ -131,8 +138,8 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
 	done
 
-	echo -e "Attempting to run command: ssh ${SSH_OPTIONS} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"" >> ${DEST}
-	if ! ssh ${SSH_OPTIONS} ${REM_SYS} "$COMMAND $VERBOSITY"; then						## Attempt to connect via ssh and run the backup script "bu.sh"
+	echo -e "Attempting to run command: ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" \"${COMMAND} ${VERBOSITY}\"" >> ${DEST}
+	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then						## Attempt to connect via ssh and run the backup script "bu.sh"
 		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## Record if the above fails for the current host.
 		echo -e "${RED}Failure.${RESET}"								## Also show failure on stdio.
 		echo -e "$(TIMESTAMP) [X] Failed to run ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"	## Also record to log file.
