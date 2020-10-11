@@ -138,7 +138,6 @@ fi
 
 ##########Determine server hostname (i.e. use local network or remote network).
 echo -e "\nChecking for local backup server availability." > ${DEST}
-#if timeout 6 ssh -4 -o "BatchMode=yes" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
 if ssh "${SSH_OPTIONS[@]}" "${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then	## If an ssh connection to the local server is successful...
 	BU_SERVER="${BU_SERVER_LOCAL}"							## Use the local server.
 	echo "Using local server (${BU_SERVER})." > ${DEST}
