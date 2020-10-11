@@ -60,33 +60,6 @@ Valid options:
 
 DEST="/dev/null"	## Default destination for command output.  I.e. don't display on screen.  -v (verbose) option changes this.
 
-######### Define array of options to be used by ssh.
-SSH_OPTIONS=(	
-	-4					## Use IPV4 (alternatively, -6 for IPV6).
-	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
-	"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
-	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
-	"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
-)
-
-######### Define array of options to be used by rsync.
-RSYNC_OPTIONS=(
-	-4		## Use IPV4 (alternatively, -6 for IPV6).
-	--archive	## Archive mode, equivalent to -rlptgoD (no -H, -A, -X)
-	--relative
-	--verbose
-	--human-readable
-	--progress
-)
-## Note using --archive is equivalent to:
-##	-r --recursive
-##	-l --links (copy symlinks as symlinks)
-##	-p --perms (preserve permissions)
-##	-t --times (preserve modification times)
-##	-g --group (preserve group)
-##	-o --owner (preserve owner when run as superuser)
-##	-D --devices preserve device files when run as superuser)
-
 ##########Interpret options
 while getopts 'fdlqvh' OPTION; do		## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
@@ -126,6 +99,35 @@ if [ ! -e "${ARGUMENT}" ]; then			## Check the argument exists
 	echo -e "${USAGE}"
 	QUIT "${BAD_ARG}"
 fi
+
+#########Define array of options to be used by ssh.
+SSH_OPTIONS=(	
+	-4					## Use IPV4 (alternatively, -6 for IPV6).
+	'-o StrictHostKeyChecking=no'		## Disable user verification for connecting to unknown (not yet authenticated) host.
+	'-o UserKnownHostsFile=/dev/null'	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+	'-o BatchMode=yes'			## Disable password prompts and host key confirmation requests.
+	'-o ConnectTimeout=4'			## Stop attempting the connection after specified number of seconds.
+)
+export RSYNC_RSH="ssh ${SSH_OPTIONS[*]}"	## Set the RSYNC_RSH environment variable so that rsync uses the same ssh options as the ssh commands.
+echo -e "\nConfigured ssh options   : ${SSH_OPTIONS[*]}" > ${DEST}
+
+#########Define array of options to be used by rsync.
+RSYNC_OPTIONS=(
+	--archive	## Archive mode, equivalent to -rlptgoD (no -H, -A, -X)
+	--relative
+	--verbose
+	--human-readable
+	--progress
+)
+## Note using --archive is equivalent to:
+##	-r --recursive
+##	-l --links (copy symlinks as symlinks)
+##	-p --perms (preserve permissions)
+##	-t --times (preserve modification times)
+##	-g --group (preserve group)
+##	-o --owner (preserve owner when run as superuser)
+##	-D --devices preserve device files when run as superuser)
+echo -e "Configured rsync options : ${RSYNC_OPTIONS[*]}" > ${DEST}
 
 ##########Verify if rsync is installed.
 echo -e "\nChecking for rsync:" > ${DEST}
@@ -211,7 +213,7 @@ echo > ${DEST}	## Log file will show rsync was attempted.
  } >> "${BU_LOG_FILE}"
 
 if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Using rsync to copy listed files to \"${RESET}${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/${BLUE}\"${RESET}"; fi
-if ! rsync "${RSYNC_OPTIONS[@]}" --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST}; then
+if ! rsync "${RSYNC_OPTIONS[@]}" --files-from="${TEMP_BU_FILE_LIST}" / "${BU_USER}@${BU_SERVER}:${BU_REMOTE_DIR}/" > ${DEST} 2>&1; then
 	echo -e "${RED}Error:${RESET} Sync failed."	## If rsync failed
 	QUIT "${RSYNC_FAILED}"
 else	
