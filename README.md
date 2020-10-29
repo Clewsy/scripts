@@ -2,19 +2,19 @@
 
 [**apt_all.sh**][link_repo_apt_all.sh]
 
-Runs apt-get update, apt-get dist-upgrade, apt-get autoremove and apt-get autoclean on a provided host or list of hosts.
+Runs apt-get update, apt-get dist-upgrade, apt-get autoremove and apt-get autoclean on a provided host or list of hosts.  Logs results to file.
 
 ---
 
 [**ball.sh**][link_repo_ball.sh]
 
-Runs bu.sh on a bunch of remote host or list of hosts.
+Runs bu.sh on a bunch of remote host or list of hosts.  Logs results to file.
 
 ---
 
 [**bu.sh**][link_repo_bu.sh]
 
-Uses rsync to back up files and directories in a list file to a remote server.  Falls back to scp if rsync is not installed.
+Uses rsync to back up files and directories in a list file to a remote server.  Logs results to file.
 
 ---
 
