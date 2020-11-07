@@ -147,18 +147,18 @@ if [[ -n "$GET_P_PRODUCT_INFO" || -n "$GET_ALL_INFO" ]]; then
 	else
 		echo -e "${COL}${BOLD}Product Info:${RESET}"
 
-		PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name)
-		PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version)
-		SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor)
-		CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type)
-		CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version)
-		CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor)
-		BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name)
-		BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version)
-		BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor)
-		BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date)
-		BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version)
-		BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor)
+		if [ -s /sys/devices/virtual/dmi/id/product_name ]; then	PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name); fi
+		if [ -s /sys/devices/virtual/dmi/id/product_version ]; then	PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version); fi
+		if [ -s /sys/devices/virtual/dmi/id/sys_vendor ]; then		SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor); fi
+		if [ -s /sys/devices/virtual/dmi/id/chassis_type ]; then	CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type); fi
+		if [ -s /sys/devices/virtual/dmi/id/chassis_version ]; then	CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version); fi
+		if [ -s /sys/devices/virtual/dmi/id/chassis_vendor ]; then	CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor); fi
+		if [ -s /sys/devices/virtual/dmi/id/board_name ]; then		BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name); fi
+		if [ -s /sys/devices/virtual/dmi/id/board_version ]; then	BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version); fi
+		if [ -s /sys/devices/virtual/dmi/id/board_vendor ]; then	BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor); fi
+		if [ -s /sys/devices/virtual/dmi/id/bios_date ]; then		BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date); fi
+		if [ -s /sys/devices/virtual/dmi/id/bios_version ]; then	BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version); fi
+		if [ -s /sys/devices/virtual/dmi/id/bios_vendor ]; then		BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor); fi
 
 		###############################
 		## Print available product info
