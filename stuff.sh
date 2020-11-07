@@ -330,13 +330,13 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 						C2="${COL}│ ${RESET}"
 					fi
 
-					CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD}")			## Define the label
-					CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD}")			## Define the UUID
-					CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD}")			## Define the type
-					CHILD_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_CHILD}")			## Define size
-					CHILD_USED=$(df -lh | grep -m 1 "${WORKING_CHILD}" | awk '{print $3}')	## Define capacity utilisation
-					CHILD_PERC=$(df -lh | grep -m 1 "${WORKING_CHILD}" | awk '{print $5}')	## Define percentage utilisation
-					CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD}")		## Define mount location
+					CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD}")					## Define the label
+					CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD}")					## Define the UUID
+					CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD}")					## Define the type
+					CHILD_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_CHILD}")					## Define size
+					CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_CHILD}" | awk '{print $3}')	## Define capacity utilisation
+					CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_CHILD}" | awk '{print $5}')	## Define percentage utilisation
+					CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD}")				## Define mount location
 
 					CHILD_SPECS=()													## Clear then reset the array of child specs
 					if [ -n "${CHILD_LABEL}" ];	then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
@@ -368,13 +368,13 @@ if [[ -n "$GET_D_DISKS_INFO" || -n "$GET_ALL_INFO" ]]; then
 							fi
 
 							if [ -e /dev/"${WORKING_GRANDCHILD}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD}"); fi	## Label
-							GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $6}')	## Type
-							GRANDCHILD_SIZE=$(lsblk -no SIZE /dev/"${WORKING_CHILD}" | sed -n "${e}p")			## Size
-							GRANDCHILD_USED=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $3}')		## Capacity used
-							GRANDCHILD_PERC=$(df -lh | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $5}')		## Percentage used
-							GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $7}')	## Mountpoint
+							GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $6}')				## Type
+							GRANDCHILD_SIZE=$(lsblk -no SIZE /dev/"${WORKING_CHILD}" | sed -n "${e}p")						## Size
+							GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $3}')				## Capacity used
+							GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD}" | awk '{print $5}' )				## Percentage used
+							GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD}" | sed -n "${e}p" | awk '{print $7}')				## Mountpoint
 
-							GRANDCHILD_SPECS=()									## Clear then reset the array of child specs
+							GRANDCHILD_SPECS=()			## Clear then reset the array of child specs
 							if [ -n "${GRANDCHILD_LABEL}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${GRANDCHILD_LABEL}"); fi
 							if [ -n "${GRANDCHILD_TYPE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
 							if [ -n "${GRANDCHILD_SIZE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
