@@ -121,6 +121,7 @@ fi
 ## Run a command to indicate the script is initiating.
 echo -e "Running script-start notification function..." > ${DEST}
 NOTIFICATION_f "START" &
+sleep 1s
 
 ## Check for the RESET flag.  If set, reset the poll result then proceed with normal poll (use to clear "Warning" poll result).
 if [[ -n "$POLLY_RESET" ]]; then
