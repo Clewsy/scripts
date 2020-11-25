@@ -21,7 +21,12 @@ BLINK_GREEN="--green"
 BLINK_BLUE="--blue"
 BLINK_FLASH="--flash 1000"
 
-##  Notifications handling function.
+## Datestamp function.  Displays similar to the default but in 24-hour format.
+DATE_f() {
+	date +"%a %d %b %Y %R:%S %Z"
+}
+
+## Notifications handling function.
 NOTIFICATION_f() {
 
 	## Kill any current running blink routines.
@@ -126,7 +131,7 @@ sleep 1s
 ## Check for the RESET flag.  If set, reset the poll result then proceed with normal poll (use to clear "Warning" poll result).
 if [[ -n "$POLLY_RESET" ]]; then
 	echo -e "Clearing warning to reset site poll status."
-	echo -e "$(date) - Site status reset." >> $LOG_FILE
+	echo -e "$(DATE_f) - Site status reset." >> $LOG_FILE
 fi
 
 ## Attempt to curl the url and obtain the response code for $HOST_URL.
@@ -136,18 +141,18 @@ echo -e "\nSite response code: ${TEST_RESULT}" > ${DEST}
 ## A site response code of 200 indicates everything is okay.
 if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
 	echo -e "\n${RED}FAILURE${RESET} - Site down!\n"
-	echo -e "$(date) - FAILURE - Site not available. Curl returned ${TEST_RESULT}" >> $LOG_FILE
+	echo -e "$(DATE_f) - FAILURE - Site not available. Curl returned ${TEST_RESULT}" >> $LOG_FILE
 	echo -e "Running failure notification function..." > ${DEST}
 	NOTIFICATION_f "FAILED" &
 else
 	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
 		echo -e "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n"
-		echo -e "$(date) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
+		echo -e "$(DATE_f) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
 		echo -e "Running recovered notification function..." > ${DEST}
 		NOTIFICATION_f "RECOVERED" &
 	else													## Site is up.
 		echo -e "\n${GREEN}SUCCESS${RESET} - Everything seems okay.\n"
-		echo -e "$(date) - SUCCESS - Site is up, everything seems okay." >> $LOG_FILE
+		echo -e "$(DATE_f) - SUCCESS - Site is up, everything seems okay." >> $LOG_FILE
 		echo -e "Running success notification command..." > ${DEST}
 		NOTIFICATION_f "OK" &
 	fi
