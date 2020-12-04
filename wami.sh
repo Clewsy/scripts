@@ -50,7 +50,7 @@ if [ -n "${POSTAL}" ];		then echo -e "${BOLD}Post Code:${RESET}----- ${POSTAL}";
 if [ -n "${TIMEZONE}" ];	then echo -e "${BOLD}Timezone:${RESET}------ ${TIMEZONE}";	fi
 echo	#Finish main output with a line break.
 
-#rm "${TEMP_FILE}"
+rm "${TEMP_FILE}"
 
 exit $SUCCESS
 
