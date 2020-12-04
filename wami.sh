@@ -13,7 +13,8 @@ SUCCESS=0
 NO_CURL=1
 CURL_FAIL=2
 
-TEMP_FILE="/tmp/wami_tempfile"			#Define the temp file location.
+TEMP_FILE="/tmp/wami_tempfile"							#Define the preferred temp file location.
+if [ ! -w "$(dirname ${TEMP_FILE})" ]; then TEMP_FILE="./wami_tempfile"; fi	#Default to the current directory if preferred is unavailable (e.g. termux).
 
 if ! command -v curl >> /dev/null ; then	#Check if curl is not installed.
 	echo -e "\n${RED}Error:${RESET}: curl is not installed.  Quitting.\n"
@@ -49,6 +50,7 @@ if [ -n "${POSTAL}" ];		then echo -e "${BOLD}Post Code:${RESET}----- ${POSTAL}";
 if [ -n "${TIMEZONE}" ];	then echo -e "${BOLD}Timezone:${RESET}------ ${TIMEZONE}";	fi
 echo	#Finish main output with a line break.
 
-rm "${TEMP_FILE}"
+#rm "${TEMP_FILE}"
 
 exit $SUCCESS
+
