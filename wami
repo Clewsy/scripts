@@ -1,0 +1,56 @@
+#!/bin/bash
+#: Title:	: wami
+#: Author	: clewsy
+#: Description	: Pull information regarding the external ip address (from ipinfo.io), format then print to screen.
+#: Options	: None (ignored).
+
+# Text formatting codes.
+RED="\033[00;31m"
+BOLD="\033[01;37m"
+RESET="\033[00;0m"
+
+# Exit codes.
+SUCCESS=0
+NO_CURL=1
+CURL_FAIL=2
+
+TEMP_FILE="/tmp/wami_tempfile"							# Define the preferred temp file location.
+if [ ! -w "$(dirname ${TEMP_FILE})" ]; then TEMP_FILE="./wami_tempfile"; fi	# Default to the current directory if preferred is unavailable (e.g. termux).
+
+if ! command -v curl >> /dev/null ; then	# Check if curl is not installed.
+	printf "\n%bError%b: curl is not installed.  Quitting.\n\n" "${RED}" "${RESET}"
+	exit ${NO_CURL}
+fi
+
+echo -e "\nPulling data from \"ipinfo.io\"..."
+if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ipinfo.io; then	# Run curl command and check if it exited with a failure.
+	printf "\n%bError%b: Failed to pull data from \"ipinfo.io\".  Quitting...\n\n" "${RED}" "${RESET}"
+	if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi	# Delete partial/incomplete ipinfo dump if it exists.
+	exit ${CURL_FAIL}
+fi
+
+IP=$(		grep -m 1 "ip"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+HOST_NAME=$(	grep "hostname"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)	# Use the underscore since $HOSTNAME is already in use.
+CITY=$(		grep "city"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+REGION=$(	grep "region"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+COUNTRY=$(	grep "country"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+LOC=$(		grep "loc"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+ORG=$(		grep "org"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+POSTAL=$(	grep -m 1 "postal"	"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+TIMEZONE=$(	grep "timezone"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+
+printf "\n"	# Start main output after a line break.
+if [ -n "${IP}" ];		then printf "%bIP:%b------------ %s\n" "${BOLD}" "${RESET}" "${IP}";		fi
+if [ -n "${HOST_NAME}" ];	then printf "%bHostname:%b------ %s\n" "${BOLD}" "${RESET}" "${HOST_NAME}";	fi
+if [ -n "${CITY}" ];		then printf "%bCity:%b---------- %s\n" "${BOLD}" "${RESET}" "${CITY}";		fi
+if [ -n "${REGION}" ];		then printf "%bRegion:%b-------- %s\n" "${BOLD}" "${RESET}" "${REGION}";	fi
+if [ -n "${COUNTRY}" ];		then printf "%bCountry:%b------- %s\n" "${BOLD}" "${RESET}" "${COUNTRY}";	fi
+if [ -n "${LOC}" ];		then printf "%bCo-ordinates:%b-- %s\n" "${BOLD}" "${RESET}" "${LOC}";		fi
+if [ -n "${ORG}" ];		then printf "%bOrganisation:%b-- %s\n" "${BOLD}" "${RESET}" "${ORG}";		fi
+if [ -n "${POSTAL}" ];		then printf "%bPost Code:%b----- %s\n" "${BOLD}" "${RESET}" "${POSTAL}";	fi
+if [ -n "${TIMEZONE}" ];	then printf "%bTimezone:%b------ %s\n" "${BOLD}" "${RESET}" "${TIMEZONE}";	fi
+printf "\n"	# Finish main output with a line break.
+
+rm "${TEMP_FILE}"
+
+exit ${SUCCESS}
