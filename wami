@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: wami
-#: Author	: clewsy
+#: Author	: clewsy (clewsy.pro)
 #: Description	: Pull information regarding the external ip address (from ipinfo.io), format then print to screen.
 #: Options	: None (ignored).
 
