@@ -38,8 +38,8 @@ QUIT_f ()
 
 ##########Define log file and ensure directory exists and is writable.
 BALL_LOG_FILE="${HOME}/.log/ball.log"
-if [ ! -d "$(dirname "${BALL_LOG_FILE}")" ]; then
-	if ! mkdir --parents "$(dirname "${BALL_LOG_FILE}")"; then
+if [ ! -w "$(dirname "${BALL_LOG_FILE}")" ]; then
+	if ! mkdir --parents "$(dirname "${BALL_LOG_FILE}")" || ! touch "${BALL_LOG_FILE}"; then
 		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${BALL_LOG_FILE})\n"
 		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it needs to write the logfile.
 	fi
