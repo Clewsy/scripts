@@ -55,7 +55,7 @@ Where [hosts] can be:
 Valid options:
 	-q	Quiet mode - only print the current host and the final summary.
 	-v	Verbose mode - print additional info to stdout.  Overrides Quiet mode (\"-q\").
-	-h	Print this usage and exit.\n
+	-h	Print this usage and exit.
 "
 
 ######### Default values can be changed with -q or -v options. 
@@ -84,9 +84,9 @@ while getopts 'vqh' OPTION; do			## Call getopts to identify selected options an
 		v)	DEST="/dev/stdout"		## -v activates verbose mode by sending output to /dev/stdout.
 			APT_GET_VERBOSITY=""		## Verbose mode removes the "--quiet" option with apt-get commands.
 			QUIET=false ;;			## Override Quiet mode option.
-		h)	printf "%b" "${USAGE}"		## -h option just prints the usage then quits.
+		h)	printf "%b" "${USAGE}\n"	## -h option just prints the usage then quits.
 			QUIT_f "${SUCCESS}" ;;		## Exit successfully.
-		?)	printf "%b" "${RED}Error:${RESET} Invalid option/s.\n ${USAGE}"	## Invalid option, show usage.
+		?)	printf "%b" "${RED}Error:${RESET} Invalid option/s.\n ${USAGE}\n"	## Invalid option, show usage.
 			QUIT_f "${BAD_OPTION}" ;;	## Exit with error.
 	esac
 done
@@ -94,7 +94,7 @@ shift $((OPTIND -1))	## This ensures only non-option arguments are considered ar
 
 ######### Validate provided argument/s.
 if [ $# -gt 1 ]; then		## If more than one argument is entered.
-	printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}"	## Print error message and usage.
+	printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}\n"	## Print error message and usage.
 	QUIT_f "${TOO_MANY_ARGS}"	## Exit.
 fi
 
