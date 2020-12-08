@@ -1,37 +1,49 @@
 #!/bin/bash
-
-## This script will taka a remote host or list of hosts, then run the backup script "bu.sh" for each.
-## That said, the "COMMAND" variable can be set to anything you want to run on multiple systems.
+#: Title:	: ball
+#: Author	: clewsy (clewsy.pro)
+#: Description	: Run a backup script (bu) on a selected host or list of hosts.
+#: Options	: -q - Quiet mode (suppress some output).
+#:		  -v - Verbose mode (show additional output).
+#:		  -h - Help (print usage information).
 
 COMMAND="~/bin/bu.sh"	## The command to run on the remote host/s.  Note using "~" avoids expanding on the client side.
 
-##########Colours.
+##########Colours and formatting.
 RED="\033[02;31m"
 GREEN="\033[02;32m"
 BLUE="\033[01;34m"
 BOLD="\033[01;37m"
 RESET="\033[0m"
+TABLE_WIDTH=30
+SEPARATOR="----------------------------------------------------------------------------------"
+FILL_H_f () { for ((i=1; i<=$1; i++)); do printf "%s" "═"; done; } ## Print '═' a specified number of times.
 
-##########Define log file and ensure directory exists.
-BALL_LOG_FILE="${HOME}/.log/ball.log"
-if [ ! -d "$(dirname "${BALL_LOG_FILE}")" ]; then mkdir --parents "$(dirname "${BALL_LOG_FILE}")"; fi
-	
 ##########Exit codes
 SUCCESS=0		## Toight.
 INVALID_OPTIONS=1	## Incorrect usage.
-TOO_MANY_ARGS=2
+TOO_MANY_ARGS=2		## Icorrect usage.
+BAD_LOG_FILE=3		## Cannont write to the defined logfile.
 
 ##########Function to print current date and time.  Used for logging.
-TIMESTAMP () { echo -ne "$(date +%Y-%m-%d\ %T)"; }
+TIMESTAMP_f () { printf "%s" "$(date +%Y-%m-%d\ %T)"; }
 
 ##########Function for exit conditions.  Log error or success and exit.
-QUIT ()
+QUIT_f ()
 {
-	if [ "${1}" -gt 0 ]; then	echo -e "$(TIMESTAMP) [X] Script failed with error code ${1}." >> "${BALL_LOG_FILE}"
-	else				echo -e "$(TIMESTAMP) [√] Script completed successfully." >> "${BALL_LOG_FILE}"; fi
-	echo -e "-----------------------------------------------------------" >> "${BALL_LOG_FILE}"
+	if [ "${1}" -gt 0 ]; then	printf "%s%d%b" "$(TIMESTAMP_f) [X] Script failed with error code " "${1}" ".\n" >> "${BALL_LOG_FILE}"
+	else				printf "%b" "$(TIMESTAMP_f) [√] Script exited successfully.\n" >> "${BALL_LOG_FILE}"; fi
+	printf "%b" "${SEPARATOR}\n" >> "${BALL_LOG_FILE}"
 	exit "${1}"
 }
+
+##########Define log file and ensure directory exists and is writable.
+BALL_LOG_FILE="${HOME}/.log/ball.log"
+if [ ! -d "$(dirname "${BALL_LOG_FILE}")" ]; then
+	if ! mkdir --parents "$(dirname "${BALL_LOG_FILE}")"; then
+		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${BALL_LOG_FILE})\n"
+		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it needs to write the logfile.
+	fi
+fi
 
 #########Usage
 USAGE="
@@ -56,7 +68,7 @@ DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with 
 SSH_OPTIONS=(
 	-4					## Use IPV4 (alternatively, -6 for IPV6).
 	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
-	"-o UserKnownHostsFile=/dev/null"	## Disable automatically saving "newly discovered" hosts to the default knownhosts file.
+	"-o UserKnownHostsFile=/dev/null"	## Disable auto saving "newly discovered" hosts to the default knownhosts file.
 	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
 	"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
 )
@@ -64,24 +76,22 @@ SSH_OPTIONS=(
 ##########Interpret options
 while getopts 'qvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
-		q)	QUIET_MODE="TRUE"		## -q sets flag that will suppress some output otherwise destined for /dev/stdout.
+		q)	QUIET_MODE="TRUE"		## -q sets flag that will suppress some output destined for /dev/stdout.
 			VERBOSITY="-q" ;;
 		v)	VERBOSITY="-v"			## -v activates verbose mode by iadding the -v flag to the bu.sh command.
 			DEST="/dev/stdout" ;;
-		h)	echo -e "${USAGE}"		## -h option just prints the usage then quits.
-			QUIT ${SUCCESS} ;;		## Exit successfully.
-		?)	echo -e "${RED}Error:${RESET} Invalid option/s."
-			echo -e "${USAGE}"		## Invalid option, show usage.
-			QUIT ${INVALID_OPTIONS} ;;	## Exit.
+		h)	printf "%b" "${USAGE}\n"	## -h option just prints the usage then quits.
+			QUIT_f ${SUCCESS} ;;		## Exit successfully.
+		?)	printf "%b" "${RED}Error:${RESET} Invalid option/s.\n${USAGE}\n"
+			QUIT_f ${INVALID_OPTIONS} ;;	## Exit.
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 ##########Check correct usage.
-if [ $# -gt 1 ]; then						## Check if more than one argument was entered.
-	echo -e "${RED}Error:${RESET} Too many arguments."	## If so, show usage and exit.
-	echo -e "${USAGE}"
-	QUIT ${TOO_MANY_ARGS}
+if [ $# -gt 1 ]; then								## Check if more than one argument was entered.
+	printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}\n"	## If so, show usage and exit.
+	QUIT_f ${TOO_MANY_ARGS}
 fi
 
 ##########Define the argument (user input or default).
@@ -89,72 +99,72 @@ ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	## First argument is the file name
 						## If argument not provided, set default (by_hosts.list in same dir as script).
 						## Syntax: parameter=${parameter-default}.
 
-##########Define the temp files.
-TEMP_BALL_SUMMARY="/tmp/temp_ball_summary"				## Define the temp summary file location.
-if [ -e "${TEMP_BALL_SUMMARY}" ]; then rm "${TEMP_BALL_SUMMARY}"; fi	## If it exists, delete the temp file (in case script failed previously).
+##########Define and clear the temp files.
+TEMP_BALL_SUMMARY="/tmp/temp_ball_summary"
+> "${TEMP_BALL_SUMMARY}"
 
-TEMP_REM_SYS_LIST="/tmp/temp_rem_sys_list"				## Define a working system list.
-if [ -e "${TEMP_REM_SYS_LIST}" ]; then rm "${TEMP_REM_SYS_LIST}"; fi	## If it exists, delete the temporary file (in case script failed previously).
+TEMP_REM_SYS_LIST="/tmp/temp_rem_sys_list"
+> "${TEMP_REM_SYS_LIST}"
 
 ##########Validate the argument and thus define the remote host/s.
 ## Arg specifies a remote host.
-if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then	## If argument is not (!) a normal file (-f) or (||) in is not (!) readable (-r).
-	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "\n${BLUE}Remote system is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"; fi	## Then assume provided argument is a single host (either [host] or [user@host]).
-	echo "${ARGUMENT}" > "${TEMP_REM_SYS_LIST}"		## Create the temp list file which will just contain the single entry.
+if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then
+	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
+	printf "%b" "${ARGUMENT}\n" > "${TEMP_REM_SYS_LIST}"
 ## Arg specifies a list of remote hosts.
 else
-	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "\n${BLUE}Remote system list is \"${RESET}${ARGUMENT}${BLUE}\".${RESET}"; fi	## Tell the user the list looks okay.
-	while read -r LINE ; do							## Iterate for every line in the system list.
-		STRIPPED_LINE="$(echo "${LINE}" | cut -d "#" -f 1)"		## Strip the content of the line after (and including) the first '#'.
-		if [ "${STRIPPED_LINE}" ]; then					## If there is anything left in the string (i.e. if entire row is NOT a comment).
-			echo "${STRIPPED_LINE}" >> "${TEMP_REM_SYS_LIST}"	## Then copy the stripped line to the temp file.
+	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system list is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
+	while read -r LINE ; do								## Iterate for every line in list.
+		STRIPPED_LINE="$(printf "%b" "${LINE}\n" | cut -d "#" -f 1)"		## Strip content of line from first '#'.
+		if [ "${STRIPPED_LINE}" ]; then						## If there is anything left.
+			printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"	## Copy the stripped line to the temp file.
 		fi
 	done < "${ARGUMENT}"
-	echo -e "\n${BLUE}Target systems:${RESET}" >> ${DEST}
-	cat "${TEMP_REM_SYS_LIST}" >> ${DEST}	## Show the intended target systems (when verbose option is used).
+	printf "%b" "\nTarget systems:\n" >> ${DEST}
+	printf "%b" "${BLUE}$(cat "${TEMP_REM_SYS_LIST}")${RESET}\n" >> ${DEST}		## Show the intended target systems.
 fi
 
 ########## Loop through the remote system list.
-if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "\n----------------------------------------------------------------------------------"; fi
+if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\n${SEPARATOR}\n"; fi
 {
-	echo -e "$(TIMESTAMP) - Script initiated for following hosts:"
+	printf "%b" "$(TIMESTAMP_f) - Script initiated for following hosts:\n"
 	cat "${TEMP_REM_SYS_LIST}"
 } >> "${BALL_LOG_FILE}"
 while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
-	if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "${BLUE}Attempting to run \"${RESET}${COMMAND}${BLUE}\" on \"${RESET}${REM_SYS}${BLUE}\"${RESET}"; fi
+	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run \"${BLUE}${COMMAND}${RESET}\" on \"${BLUE}${REM_SYS}${RESET}\"\n"; fi
 
 	## For loop to set the tab spacing depending on the length of the hostname (makes the ouput summary pretty).
-	(( NUM_BUFF=24-${#REM_SYS} ))			## Total buffer = 24 minus number of chars in "user@host"
-	COLUMN_SPACER=""
-	for (( i=1; i<NUM_BUFF; i++ )); do
-		COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
-	done
+(( NUM_BUFF=24-${#REM_SYS} ))			## Total buffer = 24 minus number of chars in "user@host"
+COLUMN_SPACER=""
+for (( i=1; i<NUM_BUFF; i++ )); do
+	COLUMN_SPACER="${COLUMN_SPACER} "	## Add a space every iteration.
+done
 
-	echo -e "Attempting to run command: ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" \"${COMMAND} ${VERBOSITY}\"" >> ${DEST}
-	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then						## Attempt to connect via ssh and run the backup script "bu.sh"
-		echo -E "${REM_SYS}${COLUMN_SPACER} ${RED}Failure.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## Record if the above fails for the current host.
-		echo -e "${RED}Failure.${RESET}"								## Also show failure on stdio.
-		echo -e "$(TIMESTAMP) [X] Failed to run ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"	## Also record to log file.
-		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi
-		continue											## Then try the next host in the list.
-	else
-		echo -E "${REM_SYS}${COLUMN_SPACER} ${GREEN}Success.${RESET}" >> "${TEMP_BALL_SUMMARY}"		## If the above succeeds, record the success.
-		echo -e "$(TIMESTAMP) [√] Successfully ran ${COMMAND} on ${REM_SYS}." >> "${BALL_LOG_FILE}"	## Also record to log file.
-		if [ "${QUIET_MODE}" != "TRUE" ]; then echo -e "----------------------------------------------------------------------------------"; fi	## Note a "success" means the ssh session was created and exited.
-														##  gracefully.  Failures with the called script are not checcked.
+	printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[@]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n" >> ${DEST}
+	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then ## Command failed.
+		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${RED}Failure.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
+		printf "%b" "${RED}Failure.${RESET}\n"								
+		printf "%b" "$(TIMESTAMP_f) [X] Failed to run ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
+		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${SEPARATOR}\n"; fi
+		continue
+	else	## Command is successful.
+		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${GREEN}Success.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
+		printf "%b" "$(TIMESTAMP_f) [√] Successfully ran ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
+		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${SEPARATOR}\n"; fi
 	fi
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
 
 ########### Print out in a pretty format a table indicating the success or failure for each host in the list.
-echo -e "${BOLD}\n╔════════════Summary:════════════╗${RESET}"
+printf "%b" "\n${BOLD}╔═Summary:$(FILL_H_f $((TABLE_WIDTH-11)))╗${RESET}\n"
 while read -r RESULT ; do
-	echo -e "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}"
+	printf "%b" "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}\n"
 done < "${TEMP_BALL_SUMMARY}"
-echo -e "${BOLD}╚════════════════════════════════╝${RESET}\n"
+printf "%b" "${BOLD}╚$(FILL_H_f ${TABLE_WIDTH}-2)╝${RESET}\n"
 
-########## All done.
-rm "${TEMP_BALL_SUMMARY}" "${TEMP_REM_SYS_LIST}"	## Delete the temporary files.
+########## All done, clean up and exit.
+rm "${TEMP_BALL_SUMMARY}" "${TEMP_REM_SYS_LIST}"
 
-QUIT ${SUCCESS}
+QUIT_f ${SUCCESS}
+
