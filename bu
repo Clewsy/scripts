@@ -25,7 +25,7 @@ SEPARATOR="------------------------------------"
 
 ##########Exit codes
 SUCCESS="0"		## Noice.
-BAD_LOGFILE="1"		## Cannont write to log file.
+BAD_LOGFILE="1"		## Cannot write to log file.
 BAD_OPTION="2"		## Incorrect usage.
 TOO_MANY_ARGS="3"	## More than one argument was provided.
 MISSING_ARG="4"		## Option -f or -d used but argument was not provided.
