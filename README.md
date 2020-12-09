@@ -1,18 +1,18 @@
 # scripts
 
-[**apt_all.sh**][link_repo_apt_all.sh]
+[**apt_all**][link_repo_apt_all]
 
 Runs apt-get update, apt-get dist-upgrade, apt-get autoremove and apt-get autoclean on a provided host or list of hosts.  Logs results to file.
 
 ---
 
-[**ball.sh**][link_repo_ball.sh]
+[**ball**][link_repo_ball]
 
-Runs bu.sh on a bunch of remote host or list of hosts.  Logs results to file.
+Runs bu on a bunch of remote host or list of hosts.  Logs results to file.
 
 ---
 
-[**bu.sh**][link_repo_bu.sh]
+[**bu**][link_repo_bu]
 
 Uses rsync to back up files and directories in a list file to a remote server.  Logs results to file.
 
@@ -53,7 +53,7 @@ Kills current openvpn service then reconnects and confirms.  Useful for quickly 
 
 ---
 
-[**wami.sh**][link_repo_wami.sh]
+[**wami**][link_repo_wami]
 
 Pulls and displays info (IP, country, city, etc) from [ipinfo.io][link_web_ipinfo] - useful to verify vpn operation.
 
@@ -103,16 +103,16 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 
 ---
 
-[link_repo_apt_all.sh]:apt_all.sh
-[link_repo_ball.sh]:ball.sh
-[link_repo_bu.sh]:bu.sh
+[link_repo_apt_all]:apt_all
+[link_repo_ball]:ball
+[link_repo_bu]:bu
 [link_repo_p0wer_switch.sh]:p0wer_switch.sh
 [link_repo_polly.sh]:polly.sh
 [link_repo_pong.sh]:pong.sh
 [link_repo_stuff.sh]:stuff.sh
 [link_repo_terbling.sh]:terbling.sh
 [link_repo_vpn.sh]:vpn.sh
-[link_repo_wami.sh]:wami.sh
+[link_repo_wami]:wami
 [link_repo_whodis.sh]:whodis.sh
 [link_repo_archive_cal_backup.sh]:archive/cal_backup.sh
 [link_repo_archive_chuck.sh]:archive/chuck.sh
