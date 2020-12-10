@@ -6,7 +6,7 @@
 #:		  -v - Verbose mode (show additional output).
 #:		  -h - Help (print usage information).
 
-COMMAND="~/bin/bu.sh"	## The command to run on the remote host/s.  Note using "~" avoids expanding on the client side.
+COMMAND="~/bin/bu"	## The command to run on the remote host/s.  Note using "~" avoids expanding on the client side.
 
 ##########Colours and formatting.
 RED="\033[02;31m"
