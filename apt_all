@@ -148,7 +148,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	if [ ${QUIET} = false ]; then printf "%b" "${BOLD}ssh connection...\t${RESET}"; fi
 	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "exit" > /dev/null 2>&1; then
 		{
-			printf "%s%-$((TABLE_WIDTH-2))s%s" "${BOLD}║${RED}" "System not found." "${RESET}${BOLD}║${RESET}\n"
+			printf "%s%-$((TABLE_WIDTH-2))s%s" "${BOLD}║" "${RED}System not found.${RESET}" "${BOLD}║${RESET}\n"
 			printf "%s%-$((TABLE_WIDTH-2))s%s" "${BOLD}║${RESET}" "Skipped." "${BOLD}║${RESET}\n"
 			printf "%b" "${BOLD}╠$(FILL_H_f $((TABLE_WIDTH-2)))╣${RESET}\n"
 		} >> "${TEMP_SUMMARY_FILE}"
@@ -184,7 +184,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	NEW=$(ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${REM_PATH_DEF} sudo apt list --upgradable --quiet=2")
 	if [[ ! ${NEW} ]]; then
 		{
-			printf "%s%$((TABLE_WIDTH-13))s%s" "${BOLD}║${RESET}Up-to-date." "Skipped." "${BOLD}║${RESET}\n"
+			printf "%s%$((TABLE_WIDTH-13))s%s" "${BOLD}║${RESET}Up-to-date.${GREEN}" "Skipped." "${RESET}${BOLD}║${RESET}\n"
 			printf "%b" "${BOLD}╠$(FILL_H_f $((TABLE_WIDTH-2)))╣${RESET}\n"
 		} >> "${TEMP_SUMMARY_FILE}"
 		if [ ${QUIET} = false ]; then printf "%b" "${BOLD}Up-to-date.\t\t${RESET}${GREEN}Skipping...${RESET}\n"; fi
