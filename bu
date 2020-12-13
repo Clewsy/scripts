@@ -10,19 +10,6 @@
 #:		: -v	Verbose mode (show additional output).
 #:		: none	Assumes -l.
 
-##########Configurable settings.
-BU_USER="b4t"
-BU_SERVER_LOCAL="seymour"
-BU_SERVER_REMOTE="clews.pro"
-BU_REMOTE_DIR="/home/${BU_USER}/file_cache/${HOSTNAME}"
-
-##########Colours and formatting.
-RED="\033[02;31m"
-GREEN="\033[02;32m"
-BLUE="\033[01;34m"
-RESET="\033[0m"
-SEPARATOR="------------------------------------"
-
 ##########Exit codes
 SUCCESS="0"		## Noice.
 BAD_LOGFILE="1"		## Cannot write to log file.
@@ -36,6 +23,19 @@ NO_REM_DIR="8"		## ssh command to create remote directory failed.
 BAD_LIST_FILE="9"	## List file not identified as ascii text file.
 NO_VALID_FILES="10"	## Parsing list file  found no valid files to back up.
 RSYNC_FAILED="11"	## rsync command was reached but failed.
+
+##########Configurable settings.
+BU_USER="b4t"
+BU_SERVER_LOCAL="seymour"
+BU_SERVER_REMOTE="clews.pro"
+BU_REMOTE_DIR="/home/${BU_USER}/file_cache/${HOSTNAME}"
+
+##########Colours and formatting.
+RED="\033[02;31m"
+GREEN="\033[02;32m"
+BLUE="\033[01;34m"
+RESET="\033[0m"
+SEPARATOR="------------------------------------"
 
 ##########Define log file and ensure directory exists.
 BU_LOG_FILE="${HOME}/.log/bu.log"

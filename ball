@@ -8,6 +8,12 @@
 
 COMMAND="~/bin/bu"	## The command to run on the remote host/s.  Note using "~" avoids expanding on the client side.
 
+##########Exit codes
+SUCCESS=0		## Toight.
+INVALID_OPTIONS=1	## Incorrect usage.
+TOO_MANY_ARGS=2		## Icorrect usage.
+BAD_LOG_FILE=3		## Cannont write to the defined logfile.
+
 ##########Colours and formatting.
 RED="\033[02;31m"
 GREEN="\033[02;32m"
@@ -17,12 +23,6 @@ RESET="\033[0m"
 TABLE_WIDTH=30
 SEPARATOR="----------------------------------------------------------------------------------"
 FILL_H_f () { for ((i=1; i<=$1; i++)); do printf "%s" "═"; done; } ## Print '═' a specified number of times.
-
-##########Exit codes
-SUCCESS=0		## Toight.
-INVALID_OPTIONS=1	## Incorrect usage.
-TOO_MANY_ARGS=2		## Icorrect usage.
-BAD_LOG_FILE=3		## Cannont write to the defined logfile.
 
 ##########Function to print current date and time.  Used for logging.
 TIMESTAMP_f () { printf "%s" "$(date +%Y-%m-%d\ %T)"; }

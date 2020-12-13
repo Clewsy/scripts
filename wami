@@ -4,15 +4,15 @@
 #: Description	: Pull information regarding the external ip address (from ipinfo.io), format then print to screen.
 #: Options	: None (ignored).
 
-# Text formatting codes.
-RED="\033[00;31m"
-BOLD="\033[01;37m"
-RESET="\033[00;0m"
-
 # Exit codes.
 SUCCESS=0
 NO_CURL=1
 CURL_FAIL=2
+
+# Text formatting codes.
+RED="\033[00;31m"
+BOLD="\033[01;37m"
+RESET="\033[00;0m"
 
 TEMP_FILE="/tmp/wami_tempfile"							# Define the preferred temp file location.
 if [ ! -w "$(dirname ${TEMP_FILE})" ]; then TEMP_FILE="./wami_tempfile"; fi	# Default to the current directory if preferred is unavailable (e.g. termux).

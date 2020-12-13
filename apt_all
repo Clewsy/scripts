@@ -6,6 +6,12 @@
 #:		  -v - Verbose mode (show additional output).
 #:		  -h - Help (print usage information).
 
+########## Exit codes
+SUCCESS=0	## Noice.
+BAD_OPTION=1	## Invalid option.
+TOO_MANY_ARGS=2	## Incorrect usage.
+BAD_LOGFILE=3	## Unable to write to the defined logfile directory.
+
 ########## Colours and formatting.
 RED="\033[02;31m"
 GREEN="\033[02;32m"
@@ -19,12 +25,6 @@ FILL_H_f () { for ((i=1; i<=$1; i++)); do printf "%s" "â•"; done; } ## Print 'â
 
 ########## Function to print current date and time.  Used for logging.
 TIMESTAMP_f () { printf "%s" "$(date +%Y-%m-%d\ %T)"; }
-
-########## Exit codes
-SUCCESS=0	## Noice.
-BAD_OPTION=1	## Invalid option.
-TOO_MANY_ARGS=2	## Incorrect usage.
-BAD_LOGFILE=3	## Unable to write to the defined logfile directory.
 
 ########## Function for exit conditions.  Log error or success and exit.
 QUIT_f ()
