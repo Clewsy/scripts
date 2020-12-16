@@ -148,7 +148,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	if [ ${QUIET} = false ]; then printf "%b" "${BOLD}ssh connection...\t${RESET}"; fi
 	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "exit" > /dev/null 2>&1; then
 		{
-			printf "%s%-$((TABLE_WIDTH-2))s%s" "${BOLD}║" "${RED}System not found.${RESET}" "${BOLD}║${RESET}\n"
+			printf "%s%-$((TABLE_WIDTH-2))s%s" "${BOLD}║${RED}" "System not found." "${RESET}${BOLD}║${RESET}\n"
 			printf "%s%-$((TABLE_WIDTH-2))s%s" "${BOLD}║${RESET}" "Skipped." "${BOLD}║${RESET}\n"
 			printf "%b" "${BOLD}╠$(FILL_H_f $((TABLE_WIDTH-2)))╣${RESET}\n"
 		} >> "${TEMP_SUMMARY_FILE}"
