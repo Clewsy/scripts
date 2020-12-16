@@ -134,7 +134,7 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
 	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run \"${BLUE}${COMMAND}${RESET}\" on \"${BLUE}${REM_SYS}${RESET}\"\n"; fi
 	printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[@]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n" >> ${DEST}
-	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}"; then ## Command failed.
+	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}" > ${DEST}; then ## Command failed.
 		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${RED}Failure.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
 		printf "%b" "${RED}Failure.${RESET}\n"								
 		printf "%b" "$(TIMESTAMP_f) [X] Failed to run ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
