@@ -136,14 +136,13 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 	printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[@]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n" >> ${DEST}
 	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}" > ${DEST}; then ## Command failed.
 		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${RED}Failure.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
-		printf "%b" "${RED}Failure.${RESET}\n"								
 		printf "%b" "$(TIMESTAMP_f) [X] Failed to run ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
-		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${SEPARATOR}\n"; fi
+		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${RED}Failure.${RESET}\n${SEPARATOR}\n"; fi
 		continue
 	else	## Command is successful.
 		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${GREEN}Success.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
 		printf "%b" "$(TIMESTAMP_f) [√] Successfully ran ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
-		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${SEPARATOR}\n"; fi
+		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${GREEN}Success.${RESET}\n${SEPARATOR}\n"; fi
 	fi
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
@@ -153,7 +152,7 @@ printf "%b" "\n${BOLD}╔═Summary:$(FILL_H_f $((TABLE_WIDTH-11)))╗${RESET}\n
 while read -r RESULT ; do
 	printf "%b" "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}\n"
 done < "${TEMP_BALL_SUMMARY}"
-printf "%b" "${BOLD}╚$(FILL_H_f ${TABLE_WIDTH}-2)╝${RESET}\n"
+printf "%b" "${BOLD}╚$(FILL_H_f ${TABLE_WIDTH}-2)╝${RESET}\n\n"
 
 ########## All done, clean up and exit.
 rm "${TEMP_BALL_SUMMARY}" "${TEMP_REM_SYS_LIST}"
