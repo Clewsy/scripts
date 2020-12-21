@@ -36,7 +36,7 @@ while read -r row; do
 	printf -v DATE "%s" "$(date --date=@"${row:0:10}" +%Y-%m-%d)"	# Parse date.
 	printf -v TIME "%s" "$(date --date=@"${row:0:10}" +%T)"		# Parse time.
 	MAC=${row:11:17}						# Parse MAC address.
-	IP=$(cut -d " " -f 3 <<<"${row}")					# Parse IP address.
+	IP=$(cut -d " " -f 3 <<<"${row}")				# Parse IP address.
 	NAME=$(cut -d " " -f 4 <<<"${row}")				# Parse hostname.
 
 	printf "%${MAX_NAME_SIZE}s  %-10s  %-8s  %-17s  %s\n" "${NAME}" "${DATE}" "${TIME}" "${MAC}" "${IP}"
