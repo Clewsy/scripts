@@ -1,47 +1,49 @@
 #!/bin/bash
+#: Title:	: whodis
+#: Author	: clewsy (clewsy.pro)
+#: Description	: Graps the content of /tmp/dhcp.leases from a defined host (typically a router), tabulates and prints to screen.
+#: Options	: none
 
-## This script grabs the /tmp/dhcp.leases from a defined host (likely a router) and outputs the prettified content to screen.
-
-# Define the user and hostame of the router.
-ROUTER="root@192.168.1.1"
+# Define the user and hostame (or ip address) of the router.
+ROUTER="root@kif"
 
 # Exit codes.
 SUCCESS=0
 NO_ROUTER=1
 
-# Define temp files.
-TEMPFILE_1="/tmp/whodis_tempfile_1"
-TEMPFILE_2="/tmp/whodis_tempfile_2"
+# Colours and formatting.
+RED="\033[02;31m"
+BOLD="\033[01;37m"
+RESET="\033[0m"
+MAX_NAME_SIZE=12	# Max string length for hostnames.
+
+# Define and initialise temp file.
+TEMPFILE="/tmp/whodis_tempfile"
+> "${TEMPFILE}"
 
 # Connect to the router and cat the dhcp.leases file.  Store to local temp file.
-if ! ssh $ROUTER "cat /tmp/dhcp.leases" > ${TEMPFILE_1}; then
-	echo -e "Failed.  No connection to router."
+if ! ssh ${ROUTER} "cat /tmp/dhcp.leases" > ${TEMPFILE}; then
+	printf "%b" "${RED}Failed.${RESET}  No connection to router.\n"
 	exit ${NO_ROUTER}
 fi
+
+# Print the table column headings.
+printf "${BOLD}%${MAX_NAME_SIZE}s  %-10s  %-8s  %-17s  %s${RESET}\n" "NAME" "DATE" "TIME" "MAC" "IP"
 
 # Loop through each row in the temp file.
 while read -r row; do
 
-	DATE=$(date --date=@"$(echo "${row}" | cut -d " " -f 1)" +%Y-%m-%d)	# Parse date
-	TIME=$(date --date=@"$(echo "${row}" | cut -d " " -f 1)" +%T)		# Parse time
-	MAC=$(echo "${row}" | cut -d " " -f 2)					# Parse MAC address
-	IP=$(echo "${row}" | cut -d " " -f 3)					# Parse IP address
-	NAME=$(echo "${row}" | cut -d " " -f 4)					# Parse hostname
+	printf -v DATE "%s" "$(date --date=@"${row:0:10}" +%Y-%m-%d)"	# Parse date.
+	printf -v TIME "%s" "$(date --date=@"${row:0:10}" +%T)"		# Parse time.
+	MAC=${row:11:17}						# Parse MAC address.
+	IP=$(cut -d " " -f 3 <<<"${row}")					# Parse IP address.
+	NAME=$(cut -d " " -f 4 <<<"${row}")				# Parse hostname.
 
-	echo "${DATE} ${TIME} ${MAC} ${IP} ${NAME}" >> ${TEMPFILE_2}		# Write to second temp file.
+	printf "%${MAX_NAME_SIZE}s  %-10s  %-8s  %-17s  %s\n" "${NAME}" "${DATE}" "${TIME}" "${MAC}" "${IP}"
 
-done < ${TEMPFILE_1}
+done < ${TEMPFILE}
 
-# Append column headings to the top of the temp file ("1i" puts the text at row 1)
-sed -i "1i DATE TIME MAC IP HOSTNAME" ${TEMPFILE_2}
-
-# Print the file to stdout with column for nice formatting.
-echo
-column -t ${TEMPFILE_2}
-echo
-
-# Clean up, delete the temp files.
-rm ${TEMPFILE_1} ${TEMPFILE_2}
-
+# Clean up and exit.
+rm ${TEMPFILE}
 exit ${SUCCESS}
 
