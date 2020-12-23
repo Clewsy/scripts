@@ -1,13 +1,34 @@
 #!/bin/bash
+#: Title:	: polly
+#: Author	: clewsy (clewsy.pro)
+#: Description	: Poll a url and check for successful response code 200.  Logs results and provides visual status indication via a blink(1) device on an LED port.
+#:		: Intended to be run as a cron job, for example to run every 5 minutes:	*/5 * * * * sudo /usr/local/sbin/polly.sh
+#: Options	: -p - Poll url and check status.  This is the primary function of the script.
+#:		: -s - Show last Status.  Effecticely displays the last entry in the log file.  Does not run a new poll operation.
+#:		: -l - Show Log file.  Effectively cats the entire log file.
+#:		: -r - Reset status.  Allows resetting status from "RECOVERED" to "OK" (assuming new poll results in "OK" and not "FAILED").
+#:		: -v - Verbose mode.  Shows additional output.
+#:		: -h - Help.  Print usage information.
+#: Notes	: For long-term deployment, consider configuring a logrotate file.  For example:
+#:		: #/etc/logrotate.d/polly
+#:		: /var/log/polly.log {
+#:		:   su root root
+#:		:   monthly
+#:		:   rotate 12
+#:		:   compress
+#:		:   missingok
+#:		:   notifempty
+#:		:   create 644 root root
+#:		: }
 
-## This script will poll a url and check for a specified string.  The intention is to verify that a web-site is up and operating as expected.
-## Commands can be specified to be run in the event that the web-site is operating fine, is down, or has recovered (was down but is operating again).
-## By default, these events will trigger a change in colour of an LED indicator - a blink(1) usb LED - https://blink1.thingm.com/
-## For this usage, the script must be run as sudo and the blink1-tool binary must be within the $PATH for root.
-## The script can be run as a user cronjob, for example to run every 5 minutes:	*/5 * * * * sudo /usr/local/sbin/polly.sh
-## Note, the script requires curl.
+## Exit codes.
+SUCCESS=0
+BAD_OPTION=1
+BAD_ARGUMENT=2
+NO_ROOT=3
+NO_CURL=4
 
-HOST_URL="https://clews.pro"	## Host url or ip address to test for connectivity
+HOST_URL="https://clews.pro"	## Host url or ip address to test for site status.
 
 LOG_FILE="/var/log/polly.log"	## Log file location.
 
@@ -22,9 +43,7 @@ BLINK_BLUE="--blue"
 BLINK_FLASH="--flash 1000"
 
 ## Datestamp function.  Displays similar to the default but in 24-hour format.
-DATE_f() {
-	date +"%a %d %b %Y %R:%S %Z"
-}
+TIMESTAMP_f() { date +"%Y-%m-%d %T"; }
 
 ## Notifications handling function.
 NOTIFICATION_f() {
@@ -44,21 +63,17 @@ NOTIFICATION_f() {
 	blink1-tool ${COLOUR} ${FLASH} > ${DEST}
 }
 
-## Exit codes.
-SUCCESS=0
-BAD_OPTION=1
-BAD_ARGUMENT=2
-NO_ROOT=3
-NO_CURL=4
-
 ## stdout output text colours.
 RED="\033[02;31m"
 ORANGE="\033[02;33m"
 GREEN="\033[02;32m"
+BOLD="\033[01;37m"
 RESET="\033[0m"
 
 ## Script usage.
 USAGE="
+$(basename "$0") will poll a defined URL (${HOST_URL}) and log the result.
+
 Usage: $(basename "$0") [option]
 Valid options:
 -p	Standard poll: check site status, show & log the result. (requires root)
@@ -73,87 +88,84 @@ Note, some options must be run with root/superuser privileges.
 "
 
 ## Parse selected options.
-while getopts 'pslrvh' OPTION; do						## Call getopts to identify selected options and set corresponding flags.
+while getopts 'pslrvh' OPTION; do
 	case "$OPTION" in
-		p)	;;							## Run the standard poll commands - default option (same as no options).
-		s)	echo -e "Fetching current status (last poll result):"	## Print the last line of the log file then exit.
+		p)	;;
+		s)	printf "%b" "Fetching current status (last poll result):\n"
 			tail -n -1 ${LOG_FILE}
-			exit $SUCCESS
-			;;
-		l)	echo -e "Printing log file (${LOG_FILE}):" 		## Simply dump the log file to stdout then exit.
-			cat ${LOG_FILE}
-			exit $SUCCESS
-			;;
-		r)	POLLY_RESET="true"					## Set flag to reset poll status.  Note, no exit.  After reset, the script will still run.
-			;;
-		v)	DEST="/dev/stdout"					## Change DEST from /dev/null to /dev/stdout for verbose output.
-			CURL_VERBOSITY=""					## Remove the "--silent" option (used when calling curl command).
-			;;
-		h)	echo -e "${USAGE}"					## Print help (usage) and exit.
-			exit $SUCCESS
-			;;
-		?)	echo -e "${USAGE}"					## Invalid option, show usage and exit.
-			exit $BAD_OPTION
-			;;
+			exit ${SUCCESS} ;;
+		l)	printf "%b" "Printing log file (${LOG_FILE}):\n"
+			cat "${LOG_FILE}"
+			exit ${SUCCESS} ;;
+		r)	POLLY_RESET="true" ;;
+		v)	DEST="/dev/stdout"
+			CURL_VERBOSITY="" ;;
+		h)	printf "%b" "${USAGE}\n"
+			exit ${SUCCESS} ;;
+		?)	echo -e "${USAGE}"
+			exit $BAD_OPTION ;;
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 ## No arguments are expected, so ensure not have been given.
-echo -e "\nEnsuring no arguments were provided..." > ${DEST}
-if (( $# > 0 )); then						## Check if an argument was entered.
-	echo -e "${RED}Invalid argument.${RESET}\n ${USAGE}"	## If so, show usage and exit.
-	exit $BAD_ARGUMENT
+printf "%b" "\nEnsuring no arguments were provided...\n" > ${DEST}
+if (( $# > 0 )); then
+	printf "%b" "${RED}Unexpected argument.${RESET}\n ${USAGE}\n"
+	exit ${BAD_ARGUMENT}
 fi
 
 ## Verify that script was called with superuser permissions.
-echo -e "\nChecking for superuser access..." > ${DEST}
-if [[ $EUID -ne 0 ]]; then					## If userid is not that of root.
-	echo -e "${RED}Permission denied.${RESET}\n ${USAGE}" 
-	exit $NO_ROOT
+printf "%b" "\nChecking for superuser access...\n" > ${DEST}
+if [[ $EUID -ne 0 ]]; then
+	printf "%b" "${RED}Permission denied.${RESET}\n ${USAGE}" 
+	exit ${NO_ROOT}
 fi
 
 ## Verify that curl is installed.
-echo -e "\nChecking for curl..." > ${DEST}
+printf "%b" "\nChecking for curl...\n" > ${DEST}
 if ! command -v curl > ${DEST}; then
-	echo -e "${RED}Error${RESET}, curl is not installed.  Quitting..."
-	exit $NO_CURL
+	printf "%b" "${RED}Error${RESET}, curl is not installed.  Quitting...\n"
+	exit ${NO_CURL}
 fi
 
 
 ############ Main script functionality.
 
 ## Run a command to indicate the script is initiating.
-echo -e "Running script-start notification function..." > ${DEST}
+printf "%b" "\nRunning script-start notification function...\n" > ${DEST}
 NOTIFICATION_f "START" &
-sleep 1s
+sleep 1s	## 1 second delay for effect and to allow completion of previous blink1-tool command/s.
 
 ## Check for the RESET flag.  If set, reset the poll result then proceed with normal poll (use to clear "Warning" poll result).
 if [[ -n "$POLLY_RESET" ]]; then
-	echo -e "Clearing warning to reset site poll status."
-	echo -e "$(DATE_f) - Site status reset." >> $LOG_FILE
+	printf "%b" "\nClearing warning to reset site poll status.\n"
+	printf "%b" "$(TIMESTAMP_f) - Site status reset.\n" >> $LOG_FILE
 fi
 
 ## Attempt to curl the url and obtain the response code for $HOST_URL.
-TEST_RESULT=$(curl "${CURL_VERBOSITY}" --output /dev/stdout --write-out '%{http_code}' ${HOST_URL} | tail --lines 1)
-echo -e "\nSite response code: ${TEST_RESULT}" > ${DEST}
+printf "%b" "\nAttempting to poll site (${HOST_URL}) with curl...\n" > ${DEST}
+TEST_RESULT=$(curl ${CURL_VERBOSITY} --output /dev/stdout --write-out '%{http_code}' "${HOST_URL}" | tail --lines 1)
+printf "%b" "\nSite response code: ${BOLD}${TEST_RESULT}${RESET}\n" > ${DEST}
 
 ## A site response code of 200 indicates everything is okay.
 if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
-	echo -e "\n${RED}FAILURE${RESET} - Site down!\n"
-	echo -e "$(DATE_f) - FAILURE - Site not available. Curl returned ${TEST_RESULT}" >> $LOG_FILE
-	echo -e "Running failure notification function..." > ${DEST}
+	printf "%b" "\n${RED}FAILURE${RESET} - Site down!\n\n"
+	printf "%b" "$(TIMESTAMP_f) - FAILURE - Site not available. Curl returned ${TEST_RESULT}\n" >> $LOG_FILE
+	printf "%b" "Running failure notification function...\n\n" > ${DEST}
 	NOTIFICATION_f "FAILED" &
 else
-	if tail --lines 1 $LOG_FILE | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
-		echo -e "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n"
-		echo -e "$(DATE_f) - WARNING - Site running but has recovered from downtime." >> $LOG_FILE
-		echo -e "Running recovered notification function..." > ${DEST}
+	printf "%b" "\nChecking last poll result recorded in log file...\n"
+	if tail --lines 1 ${LOG_FILE} | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
+		printf "%b" "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n\n"
+		printf "%b" "$(TIMESTAMP_f) - WARNING - Site running but has recovered from downtime.\n" >> $LOG_FILE
+		printf "%b" "Running recovered notification function...\n\n" > ${DEST}
 		NOTIFICATION_f "RECOVERED" &
 	else													## Site is up.
-		echo -e "\n${GREEN}SUCCESS${RESET} - Everything seems okay.\n"
-		echo -e "$(DATE_f) - SUCCESS - Site is up, everything seems okay." >> $LOG_FILE
-		echo -e "Running success notification command..." > ${DEST}
+		printf "%b" "\n${GREEN}SUCCESS${RESET} - Everything seems okay.\n\n"
+		printf "%b" "$(TIMESTAMP_f) - SUCCESS - Site is up, everything seems okay.\n" >> $LOG_FILE
+		printf "%b" "Running success notification command...\n\n" > ${DEST}
 		NOTIFICATION_f "OK" &
 	fi
 fi
+
