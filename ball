@@ -125,7 +125,7 @@ else
 fi
 
 ########## Loop through the remote system list.
-if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\n${SEPARATOR}\n"; fi
+if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\n${SEPARATOR}\n\n"; fi
 {
 	printf "%b" "$(TIMESTAMP_f) - Script initiated for following hosts:\n"
 	cat "${TEMP_REM_SYS_LIST}"
@@ -134,15 +134,20 @@ while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entr
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
 	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run \"${BLUE}${COMMAND}${RESET}\" on \"${BLUE}${REM_SYS}${RESET}\"\n"; fi
 	printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[@]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n" >> ${DEST}
+	printf "%b" "\n${BOLD}############################## BEGIN CLIENT OUTPUT ###############################\n${RESET}" >> ${DEST}
 	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}" > ${DEST}; then ## Command failed.
+		printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n" >> ${DEST}
 		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${RED}Failure.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
 		printf "%b" "$(TIMESTAMP_f) [X] Failed to run ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
-		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${RED}Failure.${RESET}\n${SEPARATOR}\n"; fi
+		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${RED}Failure.${RESET}  Command failed on \"${BLUE}${REM_SYS}${RESET}\"\n\n${SEPARATOR}\n\n"; fi
+
 		continue
 	else	## Command is successful.
+		printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n\n" >> ${DEST}
 		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${GREEN}Success.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
 		printf "%b" "$(TIMESTAMP_f) [√] Successfully ran ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
-		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${GREEN}Success.${RESET}\n${SEPARATOR}\n"; fi
+		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${GREEN}Success.${RESET}  Command succeded on \"${BLUE}${REM_SYS}${RESET}\"\n\n${SEPARATOR}\n\n"; fi
+
 	fi
 done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
 
