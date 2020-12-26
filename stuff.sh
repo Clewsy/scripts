@@ -340,7 +340,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 		for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
 			DEV_NAME=$(cut -d "\"" -f 4 <<< "${DEV_DUMP[$E]}")
 			LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[$E]}" | wc -m) / 6 )) ## Determine level by counting initial whitespace.
-			NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+1))]}" | wc -m) / 6 )) ## Determine level by counting initial whitespace.
+			NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+1))]}" | wc -m) / 6 ))
 			DIFF=$((NEXT_LEVEL-LEVEL))
 			NUM_CHILDREN=0
 
@@ -352,7 +352,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 				## Increment the counter and check the next element.
 				((i++))
-				NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+i))]}" | wc -m) / 6 )) ## Determine level by counting initial whitespace.
+				NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+i))]}" | wc -m) / 6 )) ## Determine level by initial whitespace.
 				DIFF=$((NEXT_LEVEL-LEVEL))
 			done
 
