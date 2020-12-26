@@ -23,19 +23,19 @@ Uses rsync to back up files and directories in a list file to a remote server.  
 Written for use with [Termux][link_web_termux] to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
 
 ---
-[**polly.sh**][link_repo_polly.sh]
+[**polly**][link_repo_polly]
 
 Called as a cronjob to regularly poll a web site and check the return code.  Logs site status to file and uses a [blink(1)][link_web_blink1] as a visual status indicator.
 
 ---
 
-[**pong.sh**][link_repo_pong.sh]
+[**pong**][link_repo_pong]
 
 Runs through a list of servers, pings each once for a second then returns a success or fail result.
 
 ---
 
-[**stuff.sh**][link_repo_stuff.sh]
+[**stuff**][link_repo_stuff]
 
 Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 
@@ -47,7 +47,7 @@ Prints an ascii-art logo and some basic system info to the command line.
 
 ---
 
-[**vpn.sh**][link_repo_vpn.sh]
+[**vpn**][link_repo_vpn]
 
 Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
 
@@ -59,7 +59,7 @@ Pulls and displays info (IP, country, city, etc) from [ipinfo.io][link_web_ipinf
 
 ---
 
-[**whodis.sh**][link_repo_whodis.sh]
+[**whodis**][link_repo_whodis]
 
 Grabs the contents of the /tmp/dhcp.leases file on a remote router, does some basic formatting and prints it to stdout.
 
@@ -107,13 +107,13 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_ball]:ball
 [link_repo_bu]:bu
 [link_repo_p0wer_switch.sh]:p0wer_switch.sh
-[link_repo_polly.sh]:polly.sh
-[link_repo_pong.sh]:pong.sh
-[link_repo_stuff.sh]:stuff.sh
+[link_repo_polly]:polly
+[link_repo_pong]:pong
+[link_repo_stuff]:stuff
 [link_repo_terbling.sh]:terbling.sh
-[link_repo_vpn.sh]:vpn.sh
+[link_repo_vpn]:vpn
 [link_repo_wami]:wami
-[link_repo_whodis.sh]:whodis.sh
+[link_repo_whodis]:whodis
 [link_repo_archive_cal_backup.sh]:archive/cal_backup.sh
 [link_repo_archive_chuck.sh]:archive/chuck.sh
 [link_repo_archive_grab.sh]:archive/grab.sh
