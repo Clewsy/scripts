@@ -33,8 +33,9 @@ GRAY="\\033[00;40m"
 WHITE="\\033[00;37m"
 
 ## Set theme colour.
-COL="${CYAN}"
+DEFAULT_COL="${CYAN}"
 
+## Text emphasis.
 BOLD="\\033[1m"
 DIM="\\033[2m"
 RESET="\\033[0m"
@@ -82,11 +83,26 @@ shift $((OPTIND -1))		## This ensures only non-option arguments are considered a
 if [ -z "$OPTIONS" ]; then GET_ALL_INFO="TRUE"; fi
 
 ## Ensure no argument was entered.
-if (( $# > 0 )); then
+if (( $# > 1 )); then
 	printf "%b" "${RED}Error:${RESET} Invalid argument.\n"
 	printf "%b" "${USAGE}\n"
 	exit $BAD_ARGUMENT
 fi
+
+## Parse the first argument to set the theme colour.
+case $1 in
+	"BLACK" 	| "black")		COL="${BLACK}";;
+	"RED"		| "red")		COL="${RED}";;
+	"ORANGE"	| "orange")		COL="${ORANGE}";;
+	"GREEN"		| "green")		COL="${GREEN}";;
+	"YELLOW"	| "yellow")		COL="${YELLOW}";;
+	"BLUE"		| "blue")		COL="${BLUE}";;
+	"MAGENTA"	| "magenta")	COL="${MAGENTA}";;
+	"CYAN"		| "cyan")		COL="${CYAN}";;
+	"GRAY"		| "gray")		COL="${GRAY}";;
+	"WHITE"		| "white")		COL="${WHITE}";;
+	*)							COL="${DEFAULT_COL}";;
+esac
 
 ## Begin main output.  Start with a header.
 printf "%b" "\n${COL}${BOLD}╔════════════════════╗${RESET}\n"
@@ -109,17 +125,14 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 		## Print available CPU core temps - lm_sensors
 		for CHECK in {0..11}; do	## Look for up to 12 core temps.
 			CORE_TEMP="$(sensors | grep "Core ${CHECK}" | awk '{print $3}')"
-#D:if [ -n "${CORE_TEMP}" ] && [ "${CORE_TEMP}" != "0" ]; then
 			if [ -n "${CORE_TEMP}" ]; then
 				(( FOUND_CORE_TEMP++ ))
 				CORE_TEMP_[${FOUND_CORE_TEMP}]=${CORE_TEMP}
 			fi
 		done
-#D:		if [ "${FOUND_CORE_TEMP}" -gt 0 ]; then
 		if (( FOUND_CORE_TEMP > 0 )); then
 			printf "%b" "${COL}${BOLD}├─Core Temperatures:${RESET}\n"
 			for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do	## Loop for each found core.
-#D:				if [ "${CORE}" = "${FOUND_CORE_TEMP}" ]; then	printf "%b" "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}"
 				if (( CORE == FOUND_CORE_TEMP )); then	printf "%b" "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"
 				else									printf "%b" "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"; fi
 			done
@@ -133,11 +146,9 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 				FAN_SPEED_[$FOUND_FAN]=${FAN_SPEED}
 			fi
 		done
-#D:		if [ "${FOUND_FAN}" -gt 0 ]; then
 		if (( FOUND_FAN > 0 )); then
 			printf "%b" "${COL}${BOLD}├─Fan Speeds:${RESET}\n"
 			for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do	## Loop for each found fan.
-#D:				if [ "${FAN}" = "${FOUND_FAN}" ]; then	echo -e "${COL}│ └─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm"	## Last found fan.
 				if (( FAN == FOUND_FAN )); then	printf "%b" "${COL}│ └─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"
 				else							printf "%b" "${COL}│ ├─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"; fi
 			done
@@ -147,11 +158,9 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 	###############################
 	## Print available core temp - raspberry pi.
 	## Sensors is not available or returned no temps, but temp file is present (likely a pi) so use that to show temperature.
-#D:	if [ "${FOUND_CORE_TEMP}" = "0" ] && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
 	if (( FOUND_CORE_TEMP == 0 )) && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
-		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)	## File contains integer value equal to 1000*temperature
-#D:		if [ "${RAW_CORE_TEMP}" ]; then						## Successfully read teamp file.
-		if (( RAW_CORE_TEMP )); then						## Successfully read teamp file.
+		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)	## File contains inte value equal to 1000*temp.
+		if (( RAW_CORE_TEMP )); then
 			CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
 			printf "%b" "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}\n"
 		fi
@@ -192,32 +201,28 @@ if [[ ${GET_P_PRODUCT_INFO} || ${GET_ALL_INFO} ]]; then
 		if		[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ] &&	[ -n "${SYS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})\n"
 		elif	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ];							then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}\n"
 		elif 	[ -n "${PRODUCT_NAME}" ] &&									[ -n "${SYS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})\n"
-		elif	[ -n "${PRODUCT_NAME}" ];															then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}\n"
-fi #D:		else																								printf "%b" "${COL}${BOLD}├─Product:${RESET} Information not found\n"; fi
+		elif	[ -n "${PRODUCT_NAME}" ];															then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}\n"; fi
 
 		###############################
 		## Print available chassis info
 		if		[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ] &&	[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})\n"
 		elif	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ];								then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}\n"
 		elif	[ -n "${CHASSIS_TYPE}" ] &&									[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})\n"
-		elif	[ -n "${CHASSIS_TYPE}" ];																then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}\n"
-fi #D:		else																									printf "%b" "${COL}${BOLD}├─Chassis:${RESET} Information not found\n"; fi
+		elif	[ -n "${CHASSIS_TYPE}" ];																then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}\n"; fi
 
 		###############################
 		## Print available motherboard info
 		if		[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ] &&	[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})\n"
 		elif	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ];									then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}\n"
 		elif	[ -n "${BOARD_NAME}" ] &&									[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})\n"
-		elif	[ -n "${BOARD_NAME}" ];																	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}\n"
-fi #D:		else																									printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} Information not found\n"; fi
+		elif	[ -n "${BOARD_NAME}" ];																	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}\n"; fi
 
 		###############################
 		## Print available bios info
 		if		[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ] &&	[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})\n"
 		elif	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ];								then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}\n"
 		elif	[ -n "${BIOS_DATE}" ] &&								[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})\n"
-		elif	[ -n "${BIOS_DATE}" ];																then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}\n"
-fi #D:		else																								printf "%b" "${COL}${BOLD}└─BIOS:${RESET} Information not found\n"; fi
+		elif	[ -n "${BIOS_DATE}" ];																then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}\n"; fi
 	fi
 fi
 
@@ -318,7 +323,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 		for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
 			if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
 			if ! grep -e "name" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
-			DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}	## Eliminate all but the initial whitespace.  LEVEL determined by whitespace count.
+			DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}	## Eliminate all but the initial whitespace.  LEVEL determined by #whitespace.
 		done
 		for ELEMENT in ${DELETE_ELEMENTS[@]}; do unset DEV_DUMP[${ELEMENT}]; done
 
@@ -448,7 +453,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 									C3="${COL}${DIM}│ ${RESET}"
 								fi
 
-								if [ -e /dev/"${WORKING_GRANDCHILD_DEV_NAME}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD}"); fi
+								if [ -e /dev/"${WORKING_GRANDCHILD_DEV_NAME}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD_DEV_NAME}"); fi
 								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $6}')
 								GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $2}')
 								GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $2}')
@@ -512,7 +517,7 @@ fi
 
 ####################################################################################################################################
 ## -o : Print OS kernel and distribution info
-if [[ -n "$GET_O_OS_INFO" || -n "$GET_ALL_INFO" ]]; then
+if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
 	OS_NAME=$(uname -o)
 	ARCH=$(uname -m)
 	KERNEL=$(uname -s)
@@ -541,95 +546,72 @@ fi
 
 ###############################################################################################################################################################
 ## -n : Print network and network interface info
-if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
-	echo -e "${COL}${BOLD}Network:${RESET}"
+if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
+	printf "%b" "${COL}${BOLD}Network:${RESET}\n"
 
 	## Show external IP
-	if ! command -v curl >> /dev/null ; then					## If curl not installed
-		EXT_IP="Cannot determine - curl not installed."				## Print a "no curl" error
+	if ! command -v curl >> /dev/null ; then
+		EXT_IP="Cannot determine - curl not installed."
 	else
-		EXT_IP=$(curl --silent --max-time 5 https://ipecho.net/plain)		## Determine external IP
-		if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi		## If no data exists for ext_ip, create error message.
-		echo -e "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}"			## Print EXT_IP
+		EXT_IP=$(curl --silent --max-time 5 https://ipecho.net/plain)
+		if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi
+		printf "%b" "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}\n"
 	fi
 
 	## Show primary dns address
-	if command -v nmcli >> /dev/null ; then	DNS=$(nmcli dev show | grep -m 1 "DNS" | tr -s " " | cut -d " " -f 2)	## Preferably determine DNS using nmcli command
-	elif [ -f /etc/resolv.conf ] ; then	DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)	## Alternatively grep first DNS from resolv.conf
-	else					DNS="Not found (no nmcli and no /etc/resolve.conf)." ; fi
-
-
-	if [ -n "${DNS}" ]; then echo -e "${COL}${BOLD}├─DNS:${RESET} ${DNS}"; fi	## If data exists for DNS
+	if command -v nmcli > /dev/null; then			DNS=$(nmcli dev show | grep -m 1 "DNS" | tr -s " " | cut -d " " -f 2)
+	elif  command -v resolvectl > /dev/null; then	DNS=$(resolvectl status | grep -e "DNS Servers:" | awk '{print $3}')
+	elif [ -f /etc/resolv.conf ]; then				DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)
+	else											DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
+	if [ -n "${DNS}" ]; then printf "%b" "${COL}${BOLD}├─DNS:${RESET} ${DNS}\n"; fi
 
 	## Show default gateway address
-	if ! command -v ip >> /dev/null ; then							## If ip not installed
-		if ! command -v route >> /dev/null ; then					## If route not installed
-			if ! command -v netstat >> /dev/null ; then				## If netstat not installed
-				GW="Cannot determine default gateway address (ip nor route nor netstat installed)"
-			else
-				GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')	## Use netstat to determine the gateway
-			fi
-		else
-			GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')			## Use route to determine the gateway
-		fi
-	else
-		GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)				## Use ip to determine the gateway
-	fi
+	if command -v ip > /dev/null ; then			GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
+	elif command -v route > /dev/null ; then	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+	elif command -v netstat > /dev/null ; then	GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+	else										GW="Cannot determine default gateway address (ip nor route nor netstat installed)"; fi
 	if [ "${GW}" = "" ]; then GW="Could not detect gateway."; fi
-	echo -e "${COL}${BOLD}├─Gateway:${RESET} ${GW}"						## Print the gateway address
+	printf "%b" "${COL}${BOLD}├─Gateway:${RESET} ${GW}\n"
 
 	## Get hostname
-	echo -e "${COL}${BOLD}├─Hostname:${RESET} $(uname -n)"
+	printf "%b" "${COL}${BOLD}├─Hostname:${RESET} $(uname -n)\n"
 
 	## Get info for all network interface devices (physical and virtual)
-	if ! find /sys/class/net &> /dev/null ; then echo -e "${COL}${BOLD}└─Interface:${RESET} Cannot detect interfaces (no /sys/class/net/)."
+	if ! find /sys/class/net &> /dev/null ; then printf "%b" "${COL}${BOLD}└─Interface:${RESET} Cannot detect interfaces (no /sys/class/net/).\n"
 	else
 
-		NUM_DEVS=$(find /sys/class/net -type l | wc -w)		## Determine the number of network interfaces.
-		for (( c=1; c<=NUM_DEVS; c++ ))				## Run this loop for each interface.
+		## Run this loop for each interface.
+		NUM_DEVS=$(find /sys/class/net -type l | wc -w)
+		for (( c=1; c<=NUM_DEVS; c++ ))
 		do
-			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)				## Select working interface from the list of interfaces
-			if [ -e /sys/class/net/"${WORKING_INTERFACE}"/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)		## Status up, down or unknown
-			else								STATUS="unknown"; fi
-			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)										## MAC address of the inteface.
+			## Define current interface in list.
+			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)
+			if (( c == NUM_DEVS )); then	printf "%b" "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}  ${RESET}"
+			else							printf "%b" "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}│ ${RESET}"; fi
 
-			if (( c==NUM_DEVS )); then	echo -e "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}${BOLD}  ${RESET}"	## If it's the last interfac
-			else				echo -e "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}" && C1="${COL}${BOLD}│ ${RESET}"; fi
+			## Determine current status of interface.
+			if [ -e /sys/class/net/"${WORKING_INTERFACE}"/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)
+			else															STATUS="unknown"; fi
+
+			## Determine the MAC address of interface.
+			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)
 
 			## Determine the IP address assigned o the interface
-			## Check if the status of the inteface is "up" or "unkown" (not "down")
-			if [ "${STATUS}" != "down" ]; then ## If so, print the designated IP address.
-				if ! command -v ip >> /dev/null ; then				# If ip is not installed (send to /dev/null to suppress stdout)
-					if ! command -v ifconfig >> /dev/null ; then		# If ifconfig is not installed (send to /dev/null to suppress stdout)
-						IP="Cannot determine interface ip address (neither ip nor ifconfig installed)"
-					else
-						IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)	## Use ifconfig
-					fi
-				else
-					IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)			## Use ip
-				fi
+			if [ "${STATUS}" != "down" ]; then
+				if command -v ip > /dev/null; then				IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)
+				elif command -v ifconfig >> /dev/null ; then	IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)
+				else											IP="Cannot determine interface ip address (neither ip nor ifconfig installed)"; fi
 			fi
 
 			## Determine the connected ESSID (if present)
-			## Check if the current interface is connected to WIFI.  If so, show ESSID.
-			if ! command -v iwgetid >> /dev/null ; then			## If iwgetid is not installed (send to /dev/null to suppress stdout)
-				if ! command -v iw >> /dev/null ; then			## If iw is not installed (send to /dev/null to suppress stdout)
-					if ! command -v nmcli >> /dev/null ; then	## If nmcli is not installed (send to /dev/null to suppress stdout)
-						ESSID=""
-					else
-						ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)	## Use nmcli to determine ESSID
-					fi
-				else
-					ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)		## Use iw to detemine ESSID
-				fi
-			else
-				IF_WIFI_CONN=$(iwgetid | awk '{print $1}')				## Use iwgetid to determine ESSID
-				if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then		## If iwgetid shows that WORKING_INTERFACE has a connected ESSID
-					ESSID=$(iwgetid -r)						## Then get the ESSID.
-				else
-					ESSID=""							## Needed in-case previous loop iteration sets ESSID
-				fi
-			fi
+			if command -v iwgetid >> /dev/null ; then
+				IF_WIFI_CONN=$(iwgetid | awk '{print $1}')
+				if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then	ESSID=$(iwgetid -r)
+				else														ESSID=""; fi
+			elif command -v iw > /dev/null; then	ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)
+			elif command -v nmcli > /dev/null; then	ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)
+			else									ESSID=""; fi
+
 			if [ "${ESSID}" == "Wired" ] ; then ESSID=""; fi		## If an essid was found
 
 			## Clear and then set the array of interface specs
@@ -640,16 +622,16 @@ if [[ -n "$GET_N_NETWORK_INFO" || -n "$GET_ALL_INFO" ]]; then
 			if [ -n "${ESSID}" ]; then	INT_SPECS+=("${COL}Connected ESSID:${RESET} ${ESSID}"); fi
 
 			## Print out each of the identified specifications for the current inteface
-			for (( icspec=0; icspec<${#INT_SPECS[@]}; icspec++ ))					## Loop for ech grandchild spec
+			for (( icspec=0; icspec<${#INT_SPECS[@]}; icspec++ ))
 			do
-				if (( icspec==(${#INT_SPECS[@]}-1) )); then	C2="${COL}└─${RESET}"	## If last spec in array
-				else						C2="${COL}├─${RESET}"; fi
-				echo -e "${C1}${C2}${INT_SPECS[icspec]}"				## Print the spec
+				if (( icspec==(${#INT_SPECS[@]}-1) )); then	C2="${COL}└─${RESET}"
+				else										C2="${COL}├─${RESET}"; fi
+				printf "%b" "${C1}${C2}${INT_SPECS[icspec]}\n"
 			done
 		done
 	fi
 fi
 
-echo -e "${COL}${BOLD}──────────────────────────────────────────────────${RESET}\n"
+printf "%b" "${COL}${BOLD}──────────────────────────────────────────────────${RESET}\n\n"
 
 exit ${SUCCESS}
