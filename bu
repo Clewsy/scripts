@@ -47,7 +47,7 @@ if [ ! -w "$(dirname "${BU_LOG_FILE}")" ]; then
 fi
 
 ##########Function to print current date and time.  Used for logging.
-TIMESTAMP_f () { printf "%s" "$(date +%Y-%m-%d\ %T)"; }
+TIMESTAMP_f () { date +%Y-%m-%d\ %T; }
 
 ##########Function for exit conditions.  Log error or success and exit.
 QUIT_f ()
