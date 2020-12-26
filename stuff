@@ -82,7 +82,7 @@ shift $((OPTIND -1))		## This ensures only non-option arguments are considered a
 ## If no options selected,assumes -A option so set GET_ALL_INFO flag.
 if [ -z "$OPTIONS" ]; then GET_ALL_INFO="TRUE"; fi
 
-## Ensure no argument was entered.
+## Ensure no more than 1 argument was entered.
 if (( $# > 1 )); then
 	printf "%b" "${RED}Error:${RESET} Invalid argument.\n"
 	printf "%b" "${USAGE}\n"
