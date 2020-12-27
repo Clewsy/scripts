@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 #!/bin/bash
-#: Title:		: bp0wer_switch
+#: Title:		: p0wer_switch
 #: Author		: clewsy (clewsy.pro)
 #: Description	: Script for use with Termux on phone or tablet. Connects to p0wer server over local network if available, otherwise
 #:				: attempts a remote connection.  Once connected, runs ${COMMAND}. Intended to run p0wer app on p0wer server to
