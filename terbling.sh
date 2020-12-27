@@ -1,8 +1,14 @@
 #!/bin/bash
+#: Title:		: terbling
+#: Author		: clewsy (clewsy.pro)
+#: Description	: Just show the logo and some basic system info.
+#: Options		: None.
 
-## Just show the logo and some basic system info.
+## Exit codes.
+SUCCESS=0
+BAD_ARGUMENT=1
 
-## Define theme colour options.
+## Define colours and formatting.
 BLACK="\\033[00;30m"
 RED="\\033[00;31m"
 ORANGE="\\033[00;38;5;214m"
@@ -14,77 +20,98 @@ CYAN="\\033[00;36m"
 GRAY="\\033[00;40m"
 WHITE="\\033[00;37m"
 
-## Set theme colour.
-COL="${GREEN}"
-COL_L="${COL}"
-
 BOLD="\\033[1m"
 DIM="\\033[2m"
 RESET="\\033[0m"
 
-###############################################################################################################################################################
+## Set theme colour.
+DEFAULT_COL="${CYAN}"
+
+## Ensure no more than 1 argument was entered.
+if (( $# > 1 )); then
+	printf "%b" "${RED}Error:${RESET} Invalid argument.\n"
+	printf "%b" "${USAGE}\n"
+	exit $BAD_ARGUMENT
+fi
+
+## Parse the first argument to set the theme colour.
+case $1 in
+	"BLACK" 	| "black")		COL="${BLACK}";;
+	"RED"		| "red")		COL="${RED}";;
+	"ORANGE"	| "orange")		COL="${ORANGE}";;
+	"GREEN"		| "green")		COL="${GREEN}";;
+	"YELLOW"	| "yellow")		COL="${YELLOW}";;
+	"BLUE"		| "blue")		COL="${BLUE}";;
+	"MAGENTA"	| "magenta")	COL="${MAGENTA}";;
+	"CYAN"		| "cyan")		COL="${CYAN}";;
+	"GRAY"		| "gray")		COL="${GRAY}";;
+	"WHITE"		| "white")		COL="${WHITE}";;
+	*)							COL="${DEFAULT_COL}";;
+esac
+
+####################################################################################################################################
 ## Bios info
 BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date)
 BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version)
 BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor)
-S01="${COL}${BOLD}Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})"	## Bios date, version, vendor
+S01="${BOLD}Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})"
 
-###############################################################################################################################################################
+####################################################################################################################################
 ## CPU info
-CPU_MODEL=$(lscpu | grep "Model name" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_VENDOR=$(lscpu | grep "Vendor ID" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_ARCH=$(lscpu | grep "Architecture" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_MODE=$(lscpu | grep "CPU op-mode" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_CORES=$(lscpu | grep -m 1 "CPU(s)" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_SPEED=$(lscpu | grep "CPU MHz" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_MAX_SPEED=$(lscpu | grep "CPU max" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
-CPU_MIN_SPEED=$(lscpu | grep "CPU min" | tr -s " " | cut -d ":" -f 2 | cut -c2-)
+CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:" | sed 's/Model name: *//')
+CPU_VENDOR=$(lscpu | grep -m 1 -e "Vendor ID:" | sed 's/Vendor ID: *//')
+CPU_ARCH=$(lscpu | grep -m 1 -e "Architecture:" | sed 's/Architecture: *//')
+CPU_MODE=$(lscpu | grep -m 1 -e "CPU op-mode(s):" | sed 's/CPU op-mode(s): *//')
+CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):" | sed 's/CPU(s): *//')
+CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:" | sed 's/CPU MHz: *//')
+CPU_MAX_SPEED=$(lscpu | grep -m 1 -e "CPU max MHz:" | sed 's/CPU max MHz: *//')
+CPU_MIN_SPEED=$(lscpu | grep -m 1 -e "CPU min MHz:" | sed 's/CPU min MHz: *//')
 
-S02="${COL}${BOLD}Processor:${RESET}"
-S03="${COL}--Model:${RESET} ${CPU_MODEL}"		## CPU model
-S04="${COL}--Vendor:${RESET} ${CPU_VENDOR}"		## CPU vendor
-S05="${COL}--Architecture:${RESET} ${CPU_ARCH}"		## Architecture
-S06="${COL}--Mode(s):${RESET} ${CPU_MODE}"		## CPU op-mode(s)
-S07="${COL}--Cores:${RESET} ${CPU_CORES}"		## CPU(s)
-S08="${COL}--Speed:${RESET} ${CPU_SPEED}MHz"		## CPU MHz
-S09="${COL}--Max Speed:${RESET} ${CPU_MAX_SPEED}MHz"	## Max CPU MHz
-S10="${COL}--Min Speed:${RESET} ${CPU_MIN_SPEED}MHz"	## Min CPU MHz
+S02="${BOLD}Processor:${RESET}"
+S03="--Model:${RESET} ${CPU_MODEL}"
+S04="--Vendor:${RESET} ${CPU_VENDOR}"
+S05="--Architecture:${RESET} ${CPU_ARCH}"
+S06="--Mode(s):${RESET} ${CPU_MODE}"
+S07="--Cores:${RESET} ${CPU_CORES}"
+S08="--Speed:${RESET} ${CPU_SPEED}MHz"
+S09="--Max Speed:${RESET} ${CPU_MAX_SPEED}MHz"
+S10="--Min Speed:${RESET} ${CPU_MIN_SPEED}MHz"
 
-###############################################################################################################################################################
+####################################################################################################################################
 ## OS kernel and distribution info
-S11="${COL}${BOLD}Operating System:${RESET}"
-S12="${COL}--OS:${RESET} $(uname -o)"								## OS
-S13="${COL}--Architecture:${RESET} $(uname -m)"							## Architecture
-S14="${COL}--Kernel:${RESET} $(uname -s)"							## Kernel
-S15="${COL}${DIM}----Version:${RESET} $(uname -v)"						## Kernel version
-S16="${COL}${DIM}----Release:${RESET} $(uname -r)"						## Kernel release
-S17="${COL}--Distribution:${RESET} $(grep "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"	## Distro
-S18="${COL}${DIM}----Version:${RESET} $(grep "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"	## Distro version
-S19="${COL}${DIM}----ID:${RESET} $(grep "^ID=" /etc/os-release | cut -d "=" -f 2)"		## Distro ID
-S20="${COL}${DIM}----Codename:${RESET} $(lsb_release -c | cut -f2)"				## Distro codename
+S11="${BOLD}Operating System:${RESET}"
+S12="--OS:${RESET} $(uname -o)"
+S13="--Architecture:${RESET} $(uname -m)"
+S14="--Kernel:${RESET} $(uname -s)"
+S15="${DIM}----Version:${RESET} $(uname -v)"
+S16="${DIM}----Release:${RESET} $(uname -r)"
+S17="--Distribution:${RESET} $(grep -e "^PRETTY_NAME=" /etc/os-release | cut -d "\"" -f 2)"
+S18="${DIM}----Version:${RESET} $(grep -e "^VERSION=" /etc/os-release | cut -d "\"" -f 2)"
+S19="${DIM}----ID:${RESET} $(grep -e "^ID=" /etc/os-release | cut -d "=" -f 2)"
+S20="${DIM}----Codename:${RESET} $(lsb_release -c | cut -f2)"
 
-###############################################################################################################################################################
+####################################################################################################################################
 ## Output
-echo -e "
-${COL_L}${BOLD}               ____	    ${S01}
-${COL_L}${BOLD}              /   /    /\    ${S02}
-${COL_L}${BOLD}             /   /    /  \    ${S03}
-${COL_L}${BOLD}            /   /    /    \    ${S04}
-${COL_L}${BOLD}           /   /    /      \    ${S05}
-${COL_L}${BOLD}          /   /    /   /\   \    ${S06}
-${COL_L}${BOLD}         /   /    /   /  \   \    ${S07}
-${COL_L}${BOLD}        /   /    /    \   \   \    ${S08}
-${COL_L}${BOLD}       /   /    /      \   \   \    ${S09}
-${COL_L}${BOLD}      /   /    /   /\   \   \   \    ${S10}
-${COL_L}${BOLD}     /   /    /   /  \   \   \   \    ${S11}
-${COL_L}${BOLD}    /   /    /   /    \   \   \   \    ${S12}
-${COL_L}${BOLD}   /   /____/   /______\   \   \   \    ${S13}
-${COL_L}${BOLD}  /                         \   \   \    ${S14}
-${COL_L}${BOLD} /________________________   \   \   \    ${S15}
-${COL_L}${BOLD}                          \   \   \  /    ${S16}
-${COL_L}${BOLD}   ________________________\   \   \/    ${S17}
-${COL_L}${BOLD}   \                            \       ${S18}
-${COL_L}${BOLD}    \____________________________\     ${S19}
-${COL_L}${BOLD}				      ${S20}
+printf "%b" "
+${COL}${BOLD}               ____	    ${S01}
+${COL}${BOLD}              /   /    /\    ${S02}
+${COL}${BOLD}             /   /    /  \    ${S03}
+${COL}${BOLD}            /   /    /    \    ${S04}
+${COL}${BOLD}           /   /    /      \    ${S05}
+${COL}${BOLD}          /   /    /   /\   \    ${S06}
+${COL}${BOLD}         /   /    /   /  \   \    ${S07}
+${COL}${BOLD}        /   /    /    \   \   \    ${S08}
+${COL}${BOLD}       /   /    /      \   \   \    ${S09}
+${COL}${BOLD}      /   /    /   /\   \   \   \    ${S10}
+${COL}${BOLD}     /   /    /   /  \   \   \   \    ${S11}
+${COL}${BOLD}    /   /    /   /    \   \   \   \    ${S12}
+${COL}${BOLD}   /   /____/   /______\   \   \   \    ${S13}
+${COL}${BOLD}  /                         \   \   \    ${S14}
+${COL}${BOLD} /________________________   \   \   \    ${S15}
+${COL}${BOLD}                          \   \   \  /    ${S16}
+${COL}${BOLD}   ________________________\   \   \/    ${S17}
+${COL}${BOLD}   \                            \       ${S18}
+${COL}${BOLD}    \____________________________\     ${S19}
+${COL}${BOLD}				      ${S20}\n\n\n"
 
-"
+exit ${SUCCESS}
