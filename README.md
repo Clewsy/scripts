@@ -41,7 +41,7 @@ Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/m
 
 ---
 
-[**terbling.sh**][link_repo_terbling.sh]
+[**terbling**][link_repo_terbling]
 
 Prints an ascii-art logo and some basic system info to the command line.
 
@@ -110,7 +110,7 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_polly]:polly
 [link_repo_pong]:pong
 [link_repo_stuff]:stuff
-[link_repo_terbling.sh]:terbling.sh
+[link_repo_terbling]:terbling
 [link_repo_vpn]:vpn
 [link_repo_wami]:wami
 [link_repo_whodis]:whodis
