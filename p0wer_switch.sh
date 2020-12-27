@@ -1,27 +1,28 @@
 #!/data/data/com.termux/files/usr/bin/bash
+#!/bin/bash
+#: Title:		: bp0wer_switch
+#: Author		: clewsy (clewsy.pro)
+#: Description	: Script for use with Termux on phone or tablet. Connects to p0wer server over local network if available, otherwise
+#:				: attempts a remote connection.  Once connected, runs ${COMMAND}. Intended to run p0wer app on p0wer server to
+#:				: switch on/off a selected mains outlet.
+#: Options		: None
 
-## Termux script for use on phone or tablet.
-## Connects to p0wer server over local network if available.
-## If not available, attempts connection remotely.
-## Once connected, runs $COMMAND
-## Intended to run p0wer programme on p0wer server to switch on/off a selected mains point.
+LOC_USER="b4t"							# User for attempting local network connection (faster).
+LOC_SERVER="p0wer"						# Hostname fo attempting local network connection.
+REM_USER="b4t"							# User for attempting remote network connection (if local fails).
+REM_SERVER="clews.pro"					# Hostname for remote network connection.
+COMMAND="/usr/local/sbin/p0wer a off"	# Command to run on server.
 
-LOC_USER="b4t"		# User for attempting local network connection (faster).
-LOC_SERVER="p0wer"	# Hostname fo rattempting local network connection.
-REM_USER="b4t"		# User for attempting remote network connection (if local fails)
-REM_SERVER="b4t.site"	# Hostname for remote network connection.
-COMMAND="p0wer a on"	# Command to run on server.
-
-echo "Desired command on target: \"${COMMAND}\""
-echo "Attempting local connection."
-if ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"; then		# If local connection succeeds.
-	echo "Command successfully sent locally."
-else								# Local connection timed out.
-	echo "Unable to make local connection.  Attempting remote connection"
+printf "%b" "Desired command on target: \"${COMMAND}\"\n"
+printf "%b" "Attempting local connection.\n"
+if ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"; then
+	printf "%b" "Command successfully sent locally.\n"
+else
+	printf "%b" "Unable to make local connection.  Attempting remote connection.\n"
 	if ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} \"${COMMAND}\""; then
-		echo "Command successfully sent remotely."
-	else							# Remote connection timed out.
-		echo "Unable to connect.  Quitting."
+		printf "%b" "Command successfully sent remotely.\n"
+	else
+		printf "%b" "Unable to connect.  Quitting.\n"
 	fi
 fi
 
