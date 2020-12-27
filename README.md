@@ -18,7 +18,7 @@ Uses rsync to back up files and directories in a list file to a remote server.  
 
 ---
 
-[**p0wer\_switch.sh**][link_repo_p0wer_switch.sh]
+[**p0wer\_switch**][link_repo_p0wer_switch]
 
 Written for use with [Termux][link_web_termux] to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
 
@@ -106,7 +106,7 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_apt_all]:apt_all
 [link_repo_ball]:ball
 [link_repo_bu]:bu
-[link_repo_p0wer_switch.sh]:p0wer_switch.sh
+[link_repo_p0wer_switch]:p0wer_switch
 [link_repo_polly]:polly
 [link_repo_pong]:pong
 [link_repo_stuff]:stuff
