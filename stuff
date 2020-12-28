@@ -42,7 +42,8 @@ RESET="\\033[0m"
 
 ## Define usage/help.
 USAGE="
-Usage: $(basename "$0") [option]
+Usage: $(basename "$0") [option] [theme]
+
 Valid options:
 -A	All info.
 -l	Live data (temps, fan speeds, users, uptime).
@@ -55,6 +56,18 @@ Valid options:
 -o	Operating system and kernel info.
 -n	Network info.
 -h	Print this help.
+
+Valid themes:
+  RED
+  ORANGE
+  YELLOW
+  GREEN
+  BLUE
+  CYAN (default)
+  MAGENTA
+  BLACK
+  GRAY
+  WHITE
 "
 
 ## Get command line options and set appropriate flags.
