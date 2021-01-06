@@ -573,7 +573,7 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 
 	## Show primary dns address
 	if command -v nmcli > /dev/null; then			DNS=$(nmcli dev show | grep -m 1 "DNS" | tr -s " " | cut -d " " -f 2)
-	elif  resolvectl &> /dev/null; then				DNS=$(resolvectl status | grep -e "DNS Servers:" | awk '{print $3}')
+	elif  resolvectl &> /dev/null; then				DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:" | awk '{print $3}')
 	elif [ -f /etc/resolv.conf ]; then				DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)
 	else											DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
 	if [ -n "${DNS}" ]; then printf "%b" "${COL}${BOLD}├─DNS:${RESET} ${DNS}\n"; fi
