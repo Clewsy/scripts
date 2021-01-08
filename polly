@@ -30,7 +30,7 @@ BAD_LOGFILE=4
 
 HOST_URL="https://clews.pro"	## Host url or ip address to test for site status.
 
-LOG_FILE="~/.log/polly.log"	## Log file location.
+LOG_FILE="${HOME}/.log/polly.log"	## Log file location.
 
 DEST="/dev/null"		## Default output destination.  Option -v sets to /dev/stdout for verbose output.
 CURL_VERBOSITY="--silent"	## Default option for use with curl command.  Option -v removes this.
