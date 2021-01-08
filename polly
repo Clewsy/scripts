@@ -25,12 +25,12 @@
 SUCCESS=0
 BAD_OPTION=1
 BAD_ARGUMENT=2
-NO_ROOT=3
-NO_CURL=4
+NO_CURL=3
+BAD_LOGFILE=4
 
 HOST_URL="https://clews.pro"	## Host url or ip address to test for site status.
 
-LOG_FILE="/var/log/polly.log"	## Log file location.
+LOG_FILE="~/.log/polly.log"	## Log file location.
 
 DEST="/dev/null"		## Default output destination.  Option -v sets to /dev/stdout for verbose output.
 CURL_VERBOSITY="--silent"	## Default option for use with curl command.  Option -v removes this.
@@ -52,7 +52,7 @@ NOTIFICATION_f() {
 	pkill blink1-tool
 
 	## Determine desired colour and flashing status.
-	case "$1" in
+	case "${1}" in
 		START)		COLOUR=${BLINK_BLUE};	FLASH="" ;;
 		FAILED)		COLOUR=${BLINK_RED};	FLASH=${BLINK_FLASH} ;;
 		RECOVERED)	COLOUR=${BLINK_ORANGE};	FLASH="" ;;
@@ -76,20 +76,18 @@ $(basename "$0") will poll a defined URL (${HOST_URL}) and log the result.
 
 Usage: $(basename "$0") [option]
 Valid options:
--p	Standard poll: check site status, show & log the result. (requires root)
+-p	Standard poll: check site status, show & log the result.
 -s	Show the current status (i.e. result of last poll).
 -l	Show the full log.
--r	Reset the recovered flag. (requires root)
+-r	Reset the recovered flag.
 -v 	Verbose output.
 -h	Show help.
-<none>	Same as -p, standard poll. (requires root)
-
-Note, some options must be run with root/superuser privileges.
+<none>	Same as -p, standard poll.
 "
 
 ## Parse selected options.
 while getopts 'pslrvh' OPTION; do
-	case "$OPTION" in
+	case "${OPTION}" in
 		p)	;;
 		s)	printf "%b" "Fetching current status (last poll result):\n"
 			tail -n -1 ${LOG_FILE}
@@ -103,7 +101,7 @@ while getopts 'pslrvh' OPTION; do
 		h)	printf "%b" "${USAGE}\n"
 			exit ${SUCCESS} ;;
 		?)	echo -e "${USAGE}"
-			exit $BAD_OPTION ;;
+			exit ${BAD_OPTION} ;;
 	esac
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
@@ -115,15 +113,28 @@ if (( $# > 0 )); then
 	exit ${BAD_ARGUMENT}
 fi
 
-## Verify that script was called with superuser permissions.
-printf "%b" "\nChecking for superuser access...\n" > ${DEST}
-if [[ $EUID -ne 0 ]]; then
-	printf "%b" "${RED}Permission denied.${RESET}\n ${USAGE}" 
-	exit ${NO_ROOT}
-fi
-
 ## Verify that curl is installed.
 printf "%b" "\nChecking for curl...\n" > ${DEST}
+if ! command -v curl > ${DEST}; then
+	printf "%b" "${RED}Error${RESET}, curl is not installed.  Quitting...\n"
+	exit ${NO_CURL}
+fi
+
+## Ensure the logfile location exists and is writable.
+printf "%b" "\nEnsuring logfile directory exists...\n" > ${DEST}
+if [ ! -d $(dirname ${LOG_FILE}) ]; then
+	printf "%b" "Logfile directory doesn't exist.  Will attempt to create...\n" > ${DEST}
+	if ! mkdir $(dirname ${LOG_FILE}) &> ${DEST}; then
+		printf "%b" "${RED}Error${RESET}, cannot create logfile directory.  Quitting...\n"
+		exit ${BAD_LOGFILE}
+	fi
+printf "%b" "\nEnsuring logfile is writable...\n" > ${DEST}
+elif [[ ! -w $(dirname ${LOG_FILE}) || -e ${LOG_FILE} && ! -w ${LOG_FILE} ]]; then
+	printf "%b" "${RED}Error${RESET}, logfile (${LOG_FILE}) is not accessible.  Quitting...\n"
+	exit ${BAD_LOGFILE}
+fi
+
+## Ensure curl is installed.
 if ! command -v curl > ${DEST}; then
 	printf "%b" "${RED}Error${RESET}, curl is not installed.  Quitting...\n"
 	exit ${NO_CURL}
