@@ -1,24 +1,25 @@
 #!/bin/bash
 #: Title:	: polly
 #: Author	: clewsy (clewsy.pro)
-#: Description	: Poll a url and check for successful response code 200.  Logs results and provides visual status indication via a blink(1) device on an LED port.
-#:		: Intended to be run as a cron job, for example to run every 5 minutes:	*/5 * * * * /home/user/bin/polly
+#: Description	: Poll a url and check for successful response code 200.  Logs results and provides visual status indication via a
+#:		: blink(1) device on an LED port.  Intended to be run as a cron job, for example to run every 5 minutes:
+#:		: */5 * * * * /usr/local/sbin/polly
 #: Options	: -p - Poll url and check status.  This is the primary function of the script.
 #:		: -s - Show last Status.  Effecticely displays the last entry in the log file.  Does not run a new poll operation.
-#:		: -l - Show Log file.  Effectively cats the entire log file.
-#:		: -r - Reset status.  Allows resetting status from "RECOVERED" to "OK" (assuming new poll results in "OK" and not "FAILED").
+#:		: -l - Show Log file.  Effectively dumps the entire log file to stdout.
+#:		: -r - Reset status.  Allows resetting from "RECOVERED" to "OK" (assuming new poll returns "OK", not "FAILED").
 #:		: -v - Verbose mode.  Shows additional output.
 #:		: -h - Help.  Print usage information.
 #: Notes	: For long-term deployment, consider configuring a logrotate file.  For example:
 #:		: #/etc/logrotate.d/polly
 #:		: /home/.log/polly.log {
-#:		:   su user user
+#:		:   su root root
 #:		:   monthly
 #:		:   rotate 12
 #:		:   compress
 #:		:   missingok
 #:		:   notifempty
-#:		:   create 644 user user
+#:		:   create 644 root root
 #:		: }
 
 ## Exit codes.
@@ -30,7 +31,7 @@ BAD_LOGFILE=4
 
 HOST_URL="https://clews.pro"	## Host url or ip address to test for site status.
 
-LOG_FILE="${HOME}/.log/polly.log"	## Log file location.
+LOG_FILE="/var/log/polly.log"	## Log file location.
 
 DEST="/dev/null"		## Default output destination.  Option -v sets to /dev/stdout for verbose output.
 CURL_VERBOSITY="--silent"	## Default option for use with curl command.  Option -v removes this.
