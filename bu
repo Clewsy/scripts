@@ -154,10 +154,10 @@ printf "%b" "Configured rsync options : ${BLUE}${RSYNC_OPTIONS[*]}${RESET}\n" > 
 
 ##########Determine server hostname (i.e. use local network or remote network).
 printf "%b" "\nChecking for local or remote backup server availability.\n" > ${DEST}
-if ssh "${SSH_OPTIONS[@]}" "${BU_USER}@${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then		## If connected to local server...
+if ssh "${SSH_OPTIONS[@]}" "${BU_USER}@${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then		## If connected to local server.
 	BU_SERVER="${BU_SERVER_LOCAL}"							## Use the local server.
 	printf "%b" "Using local server: ${BLUE}${BU_USER}${RESET}@${BLUE}${BU_SERVER}${RESET}\n" > ${DEST}
-elif ssh "${SSH_OPTIONS[@]}" "${BU_USER}@${BU_SERVER_REMOTE}" "exit" > ${DEST} 2>&1; then	## Else if connected to remote server...
+elif ssh "${SSH_OPTIONS[@]}" "${BU_USER}@${BU_SERVER_REMOTE}" "exit" > ${DEST} 2>&1; then	## Else connected to remote server.
 	BU_SERVER="${BU_SERVER_REMOTE}"							## Use the remote server.
 	printf "%b" "Using remote server: ${BLUE}${BU_USER}${RESET}@${BLUE}${BU_SERVER}${RESET}\n" > ${DEST}
 else 
@@ -167,8 +167,8 @@ fi
 
 ##########Validate the backup folder or create if absent.
 printf "%b" "\nChecking for remote backup directory \"${BLUE}${BU_REMOTE_DIR}${RESET}\" on remote backup server \"${BLUE}${BU_SERVER}${RESET}\" (will be created if absent).\n" > ${DEST}
-if ! ssh "${SSH_OPTIONS[@]}" ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	## Connects to the remote server and creates the backup dir.
-	printf "%b" "${RED}Error:${RESET} Failed to create remote directory \"${BLUE}${BU_REMOTE_DIR}${RESET}\".\n\n"			## If this fails, print error and exit.
+if ! ssh "${SSH_OPTIONS[@]}" ${BU_USER}@${BU_SERVER} "mkdir -p ${BU_REMOTE_DIR}" > ${DEST} 2>&1; then	## Creates the backup dir.
+	printf "%b" "${RED}Error:${RESET} Failed to create remote directory \"${BLUE}${BU_REMOTE_DIR}${RESET}\".\n\n"
 	QUIT_f ${NO_REM_DIR}
 fi
 printf "%b" "${GREEN}Confirmation:${RESET} Remote backup directory \"${BLUE}${BU_REMOTE_DIR}${RESET}\" validated.\n" > ${DEST}

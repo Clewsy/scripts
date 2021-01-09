@@ -1,9 +1,9 @@
 #!/bin/bash
 #: Title:	: pong
 #: Author	: clewsy (clewsy.pro)
-#: Description	: Quickly sequentially ping a list of hosts then provide a summary of the ping results.
+#: Description	: Sequentially ping a list of hosts then provide a summary of the ping results.
 #: Options	: -v - Verbose mode (show additional output).
-#:		  -h - Help (print usage information).
+#:		: -h - Help (print usage information).
 
 ## Colours and formatting
 RED="\033[02;31m"
@@ -13,8 +13,8 @@ BOLD="\033[01;37m"
 DIM="\\033[2m"
 RESET="\033[0m"
 TABLE_WIDTH=31
-FILL_DASH_f () { for ((i=1; i<=$1; i++)); do printf "%s" "-"; done; } ## Print '-' a specified number of times.
-FILL_DOUBLE_f () { for ((i=1; i<=$1; i++)); do printf "%s" "═"; done; } ## Print '═' a specified number of times.
+FILL_DASH_f () { for ((i=1; i<=$1; i++)); do printf "%s" "-"; done; }	## Print '-' a specified number of times.
+FILL_DOUBLE_f () { for ((i=1; i<=$1; i++)); do printf "%s" "═"; done; }	## Print '═' a specified number of times.
 
 ## Exit codes
 SUCCESS=0		## I guess it worked?
@@ -44,6 +44,7 @@ user@hostname		${DIM}## The user is discarded.${RESET}${BOLD}
 ip-address		${DIM}## IPv4 or IPv6.${RESET}${BOLD}
 user@ip-address		${DIM}## The user is discarded.${RESET}${BOLD}
 "
+
 
 ############################## Input/syntax/error/dependency checking.
 
@@ -84,6 +85,7 @@ then	printf "%b" "${RED}Error:${RESET} ping not installed.\n\n"
 else	printf "%b" "${GREEN}Success:${RESET} ping installed.\n" > ${DEST}
 fi
 
+
 ############################## Main script functions.
 
 ## Define temporary  output summary file.
@@ -117,7 +119,7 @@ while read -r REM_SYS; do	## Loop to repeat commands for each file name entry in
 	printf "%b" "\nPinging ${REM_SYS}.." > ${DEST}	## Print current ping - keep the user updated on progress or stall point.
 	printf "%b" "."					## Always print a period for every ping, verbose or standard mode.
 
-	if ! ping -4 -c 1 -W 2 "${REM_SYS}" 2> ${DEST} 1> /dev/null; then	## Attempt to ping the current host machine.  Ping once (-c 1), wait for 1 second max (-w 1).
+	if ! ping -4 -c 1 -W 2 "${REM_SYS}" 2> ${DEST} 1> /dev/null; then	## Attempt to ping the current host machine.
 		printf "%b" "${GREEN}Ping${RESET} ${REM_SYS}${DIM}$(FILL_DASH_f $((TABLE_WIDTH-${#REM_SYS}-11)))${RESET}${RED}Miss${RESET}\n" >> "$TEMP_SUMMARY_FILE"		## Record failure.
 	else
 		printf "%b" "${GREEN}Ping${RESET} ${REM_SYS}${DIM}$(FILL_DASH_f $((TABLE_WIDTH-${#REM_SYS}-11)))${RESET}${GREEN}Pong${RESET}\n" >> "$TEMP_SUMMARY_FILE"		## Record failure.

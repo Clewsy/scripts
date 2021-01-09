@@ -44,7 +44,7 @@ while getopts 'ckh' OPTION; do
 			sudo pkill openvpn
 			exit ${SUCCESS};;
 		h)	printf "%b" "${USAGE}\n"		## -h option just prints the usage then quits.
-			exit ${SUCCESS};;				## Exit successfully.
+			exit ${SUCCESS};;			## Exit successfully.
 		?)	printf "%b" "Invalid option/s.\n${USAGE}\n"
 			exit ${BAD_USAGE};;
 	esac

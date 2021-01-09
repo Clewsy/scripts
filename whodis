@@ -1,7 +1,7 @@
 #!/bin/bash
 #: Title:	: whodis
 #: Author	: clewsy (clewsy.pro)
-#: Description	: Graps the content of /tmp/dhcp.leases from a defined host (typically a router), tabulates and prints to screen.
+#: Description	: Grabs the content of /tmp/dhcp.leases from a defined host (typically a router), tabulates and prints to screen.
 #: Options	: none
 
 # Define the user and hostame (or ip address) of the router.

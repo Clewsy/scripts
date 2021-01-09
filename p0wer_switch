@@ -1,15 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
-#: Title:		: p0wer_switch
-#: Author		: clewsy (clewsy.pro)
+#: Title:	: p0wer_switch
+#: Author	: clewsy (clewsy.pro)
 #: Description	: Script for use with Termux on phone or tablet. Connects to p0wer server over local network if available, otherwise
-#:				: attempts a remote connection.  Once connected, runs ${COMMAND}. Intended to run p0wer app on p0wer server to
-#:				: switch on/off a selected mains outlet.
-#: Options		: None
+#:		: attempts a remote connection.  Once connected, runs ${COMMAND}. Intended to run p0wer app on p0wer server to
+#:		: switch on/off a selected mains outlet, but easily modified to run other commands over ssh from a Termux shortcut.
+#: Options	: None
 
-LOC_USER="b4t"							# User for attempting local network connection (faster).
-LOC_SERVER="p0wer"						# Hostname fo attempting local network connection.
-REM_USER="b4t"							# User for attempting remote network connection (if local fails).
-REM_SERVER="clews.pro"					# Hostname for remote network connection.
+LOC_USER="b4t"				# User for attempting local network connection (faster).
+LOC_SERVER="p0wer"			# Hostname fo attempting local network connection.
+REM_USER="b4t"				# User for attempting remote network connection (if local fails).
+REM_SERVER="clews.pro"			# Hostname for remote network connection.
 COMMAND="/usr/local/sbin/p0wer a off"	# Command to run on server.
 
 printf "%b" "Desired command on target: \"${COMMAND}\"\n"

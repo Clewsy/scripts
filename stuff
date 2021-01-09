@@ -1,19 +1,30 @@
 #!/bin/bash
-#: Title:		: stuff
-#: Author		: clewsy (clewsy.pro)
+#: Title:	: stuff
+#: Author	: clewsy (clewsy.pro)
 #: Description	: Pulls a bunch of system info, formats and prints to screen.
-#: Options		: -A	All info.
-#:				: -l	Live data (temps, fan speeds, users, uptime).
-#:				: -p	Product info.
-#:				: -c 	CPU info.
-#:				: -m	Memory info.
-#:				: -a	Audio hardware info.
-#:				: -v	Video hardware info.
-#:				: -d	Disks and partitions info.
-#:				: -o	Operating system and kernel info.
-#:				: -n	Network info.
-#:				: -h	Print help/usage.
-#:				: none	Assumes "-A".
+#: Options	: -A	All info.
+#:		: -l	Live data (temps, fan speeds, users, uptime).
+#:		: -p	Product info.
+#:		: -c 	CPU info.
+#:		: -m	Memory info.
+#:		: -a	Audio hardware info.
+#:		: -v	Video hardware info.
+#:		: -d	Disks and partitions info.
+#:		: -o	Operating system and kernel info.
+#:		: -n	Network info.
+#:		: -h	Print help/usage.
+#:		: none	Assumes "-A".
+#: Arguments	: Will accept a single argument to set a theme colour scheme other than the configured default.  Accepted colours:
+#:		: BLACK or black
+#:		: RED or red
+#:		: ORANGE or orange
+#:		: GREEN or green
+#:		: YELLOW or yellow
+#:		: BLUE or blue
+#:		: MAGENTA or magenta
+#:		: CYAN or cyan
+#:		: GRAY or gray or GREY of grey
+#:		: WHITE or white
 
 ## Exit codes.
 SUCCESS=0
@@ -71,23 +82,23 @@ Valid themes:
 "
 
 ## Get command line options and set appropriate flags.
-while getopts 'Alpcmavdonh' OPTION; do		## Call getopts to identify selected options and set corresponding flags.
-	OPTIONS="TRUE"							## Used to determine if a valid or invalid option was entered.
+while getopts 'Alpcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered.
 	case "$OPTION" in
-		A)	GET_ALL_INFO="TRUE" ;;			## Set ALL flag - same output as selecting no options.
-		l)	GET_L_LIVE_INFO="TRUE" ;;		## Set L flag - live system statistics (temp, fan speed, uptime).
+		A)	GET_ALL_INFO="TRUE" ;;		## Set ALL flag - same output as selecting no options.
+		l)	GET_L_LIVE_INFO="TRUE" ;;	## Set L flag - live system statistics (temp, fan speed, uptime).
 		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag - product info (inc. motherboard, chassis, bios).
-		c)	GET_C_CPU_INFO="TRUE" ;;		## Set C flag - cpu.
-		m)	GET_M_MEMORY_INFO="TRUE" ;;		## Set M flag - memory.
-		a)	GET_A_AUDIO_INFO="TRUE" ;;		## Set A flag - audio hardware.
-		v)	GET_V_VIDEO_INFO="TRUE" ;;		## Set V flag - video hardware.
-		d)	GET_D_DISKS_INFO="TRUE" ;;		## Set D flag - disks and partitions (inc. raid).
-		o)	GET_O_OS_INFO="TRUE" ;;			## Set O flag - operating system (inc. kernel).
+		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag - cpu.
+		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag - memory.
+		a)	GET_A_AUDIO_INFO="TRUE" ;;	## Set A flag - audio hardware.
+		v)	GET_V_VIDEO_INFO="TRUE" ;;	## Set V flag - video hardware.
+		d)	GET_D_DISKS_INFO="TRUE" ;;	## Set D flag - disks and partitions (inc. raid).
+		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag - operating system (inc. kernel).
 		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag - network.
-		h)	printf "%b" "${USAGE}\n"		## Print help (usage).
-			exit ${SUCCESS} ;;				## Exit successfully.
-		?)	printf "%b" "${USAGE}\n"		## Invalid option, show usage.
-			exit ${BAD_OPTION} ;;			## Exit.
+		h)	printf "%b" "${USAGE}\n"	## Print help (usage).
+			exit ${SUCCESS} ;;		## Exit successfully.
+		?)	printf "%b" "${USAGE}\n"	## Invalid option, show usage.
+			exit ${BAD_OPTION} ;;		## Exit.
 	esac
 done
 shift $((OPTIND -1))		## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
@@ -104,17 +115,18 @@ fi
 
 ## Parse the first argument to set the theme colour.
 case $1 in
-	"BLACK" 	| "black")		COL="${BLACK}";;
-	"RED"		| "red")		COL="${RED}";;
-	"ORANGE"	| "orange")		COL="${ORANGE}";;
-	"GREEN"		| "green")		COL="${GREEN}";;
-	"YELLOW"	| "yellow")		COL="${YELLOW}";;
-	"BLUE"		| "blue")		COL="${BLUE}";;
+	"BLACK" 	| "black")	COL="${BLACK}";;
+	"RED"		| "red")	COL="${RED}";;
+	"ORANGE"	| "orange")	COL="${ORANGE}";;
+	"GREEN"		| "green")	COL="${GREEN}";;
+	"YELLOW"	| "yellow")	COL="${YELLOW}";;
+	"BLUE"		| "blue")	COL="${BLUE}";;
 	"MAGENTA"	| "magenta")	COL="${MAGENTA}";;
-	"CYAN"		| "cyan")		COL="${CYAN}";;
-	"GRAY"		| "gray")		COL="${GRAY}";;
-	"WHITE"		| "white")		COL="${WHITE}";;
-	*)							COL="${DEFAULT_COL}";;
+	"CYAN"		| "cyan")	COL="${CYAN}";;
+	"GRAY"		| "gray")	COL="${GRAY}";;
+	"GREY"		| "grey")	COL="${GRAY}";;
+	"WHITE"		| "white")	COL="${WHITE}";;
+	*)				COL="${DEFAULT_COL}";;
 esac
 
 ## Begin main output.  Start with a header.
@@ -147,7 +159,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 			printf "%b" "${COL}${BOLD}├─Core Temperatures:${RESET}\n"
 			for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do	## Loop for each found core.
 				if (( CORE == FOUND_CORE_TEMP )); then	printf "%b" "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"
-				else									printf "%b" "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"; fi
+				else					printf "%b" "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"; fi
 			done
 		fi
 		###############################
@@ -163,7 +175,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 			printf "%b" "${COL}${BOLD}├─Fan Speeds:${RESET}\n"
 			for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do	## Loop for each found fan.
 				if (( FAN == FOUND_FAN )); then	printf "%b" "${COL}│ └─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"
-				else							printf "%b" "${COL}│ ├─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"; fi
+				else				printf "%b" "${COL}│ ├─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"; fi
 			done
 		fi
 	fi
@@ -172,7 +184,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 	## Print available core temp - raspberry pi.
 	## Sensors is not available or returned no temps, but temp file is present (likely a pi) so use that to show temperature.
 	if (( FOUND_CORE_TEMP == 0 )) && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
-		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)	## File contains inte value equal to 1000*temp.
+		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)	## File contains value equal to 1000*temp.
 		if (( RAW_CORE_TEMP )); then
 			CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
 			printf "%b" "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}\n"
@@ -196,46 +208,46 @@ if [[ ${GET_P_PRODUCT_INFO} || ${GET_ALL_INFO} ]]; then
 		[ ! -s /sys/devices/virtual/dmi/id/bios_date ];		then printf "%b" "${COL}${BOLD}Product Info:${RESET} Not found\n"
 	else
 		printf "%b" "${COL}${BOLD}Product Info:${RESET}\n"
-		if [ -s /sys/devices/virtual/dmi/id/product_name ];		then PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name); fi
+		if [ -s /sys/devices/virtual/dmi/id/product_name ];	then PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name); fi
 		if [ -s /sys/devices/virtual/dmi/id/product_version ];	then PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/sys_vendor ];		then SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor); fi
-		if [ -s /sys/devices/virtual/dmi/id/chassis_type ];		then CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type); fi
+		if [ -s /sys/devices/virtual/dmi/id/sys_vendor ];	then SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor); fi
+		if [ -s /sys/devices/virtual/dmi/id/chassis_type ];	then CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type); fi
 		if [ -s /sys/devices/virtual/dmi/id/chassis_version ];	then CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version); fi
 		if [ -s /sys/devices/virtual/dmi/id/chassis_vendor ];	then CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor); fi
-		if [ -s /sys/devices/virtual/dmi/id/board_name ];		then BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name); fi
+		if [ -s /sys/devices/virtual/dmi/id/board_name ];	then BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name); fi
 		if [ -s /sys/devices/virtual/dmi/id/board_version ];	then BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/board_vendor ];		then BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor); fi
-		if [ -s /sys/devices/virtual/dmi/id/bios_date ];		then BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date); fi
-		if [ -s /sys/devices/virtual/dmi/id/bios_version ];		then BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/bios_vendor ];		then BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor); fi
+		if [ -s /sys/devices/virtual/dmi/id/board_vendor ];	then BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor); fi
+		if [ -s /sys/devices/virtual/dmi/id/bios_date ];	then BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date); fi
+		if [ -s /sys/devices/virtual/dmi/id/bios_version ];	then BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version); fi
+		if [ -s /sys/devices/virtual/dmi/id/bios_vendor ];	then BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor); fi
 
 		###############################
 		## Print available product info
-		if		[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ] &&	[ -n "${SYS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})\n"
-		elif	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ];							then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}\n"
-		elif 	[ -n "${PRODUCT_NAME}" ] &&									[ -n "${SYS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})\n"
-		elif	[ -n "${PRODUCT_NAME}" ];															then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}\n"; fi
+		if	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ] &&	[ -n "${SYS_VENDOR}" ];		then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})\n"
+		elif	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ];					then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}\n"
+		elif 	[ -n "${PRODUCT_NAME}" ] &&					[ -n "${SYS_VENDOR}" ];		then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})\n"
+		elif	[ -n "${PRODUCT_NAME}" ];									then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}\n"; fi
 
 		###############################
 		## Print available chassis info
-		if		[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ] &&	[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})\n"
-		elif	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ];								then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}\n"
-		elif	[ -n "${CHASSIS_TYPE}" ] &&									[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})\n"
-		elif	[ -n "${CHASSIS_TYPE}" ];																then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}\n"; fi
+		if	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ] &&	[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})\n"
+		elif	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ];					then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}\n"
+		elif	[ -n "${CHASSIS_TYPE}" ] &&					[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})\n"
+		elif	[ -n "${CHASSIS_TYPE}" ];									then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}\n"; fi
 
 		###############################
 		## Print available motherboard info
-		if		[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ] &&	[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})\n"
-		elif	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ];									then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}\n"
-		elif	[ -n "${BOARD_NAME}" ] &&									[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})\n"
-		elif	[ -n "${BOARD_NAME}" ];																	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}\n"; fi
+		if	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ] &&	[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})\n"
+		elif	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ];					then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}\n"
+		elif	[ -n "${BOARD_NAME}" ] &&					[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})\n"
+		elif	[ -n "${BOARD_NAME}" ];										then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}\n"; fi
 
 		###############################
 		## Print available bios info
-		if		[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ] &&	[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})\n"
-		elif	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ];								then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}\n"
-		elif	[ -n "${BIOS_DATE}" ] &&								[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})\n"
-		elif	[ -n "${BIOS_DATE}" ];																then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}\n"; fi
+		if	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ] &&	[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})\n"
+		elif	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ];					then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}\n"
+		elif	[ -n "${BIOS_DATE}" ] &&					[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})\n"
+		elif	[ -n "${BIOS_DATE}" ];										then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}\n"; fi
 	fi
 fi
 
@@ -295,7 +307,7 @@ if [[ ${GET_A_AUDIO_INFO} || ${GET_V_VIDEO_INFO} || ${GET_ALL_INFO} ]]; then
 		if [[ ${GET_ALL_INFO} || ${GET_A_AUDIO_INFO} && ${GET_V_VIDEO_INFO} ]]; then
 			AUDIO_INFO=$(lspci -k | grep -m 1 "Audio" | cut -c23-)
 			VIDEO_INFO=$(lspci -k | grep -m 1 "VGA" | cut -c36-)
-			if		xdpyinfo &> /dev/null;	then VIDEO_RES=$(xdpyinfo | grep "dimensions" | awk '{print $2}')
+			if	xdpyinfo &> /dev/null;	then VIDEO_RES=$(xdpyinfo | grep "dimensions" | awk '{print $2}')
 			elif	xrandr &> /dev/null;	then VIDEO_RES=$(xrandr | grep "current" | cut -d ',' -f 2 | awk '{print $2$3$4}'); fi
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
@@ -336,7 +348,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 		for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
 			if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
 			if ! grep -e "name" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
-			DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}	## Eliminate all but the initial whitespace.  LEVEL determined by #whitespace.
+			DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}	## Eliminate all but the initial whitespace.
 		done
 		for ELEMENT in ${DELETE_ELEMENTS[@]}; do unset DEV_DUMP[${ELEMENT}]; done
 
@@ -345,14 +357,14 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 		## Run through each element in the DEV_DUMP array and create a new array of the format:
 		## ( DEV_NAME DEV_LEVEL DEV_CHILDREN )
-		## Where 	: DEV_NAME is the name of the device within the /dev directory.
-		##			: DEV_LEVEL represents the position within the device heirarchy.  E.g. Level 1 for sda, level 2 for sda1.
-		##			: NUM_CHILDREN	represents the child devices one level below the device.  Does not count great/grandchildren.
+		## Where : DEV_NAME 	the name of the device within the /dev directory.
+		##	 : DEV_LEVEL 	the position within the device heirarchy.  E.g. Level 1 for sda, level 2 for sda1.
+		##	 : NUM_CHILDREN the child devices one level below the device.  Does not count great/grandchildren.
 		## Also tally the total number of level 1 devices NUM_LEVEL_1.
 		NUM_LEVEL_1=0
 		for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
 			DEV_NAME=$(cut -d "\"" -f 4 <<< "${DEV_DUMP[$E]}")
-			LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[$E]}" | wc -m) / 6 )) ## Determine level by counting initial whitespace.
+			LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[$E]}" | wc -m) / 6 )) ## Get level by counting initial whitespace.
 			NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+1))]}" | wc -m) / 6 ))
 			DIFF=$((NEXT_LEVEL-LEVEL))
 			NUM_CHILDREN=0
@@ -360,12 +372,12 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 			## Loop through the next elements until we reach one of the same level - allows us to count the children.
 			i=1
 			while (( NEXT_LEVEL > LEVEL )); do
-				## If level difference is 1, current element is a direct child.  Ignores grandchildren & great-grandchildren.
+				## If level difference is 1, current element is a direct child.  Ignores great/grandchildren.
 				if ((DIFF == 1)); then ((NUM_CHILDREN++)); fi
 
 				## Increment the counter and check the next element.
 				((i++))
-				NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+i))]}" | wc -m) / 6 )) ## Determine level by initial whitespace.
+				NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+i))]}" | wc -m) / 6 )) ## Get level from whitespace.
 				DIFF=$((NEXT_LEVEL-LEVEL))
 			done
 
@@ -401,13 +413,13 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 				DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}")	## Define device model
 				DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}")	## Define device capacity
 				DEV_SPECS=()	## Clear then reset the array of device specs 
-				if [ -n "${DEVICE_TYPE}" ];		then DEV_SPECS+=("${COL}Type:${RESET} ${DEVICE_TYPE}"); fi
+				if [ -n "${DEVICE_TYPE}" ];	then DEV_SPECS+=("${COL}Type:${RESET} ${DEVICE_TYPE}"); fi
 				if [ -n "${DEVICE_MODEL}" ];	then DEV_SPECS+=("${COL}Model:${RESET} ${DEVICE_MODEL}"); fi
-				if [ -n "${DEVICE_SIZE}" ];		then DEV_SPECS+=("${COL}Size:${RESET} ${DEVICE_SIZE}"); fi
+				if [ -n "${DEVICE_SIZE}" ];	then DEV_SPECS+=("${COL}Size:${RESET} ${DEVICE_SIZE}"); fi
 				NUM_DSPECS=${#DEV_SPECS[@]}
 				for DSPEC in "${DEV_SPECS[@]}"; do
 					if [[ "${DSPEC}" == "${DEV_SPECS[((NUM_DSPECS-1))]}" && ${WORKING_NUM_CHILDREN} -lt 1 ]]; then	C2="${COL}└─${RESET}"
-					else																							C2="${COL}├─${RESET}"; fi
+					else												C2="${COL}├─${RESET}"; fi
 					printf "%b" "${C1}${C2}${DSPEC}\n"
 				done
 
@@ -447,7 +459,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 						for CSPEC in "${CHILD_SPECS[@]}"; do
 							if [[ "${CSPEC}" == "${CHILD_SPECS[((NUM_CSPECS-1))]}" && ${WORKING_CHILD_NUM_CHILDREN} -lt 1 ]]; then	C3="${COL}${DIM}└─${RESET}"
-							else																									C3="${COL}${DIM}├─${RESET}"; fi
+							else													C3="${COL}${DIM}├─${RESET}"; fi
 							printf "%b" "${C1}${C2}${C3}${CSPEC}\n"
 						done
 
@@ -474,16 +486,16 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 								GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $5}' )
 								GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $7}')
 
-								GRANDCHILD_SPECS=()	## Clear then reset the array of child specs
+								GRANDCHILD_SPECS=()	## Clear, reset the array of child specs.
 								if [ -n "${GRANDCHILD_TYPE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
 								if [ -n "${GRANDCHILD_FS}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GRANDCHILD_FS}"); fi
 								if [ -n "${GRANDCHILD_SIZE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
 								if [ -n "${GRANDCHILD_USED}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
 								if [ -n "${GRANDCHILD_MOUNT}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
 								NUM_GCSPECS=${#GRANDCHILD_SPECS[@]}
-								for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do	## Loop for each grandchild spec
+								for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do	## Loop for GC spec.
 									if [[ "${GCSPEC}" == "${GRANDCHILD_SPECS[((NUM_GSPECS-1))]}" && ${WORKING_GRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C4="${COL}${DIM}└─${RESET}"
-									else																												C4="${COL}${DIM}├─${RESET}"; fi
+									else															C4="${COL}${DIM}├─${RESET}"; fi
 									printf "%b" "${C1}${C2}${C3}${C4}${GCSPEC}\n"
 								done
 
@@ -507,14 +519,14 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 										GREATGRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}" | awk '{print $3}')
 										GREATGRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}" | awk '{print $5}' )
 
-										GREATGRANDCHILD_SPECS=()	## Clear then reset the array of child specs
-										if [ -n "${GREATGRANDCHILD_FS}" ];		then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GREATGRANDCHILD_FS}"); fi
+										GREATGRANDCHILD_SPECS=()
+										if [ -n "${GREATGRANDCHILD_FS}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GREATGRANDCHILD_FS}"); fi
 										if [ -n "${GREATGRANDCHILD_USED}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GREATGRANDCHILD_SIZE}"); fi
 										if [ -n "${GREATGRANDCHILD_USED}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GREATGRANDCHILD_USED} (${GREATGRANDCHILD_PERC})"); fi
 										NUM_GGCSPECS=${#GREATGRANDCHILD_SPECS[@]}
-										for GGCSPEC in "${GREATGRANDCHILD_SPECS[@]}" ; do	## Loop for each grandchild spec
+										for GGCSPEC in "${GREATGRANDCHILD_SPECS[@]}" ; do
 											if [[ "${GGCSPEC}" == "${GREATGRANDCHILD_SPECS[((NUM_GGSPECS-1))]}" && ${WORKING_GREATGRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C5="${COL}${DIM}└─${RESET}"
-											else																															C5="${COL}${DIM}├─${RESET}"; fi
+											else																C5="${COL}${DIM}├─${RESET}"; fi
 											printf "%b" "${C1}${C2}${C3}${C4}${C5}${GGCSPEC}\n"
 										done
 									done
@@ -537,8 +549,8 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
 	KERNEL_VER=$(uname -v)
 	KERNEL_REL=$(uname -r)
 	if command -v lsb_release >> /dev/null; then	DIST=$(lsb_release -i | cut -f2)
-													DIST_REL=$(lsb_release -r | cut -f2)
-													DIST_CODE=$(lsb_release -c | cut -f2);
+							DIST_REL=$(lsb_release -r | cut -f2)
+							DIST_CODE=$(lsb_release -c | cut -f2);
 	fi
 	SHELL_IN_USE=$(basename "${SHELL}")
 
@@ -549,15 +561,15 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
 	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Version:${RESET} ${KERNEL_VER}\n"
 	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Release:${RESET} ${KERNEL_REL}\n"
 	if [ -z "${DIST}" ]; then	printf "%b" "${COL}${BOLD}├─Distribution: ${RESET}Unknown (no lsb_release)\n"
-	else						printf "%b" "${COL}${BOLD}├─Distribution:${RESET} ${DIST}\n"
-								printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} ${DIST_REL}\n"
-								printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} ${DIST_CODE}\n"
+	else				printf "%b" "${COL}${BOLD}├─Distribution:${RESET} ${DIST}\n"
+					printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} ${DIST_REL}\n"
+					printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} ${DIST_CODE}\n"
 	fi 
 	printf "%b" "${COL}${BOLD}└─Shell:${RESET} ${SHELL_IN_USE}\n"
 	if [ -n "${BASH_VERSION}" ]; then printf "%b" "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}\n"; fi
 fi
 
-###############################################################################################################################################################
+####################################################################################################################################
 ## -n : Print network and network interface info
 if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 	printf "%b" "${COL}${BOLD}Network:${RESET}\n"
@@ -572,17 +584,17 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 	fi
 
 	## Show primary dns address
-	if command -v nmcli > /dev/null; then			DNS=$(nmcli dev show | grep -m 1 "DNS" | tr -s " " | cut -d " " -f 2)
-	elif  resolvectl &> /dev/null; then				DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:" | awk '{print $3}')
-	elif [ -f /etc/resolv.conf ]; then				DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)
-	else											DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
+	if command -v nmcli > /dev/null; then	DNS=$(nmcli dev show | grep -m 1 "DNS" | tr -s " " | cut -d " " -f 2)
+	elif  resolvectl &> /dev/null; then	DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:" | awk '{print $3}')
+	elif [ -f /etc/resolv.conf ]; then	DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)
+	else					DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
 	if [ -n "${DNS}" ]; then printf "%b" "${COL}${BOLD}├─DNS:${RESET} ${DNS}\n"; fi
 
 	## Show default gateway address
-	if command -v ip > /dev/null ; then			GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
+	if command -v ip > /dev/null ; then		GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
 	elif command -v route > /dev/null ; then	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
 	elif command -v netstat > /dev/null ; then	GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
-	else										GW="Cannot determine default gateway address (ip nor route nor netstat installed)"; fi
+	else						GW="Cannot determine default gateway address (ip nor route nor netstat installed)"; fi
 	if [ "${GW}" = "" ]; then GW="Could not detect gateway."; fi
 	printf "%b" "${COL}${BOLD}├─Gateway:${RESET} ${GW}\n"
 
@@ -600,30 +612,30 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 			## Define current interface in list.
 			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)
 			if (( c == NUM_DEVS )); then	printf "%b" "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}  ${RESET}"
-			else							printf "%b" "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}│ ${RESET}"; fi
+			else				printf "%b" "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}│ ${RESET}"; fi
 
 			## Determine current status of interface.
 			if [ -e /sys/class/net/"${WORKING_INTERFACE}"/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)
-			else															STATUS="unknown"; fi
+			else								STATUS="unknown"; fi
 
 			## Determine the MAC address of interface.
 			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)
 
 			## Determine the IP address assigned o the interface
 			if [ "${STATUS}" != "down" ]; then
-				if command -v ip > /dev/null; then				IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)
+				if command -v ip > /dev/null; then		IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)
 				elif command -v ifconfig >> /dev/null ; then	IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)
-				else											IP="Cannot determine interface ip address (neither ip nor ifconfig installed)"; fi
+				else						IP="Cannot determine interface ip address (neither ip nor ifconfig installed)"; fi
 			fi
 
 			## Determine the connected ESSID (if present)
 			if command -v iwgetid >> /dev/null ; then
 				IF_WIFI_CONN=$(iwgetid | awk '{print $1}')
 				if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then	ESSID=$(iwgetid -r)
-				else														ESSID=""; fi
+				else								ESSID=""; fi
 			elif command -v iw > /dev/null; then	ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)
 			elif command -v nmcli > /dev/null; then	ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)
-			else									ESSID=""; fi
+			else					ESSID=""; fi
 
 			if [ "${ESSID}" == "Wired" ] ; then ESSID=""; fi		## If an essid was found
 
@@ -638,7 +650,7 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 			for (( icspec=0; icspec<${#INT_SPECS[@]}; icspec++ ))
 			do
 				if (( icspec==(${#INT_SPECS[@]}-1) )); then	C2="${COL}└─${RESET}"
-				else										C2="${COL}├─${RESET}"; fi
+				else						C2="${COL}├─${RESET}"; fi
 				printf "%b" "${C1}${C2}${INT_SPECS[icspec]}\n"
 			done
 		done

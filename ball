@@ -3,8 +3,8 @@
 #: Author	: clewsy (clewsy.pro)
 #: Description	: Run a backup script (bu) on a selected host or list of hosts.
 #: Options	: -q - Quiet mode (suppress some output).
-#:		  -v - Verbose mode (show additional output).
-#:		  -h - Help (print usage information).
+#:		: -v - Verbose mode (show additional output).
+#:		: -h - Help (print usage information).
 
 COMMAND="~/bin/bu"	## The command to run on the remote host/s.  Note using "~" avoids expanding on the client side.
 

@@ -1,8 +1,8 @@
 #!/bin/bash
-#: Title:		: terbling
-#: Author		: clewsy (clewsy.pro)
+#: Title:	: terbling
+#: Author	: clewsy (clewsy.pro)
 #: Description	: Just show the logo and some basic system info.
-#: Options		: None.
+#: Options	: None.
 
 ## Exit codes.
 SUCCESS=0
@@ -36,17 +36,18 @@ fi
 
 ## Parse the first argument to set the theme colour.
 case $1 in
-	"BLACK" 	| "black")		COL="${BLACK}";;
-	"RED"		| "red")		COL="${RED}";;
-	"ORANGE"	| "orange")		COL="${ORANGE}";;
-	"GREEN"		| "green")		COL="${GREEN}";;
-	"YELLOW"	| "yellow")		COL="${YELLOW}";;
-	"BLUE"		| "blue")		COL="${BLUE}";;
+	"BLACK" 	| "black")	COL="${BLACK}";;
+	"RED"		| "red")	COL="${RED}";;
+	"ORANGE"	| "orange")	COL="${ORANGE}";;
+	"GREEN"		| "green")	COL="${GREEN}";;
+	"YELLOW"	| "yellow")	COL="${YELLOW}";;
+	"BLUE"		| "blue")	COL="${BLUE}";;
 	"MAGENTA"	| "magenta")	COL="${MAGENTA}";;
-	"CYAN"		| "cyan")		COL="${CYAN}";;
-	"GRAY"		| "gray")		COL="${GRAY}";;
-	"WHITE"		| "white")		COL="${WHITE}";;
-	*)							COL="${DEFAULT_COL}";;
+	"CYAN"		| "cyan")	COL="${CYAN}";;
+	"GRAY"		| "gray")	COL="${GRAY}";;
+	"GREY"		| "grey")	COL="${GRAY}";;
+	"WHITE"		| "white")	COL="${WHITE}";;
+	*)				COL="${DEFAULT_COL}";;
 esac
 
 ####################################################################################################################################
