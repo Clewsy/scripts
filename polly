@@ -12,7 +12,7 @@
 #:		: -h - Help.  Print usage information.
 #: Notes	: For long-term deployment, consider configuring a logrotate file.  For example:
 #:		: #/etc/logrotate.d/polly
-#:		: /home/.log/polly.log {
+#:		: /var/log/polly.log {
 #:		:   su root root
 #:		:   monthly
 #:		:   rotate 12
@@ -161,19 +161,19 @@ TEST_RESULT=$(curl ${CURL_VERBOSITY} --output /dev/stdout --write-out '%{http_co
 printf "%b" "\nSite response code: ${BOLD}${TEST_RESULT}${RESET}\n" > ${DEST}
 
 ## A site response code of 200 indicates everything is okay.
-if [ "${TEST_RESULT}" != 200 ]; then										## Site is down.
+if [ "${TEST_RESULT}" != 200 ]; then									## Site is down.
 	printf "%b" "\n${RED}FAILURE${RESET} - Site down!\n\n"
 	printf "%b" "$(TIMESTAMP_f) - FAILURE - Site not available. Curl returned ${TEST_RESULT}\n" >> $LOG_FILE
 	printf "%b" "Running failure notification function...\n\n" > ${DEST}
 	NOTIFICATION_f "FAILED" &
 else
 	printf "%b" "\nChecking last poll result recorded in log file...\n"
-	if tail --lines 1 ${LOG_FILE} | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then				## Site is up but was down.
+	if tail --lines 1 ${LOG_FILE} | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then			## Site is up but was down.
 		printf "%b" "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n\n"
 		printf "%b" "$(TIMESTAMP_f) - WARNING - Site running but has recovered from downtime.\n" >> $LOG_FILE
 		printf "%b" "Running recovered notification function...\n\n" > ${DEST}
 		NOTIFICATION_f "RECOVERED" &
-	else													## Site is up.
+	else												## Site is up.
 		printf "%b" "\n${GREEN}SUCCESS${RESET} - Everything seems okay.\n\n"
 		printf "%b" "$(TIMESTAMP_f) - SUCCESS - Site is up, everything seems okay.\n" >> $LOG_FILE
 		printf "%b" "Running success notification command...\n\n" > ${DEST}
