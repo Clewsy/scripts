@@ -135,12 +135,6 @@ elif [[ ! -w $(dirname ${LOG_FILE}) || -e ${LOG_FILE} && ! -w ${LOG_FILE} ]]; th
 	exit ${BAD_LOGFILE}
 fi
 
-## Ensure curl is installed.
-if ! command -v curl > ${DEST}; then
-	printf "%b" "${RED}Error${RESET}, curl is not installed.  Quitting...\n"
-	exit ${NO_CURL}
-fi
-
 
 ############ Main script functionality.
 
