@@ -24,10 +24,10 @@
 
 ## Exit codes.
 SUCCESS=0
-BAD_OPTION=1
-BAD_ARGUMENT=2
-NO_CURL=3
-BAD_LOGFILE=4
+BAD_LOGFILE=1
+BAD_OPTION=2
+BAD_ARGUMENT=3
+NO_CURL=4
 
 HOST_URL="https://clews.pro"	## Host url or ip address to test for site status.
 
@@ -61,7 +61,7 @@ NOTIFICATION_f() {
 	esac
 
 	## Run the blink command.
-	blink1-tool ${COLOUR} ${FLASH} > ${DEST}
+	blink1-tool "${COLOUR}" "${FLASH}" > ${DEST}
 }
 
 ## stdout output text colours.
@@ -91,7 +91,10 @@ while getopts 'pslrvh' OPTION; do
 	case "${OPTION}" in
 		p)	;;
 		s)	printf "%b" "Fetching current status (last poll result):\n"
-			tail -n -1 ${LOG_FILE}
+			if ! tail -n -1 ${LOG_FILE} 2>/dev/null; then
+				printf "%b" "${RED}Error${RESET}, logfile (${LOG_FILE}) is not accessible.  Quitting...\n"
+				exit ${BAD_LOGFILE}
+			fi
 			exit ${SUCCESS} ;;
 		l)	printf "%b" "Printing log file (${LOG_FILE}):\n"
 			cat "${LOG_FILE}"
@@ -131,7 +134,7 @@ if [ ! -d "${LOG_FILE%/*}" ]; then
 	fi
 printf "%b" "\nEnsuring logfile is writable...\n" > ${DEST}
 elif [[ ! -w ${LOG_FILE%/*} || -e ${LOG_FILE} && ! -w ${LOG_FILE} ]]; then
-	printf "%b" "${RED}Error${RESET}, logfile (${LOG_FILE}) is not accessible.  Quitting...\n"
+	printf "%b" "${RED}Error${RESET}, logfile (${LOG_FILE}) is not writable.  Quitting...\n"
 	exit ${BAD_LOGFILE}
 fi
 
@@ -151,7 +154,7 @@ fi
 
 ## Attempt to curl the url and obtain the response code for $HOST_URL.
 printf "%b" "\nAttempting to poll site (${HOST_URL}) with curl...\n" > ${DEST}
-TEST_RESULT=$(curl ${CURL_VERBOSITY} --output /dev/stdout --write-out '%{http_code}' "${HOST_URL}" | tail --lines 1)
+TEST_RESULT=$(curl "${CURL_VERBOSITY}" --output /dev/stdout --write-out '%{http_code}' "${HOST_URL}" | tail --lines 1)
 printf "%b" "\nSite response code: ${BOLD}${TEST_RESULT}${RESET}\n" > ${DEST}
 
 ## A site response code of 200 indicates everything is okay.
