@@ -104,9 +104,10 @@ printf "%b" "${BLUE}${TEMP_REM_SYS_LIST}${RESET}\n" > ${DEST}
 ## Strip any comments fromn the host list file.
 printf "%b" "\nStripping comments and users from host list file.\n" > ${DEST}
 while read -r LINE ; do								## Iterate for every line in the system list.
-	STRIPPED_LINE="$(printf "%s" "${LINE}" | cut -d '#' -f 1)"		## Strip after (and including) the first '#'.
-	STRIPPED_LINE="$(printf "%s" "${STRIPPED_LINE}" | cut -d "@" -f 2)"	## Strip before (and including) the first '@'.
-	## If there is anything left hen copy the stripped line to the temp file.
+	STRIPPED_LINE=${LINE%%\#*}		## Strip comments from first '#'.
+	STRIPPED_LINE=${STRIPPED_LINE%%$'\t'*}	## Strip trailing tabs.
+	STRIPPED_LINE=${STRIPPED_LINE%% *}	## Strip trailing spaces.
+	STRIPPED_LINE=${STRIPPED_LINE##*@}	## Strip before & including first '@'
 	if [ "${STRIPPED_LINE}" ]; then printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"; fi
 done < "${REM_SYS_LIST}"
 printf "%b" "Host list with comments and users stripped:\n${BLUE}$(cat ${TEMP_REM_SYS_LIST})${RESET}\n" > ${DEST}
