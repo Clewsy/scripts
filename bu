@@ -60,7 +60,7 @@ QUIT_f ()
 
 ##########Usage
 USAGE="
-Usage: $(basename "$0") [option] [file/list]
+Usage: ${0##*/} [option] [file/list]
 Where [file/list] is either:
 	file	: A specific file/directory to be backed up (requires option \"-f\" or \"-d\").
 	list	: A text list of files/directories to be backed up.

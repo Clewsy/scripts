@@ -26,9 +26,9 @@ DEST="/dev/null"	## Default destination for command output.  I.e. don't display 
 
 ## Usage
 USAGE="
-$(basename "$0") Sequentially ping a list of hosts to determine availibility on the network.
+${0##*/}: Sequentially ping a list of hosts to determine availibility on the network.
 
-Usage: ${BOLD}$(basename "$0") <option> [host-list]${RESET}
+Usage: ${BOLD}${0##*/} <option> [host-list]${RESET}
 
 Where [host-list] is a text list of remote systems to test for availability.
 

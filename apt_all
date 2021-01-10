@@ -46,7 +46,7 @@ fi
 
 ########## Command help/usage.
 USAGE="
-Usage: $(basename "$0") [hosts]
+Usage: ${0##*/} [hosts]
 Where [hosts] can be:
 	- [user@host]
 	- [host]	(same user as current or defined in .ssh/config)

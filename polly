@@ -73,9 +73,9 @@ RESET="\033[0m"
 
 ## Script usage.
 USAGE="
-$(basename "$0") will poll a defined URL (${HOST_URL}) and log the result.
+${0##*/} will poll a defined URL (${HOST_URL}) and log the result.
 
-Usage: $(basename "$0") [option]
+Usage: ${0##*/} [option]
 Valid options:
 -p	Standard poll: check site status, show & log the result.
 -s	Show the current status (i.e. result of last poll).

@@ -30,7 +30,7 @@ TEMP_FILE="/tmp/vpn_tempfile"
 > "${TEMP_FILE}"
 
 USAGE="
-Usage: $(basename "${0}") <option> [openvpn config file]
+Usage: ${0##*/} <option> [openvpn config file]
 Valid options:
 	-c	Cancel running vpn. (Same as -k)
 	-k	Kill running vpn. (Same as -c)
@@ -93,7 +93,7 @@ printf "%15b%b" "Current city : " "${BOLD}${CURRENT_CITY}${RESET}\n"
 
 ##########Connect to the vpn.
 printf "%b" "\nRunning openvpn using config file at \"${BLUE}${VPN_FILE}${RESET}\"\n"
-printf "%b" "\"$(basename "${0}") -c\" to cancel/kill vpn.\n"
+printf "%b" "\"${0##*/} -c\" to cancel/kill vpn.\n"
 if ! sudo openvpn --config "${VPN_FILE}" --daemon ; then	## Execute openvpn. Exit script if it fails.
 	rm "${TEMP_FILE}"
 	printf "%b" "\n${RED}Error:${RESET} openvpn failed. Quitting\n\n"

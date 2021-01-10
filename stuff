@@ -53,7 +53,7 @@ RESET="\\033[0m"
 
 ## Define usage/help.
 USAGE="
-Usage: $(basename "$0") [option] [theme]
+Usage: ${0##*/} [option] [theme]
 
 Valid options:
 -A	All info.
@@ -552,7 +552,7 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
 							DIST_REL=$(lsb_release -r | cut -f2)
 							DIST_CODE=$(lsb_release -c | cut -f2);
 	fi
-	SHELL_IN_USE=$(basename "${SHELL}")
+	SHELL_IN_USE=${SHELL##*/}
 
 	printf "%b" "${COL}${BOLD}Operating System:${RESET}\n"
 	printf "%b" "${COL}${BOLD}├─OS:${RESET} ${OS_NAME}\n"
