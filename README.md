@@ -65,6 +65,12 @@ Grabs the contents of the /tmp/dhcp.leases file on a remote router, does some ba
 
 ---
 
+[**ytdl.sh**][link_repo_ytdl.sh]
+
+Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Not often used since since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
+
+---
+
 # archived:
 
 [**cal\_backup.sh**][link_repo_archive_cal_backup.sh]
@@ -97,12 +103,6 @@ Attempt to copy a specified file/directory to a destination (relative to home di
 
 ---
 
-[**ytdl.sh**][link_repo_Archive_ytdl.sh]
-
-Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Archived as I no longer use this since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
-
----
-
 [link_repo_apt_all]:apt_all
 [link_repo_ball]:ball
 [link_repo_bu]:bu
@@ -114,12 +114,12 @@ Written for use with [Termux][link_web_termux] to download a youtube video direc
 [link_repo_vpn]:vpn
 [link_repo_wami]:wami
 [link_repo_whodis]:whodis
+[link_repo_ytdl.sh]:ytdl.sh
 [link_repo_archive_cal_backup.sh]:archive/cal_backup.sh
 [link_repo_archive_chuck.sh]:archive/chuck.sh
 [link_repo_archive_grab.sh]:archive/grab.sh
 [link_repo_archive_nc_backup.sh]:archive/nc_backup.sh
 [link_repo_archive_roll_out.sh]:archive/roll_out.sh
-[link_repo_archive_ytdl.sh]:archive/ytdl.sh
 [link_gitlab_clewsy_p0wer]:https://gitlab.com/clewsy/p0wer
 [link_web_termux]:https://termux.com/
 [link_web_blink1]:https://blink1.thingm.com/
