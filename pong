@@ -67,8 +67,8 @@ if [ $# -gt 1 ]; then								## Check if more than one argument was entered.
 fi
 
 ## Validate the list of remote systems.
-REM_SYS_LIST=${1-"$(dirname "$0")/my_hosts.list"}	## First argument is the file name of the list of remote systems.
-							## If argument not provided, set default (my_hosts.list).
+REM_SYS_LIST=${1-"${0%/*}/my_hosts.list"}	## First argument is the file name of the list of remote systems.
+						## If argument not provided, set default (my_hosts.list).
 printf "%b" "\nRemote system list is \"${REM_SYS_LIST}\".\n" > ${DEST}
 if [ ! -f "${REM_SYS_LIST}" ] || [ ! -r "${REM_SYS_LIST}" ]; then	## Ensure system list is normal (-f) and readable (-r).
 	printf "%b" "\n${RED}Error:${RESET} Remote system list \"${BLUE}${REM_SYS_LIST}${RESET}\" not found, invalid file type or no read access.\n\n"

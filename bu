@@ -39,8 +39,8 @@ SEPARATOR="------------------------------------"
 
 ##########Define log file and ensure directory exists.
 BU_LOG_FILE="${HOME}/.log/bu.log"
-if [ ! -w "$(dirname "${BU_LOG_FILE}")" ]; then
-	if ! mkdir --parents "$(dirname "${BU_LOG_FILE}")" || ! touch "${BU_LOG_FILE}"; then
+if [ ! -w "${BU_LOG_FILE%/*}" ]; then
+	if ! mkdir --parents "${BU_LOG_FILE%/*}" || ! touch "${BU_LOG_FILE}"; then
 		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${BU_LOG_FILE})\n";
 		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it needs to write the logfile.
 	fi
@@ -105,9 +105,9 @@ fi
 printf "%b" "${GREEN}Confirmation:${RESET} Usage appears valid.\n" > ${DEST}
 
 ##########Validate argument
-ARGUMENT=${1-"$(dirname "$0")/bu.list"}		## First argument is the file name of the file list a specific file to be backed up.
-						## If argument not provided, set default (bu.list in same dir as script).
-						## Syntax: parameter=${parameter-default}
+ARGUMENT=${1-"${0%/*}/bu.list"}		## First argument is the file name of the file list a specific file to be backed up.
+					## If argument not provided, set default (bu.list in same dir as script).
+					## Syntax: parameter=${parameter-default}
 printf "%b" "\nValidating argument:\n" > ${DEST}
 if [ ! -e "${ARGUMENT}" ]; then			## Check the argument exists
 	printf "%b" "${RED}Error:${RESET} File \"${BLUE}${ARGUMENT}${RESET}\" does not exist.\n${USAGE}\n"

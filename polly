@@ -123,14 +123,14 @@ fi
 
 ## Ensure the logfile location exists and is writable.
 printf "%b" "\nEnsuring logfile directory exists...\n" > ${DEST}
-if [ ! -d $(dirname ${LOG_FILE}) ]; then
+if [ ! -d "${LOG_FILE%/*}" ]; then
 	printf "%b" "Logfile directory doesn't exist.  Will attempt to create...\n" > ${DEST}
-	if ! mkdir $(dirname ${LOG_FILE}) &> ${DEST}; then
+	if ! mkdir "${LOG_FILE%/*}" &> ${DEST}; then
 		printf "%b" "${RED}Error${RESET}, cannot create logfile directory.  Quitting...\n"
 		exit ${BAD_LOGFILE}
 	fi
 printf "%b" "\nEnsuring logfile is writable...\n" > ${DEST}
-elif [[ ! -w $(dirname ${LOG_FILE}) || -e ${LOG_FILE} && ! -w ${LOG_FILE} ]]; then
+elif [[ ! -w ${LOG_FILE%/*} || -e ${LOG_FILE} && ! -w ${LOG_FILE} ]]; then
 	printf "%b" "${RED}Error${RESET}, logfile (${LOG_FILE}) is not accessible.  Quitting...\n"
 	exit ${BAD_LOGFILE}
 fi

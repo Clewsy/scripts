@@ -14,8 +14,8 @@ RED="\033[00;31m"
 BOLD="\033[01;37m"
 RESET="\033[00;0m"
 
-TEMP_FILE="/tmp/wami_tempfile"							# Define the preferred temp file location.
-if [ ! -w "$(dirname ${TEMP_FILE})" ]; then TEMP_FILE="./wami_tempfile"; fi	# Default to the current directory.
+TEMP_FILE="/tmp/wami_tempfile"						# Define the preferred temp file location.
+if [ ! -w "${TEMP_FILE%/*}" ]; then TEMP_FILE="./wami_tempfile"; fi	# Default to the current directory.
 
 if ! command -v curl >> /dev/null ; then	# Check if curl is not installed.
 	printf "\n%bError%b: curl is not installed.  Quitting.\n\n" "${RED}" "${RESET}"

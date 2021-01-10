@@ -37,8 +37,8 @@ QUIT_f ()
 
 ########## Define log file and ensure directory exists and is writable.
 APT_ALL_LOG_FILE="${HOME}/.log/apt_all.log"
-if [ ! -w "$(dirname "${APT_ALL_LOG_FILE}")" ]; then
-	if ! mkdir --parents "$(dirname "${APT_ALL_LOG_FILE}")" || ! touch "${APT_ALL_LOG_FILE}"; then
+if [ ! -w "${APT_ALL_LOG_FILE%/*}" ]; then
+	if ! mkdir --parents "${APT_ALL_LOG_FILE%/*}" || ! touch "${APT_ALL_LOG_FILE}"; then
 		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${APT_ALL_LOG_FILE})\n"
 		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it needs to write the logfile.
 	fi
@@ -99,9 +99,9 @@ if [ $# -gt 1 ]; then		## If more than one argument is entered.
 fi
 
 ######### Define argument or use default.
-ARGUMENT=${1-"$(dirname "$0")/my_hosts.list"}	## First argument is the file name of the list of remote systems.
-						## If argument not provided, set default (ball.list in same dir as script).
-						## Syntax: parameter=${parameter-default}
+ARGUMENT=${1-"${0%/*}/my_hosts.list"}	## First argument is the file name of the list of remote systems.
+					## If argument not provided, set default (ball.list in same dir as script).
+					## Syntax: parameter=${parameter-default}
 
 ######### Define and clear temp files.
 TEMP_SUMMARY_FILE="/tmp/temp_apt_summary"
