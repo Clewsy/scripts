@@ -114,11 +114,9 @@ if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then
 ## Arg specifies a list of remote hosts.
 else
 	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system list is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
-	while read -r LINE ; do								## Iterate for every line in list.
-		STRIPPED_LINE="$(printf "%b" "${LINE}\n" | cut -d "#" -f 1)"		## Strip content of line from first '#'.
-		if [ "${STRIPPED_LINE}" ]; then						## If there is anything left.
-			printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"	## Copy the stripped line to the temp file.
-		fi
+	while read -r LINE ; do	## Strip #comments from the lines.
+		STRIPPED_LINE="${LINE%%\#*}"
+		if [ "${STRIPPED_LINE}" ]; then printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"; fi
 	done < "${ARGUMENT}"
 	printf "%b" "\nTarget systems:\n" >> ${DEST}
 	printf "%b" "${BLUE}$(cat "${TEMP_REM_SYS_LIST}")${RESET}\n" >> ${DEST}		## Show the intended target systems.

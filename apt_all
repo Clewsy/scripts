@@ -120,7 +120,7 @@ else
 	printf "%b" "Target is a list of hosts.\n" > ${DEST}
 	printf "%b" "Remote system list \"${BLUE}${ARGUMENT}${RESET}\" validated.\n" > ${DEST}
 	printf "%b" "Parsing hosts list...\n" > ${DEST}
-	while read -r LINE ; do
+	while read -r LINE ; do	## Strip #comments from the lines.
 		STRIPPED_LINE="${LINE%%\#*}"
 		if [ "${STRIPPED_LINE}" ]; then printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"; fi
 	done < "${ARGUMENT}"
