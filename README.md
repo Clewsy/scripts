@@ -65,7 +65,7 @@ Grabs the contents of the /tmp/dhcp.leases file on a remote router, does some ba
 
 ---
 
-[**ytdl.sh**][link_repo_ytdl.sh]
+[**ytdl.sh**][link_repo_ytdl]
 
 Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Not often used since since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
 
@@ -114,7 +114,7 @@ Attempt to copy a specified file/directory to a destination (relative to home di
 [link_repo_vpn]:vpn
 [link_repo_wami]:wami
 [link_repo_whodis]:whodis
-[link_repo_ytdl.sh]:ytdl.sh
+[link_repo_ytdl]:ytdl
 [link_repo_archive_cal_backup.sh]:archive/cal_backup.sh
 [link_repo_archive_chuck.sh]:archive/chuck.sh
 [link_repo_archive_grab.sh]:archive/grab.sh
