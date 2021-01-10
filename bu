@@ -191,11 +191,8 @@ else	## Expecting a text list of files/directorys.
 		printf "%b" "Raw file list:\n${SEPARATOR}\n${BLUE}$(cat ${ARGUMENT})${RESET}\n${SEPARATOR}\n\n" > ${DEST}
 		printf "%b" "Validating listed files and creating valid file list:\n"
 		while read -r LINE ; do		## Iterate for every line in the backup file list.
-			STRIPPED_LINE=$(printf "%s" "${LINE}" | tr -s " " | tr -d "\t" | cut -d "#" -f 1)	## Strip comments.
+			STRIPPED_LINE=${LINE%%\#*}	## Strip comments.
 			if [ "${STRIPPED_LINE}" ]; then	
-				if [ "$(printf "%s" "${STRIPPED_LINE}" | cut -b ${#STRIPPED_LINE})" == " " ]; then ## Space at end.
-					STRIPPED_LINE="$(printf "%s" "${STRIPPED_LINE}" | cut --complement -b ${#STRIPPED_LINE})";
-				fi
 				FULL_PATH=${STRIPPED_LINE/#\~/$HOME}	## Expanded variable will be treated as a literal string.
 				FULL_PATH=${FULL_PATH/\$HOME/$HOME}	## These two commands evaluate first "~" and then "$HOME"
 									## then substitute either for the actual variable $HOME
