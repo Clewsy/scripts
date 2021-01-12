@@ -15,16 +15,16 @@
 #:		: -h	Print help/usage.
 #:		: none	Assumes "-A".
 #: Arguments	: Will accept a single argument to set a theme colour scheme other than the configured default.  Accepted colours:
-#:		: BLACK or black
-#:		: RED or red
-#:		: ORANGE or orange
-#:		: GREEN or green
-#:		: YELLOW or yellow
-#:		: BLUE or blue
-#:		: MAGENTA or magenta
-#:		: CYAN or cyan
-#:		: GRAY or gray or GREY of grey
-#:		: WHITE or white
+#:		: 	BLACK or black
+#:		: 	RED or red
+#:		: 	ORANGE or orange
+#:		: 	GREEN or green
+#:		: 	YELLOW or yellow
+#:		: 	BLUE or blue
+#:		: 	MAGENTA or magenta
+#:		: 	CYAN or cyan
+#:		: 	GRAY or gray or GREY of grey
+#:		: 	WHITE or white
 
 ## Exit codes.
 SUCCESS=0
