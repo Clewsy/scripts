@@ -23,7 +23,7 @@
 #:		: 	BLUE or blue
 #:		: 	MAGENTA or magenta
 #:		: 	CYAN or cyan
-#:		: 	GRAY or gray or GREY of grey
+#:		: 	GRAY or gray or GREY or grey
 #:		: 	WHITE or white
 
 ## Exit codes.
