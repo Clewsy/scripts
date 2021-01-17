@@ -346,7 +346,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 		## Dump lsblk device listing and map each line to an array element.
 		mapfile DEV_DUMP <<< "$(lsblk -J)"
-
 		## Identify then delete elements from the array that we want to ignore.
 		for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
 			if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
@@ -366,12 +365,12 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 		## Also tally the total number of level 1 devices NUM_LEVEL_1.
 		NUM_LEVEL_1=0
 		for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
-			DEV_NAME=$(cut -d "\"" -f 4 <<< "${DEV_DUMP[$E]}")
-			LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[$E]}" | wc -m) / 6 )) ## Get level by counting initial whitespace.
-			NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+1))]}" | wc -m) / 6 ))
+			DEV_NAME=${DEV_DUMP[$E]#*:\"}; DEV_NAME=${DEV_NAME%%\"*}
+			LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))	## Get level by counting initial whitespace.
+			NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+1))]%%\{*}" | wc -m) / 6 ))
 			DIFF=$((NEXT_LEVEL-LEVEL))
-			NUM_CHILDREN=0
 
+			NUM_CHILDREN=0
 			## Loop through the next elements until we reach one of the same level - allows us to count the children.
 			i=1
 			while (( NEXT_LEVEL > LEVEL )); do
@@ -380,7 +379,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 				## Increment the counter and check the next element.
 				((i++))
-				NEXT_LEVEL=$(( $(tr -cd ' ' <<< "${DEV_DUMP[((E+i))]}" | wc -m) / 6 )) ## Get level from whitespace.
+				NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+i))]%%\{*}" | wc -m) / 6 ))
 				DIFF=$((NEXT_LEVEL-LEVEL))
 			done
 
@@ -426,13 +425,19 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 				done
 
 				################################
-				## Level 2 devices
+				## Level 2 devices (CHILD)
 				if ((WORKING_NUM_CHILDREN > 0)); then
-					for ((C=0; C<WORKING_NUM_CHILDREN; C++)); do
+					C=0; CHILDREN_LEFT=${WORKING_NUM_CHILDREN} ## C Represents current child iteration. 
+					while ((CHILDREN_LEFT>0)); do
 						WORKING_CHILD_ELEMENT="${DEV_ARRAY[D+1+C]}"
+						WORKING_CHILD_LEVEL=${WORKING_CHILD_ELEMENT#* }; WORKING_CHILD_LEVEL=${WORKING_CHILD_LEVEL% *}
+
+						## Skip this array element if not a child.
+						if ((WORKING_CHILD_LEVEL!=2)); then ((C++)); continue; fi
+
 						WORKING_CHILD_DEV_NAME=${WORKING_CHILD_ELEMENT%% *}
 						WORKING_CHILD_NUM_CHILDREN=${WORKING_CHILD_ELEMENT##* }
-						if ((C == WORKING_NUM_CHILDREN-1)); then
+						if ((CHILDREN_LEFT == 1)); then
 							printf "%b" "${C1}${COL}└─Child:${RESET} ${WORKING_CHILD_DEV_NAME}\n"
 							C2="${COL}  ${RESET}"
 						else
@@ -466,10 +471,16 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 						done
 
 						################################
-						## Level 3 devices
+						## Level 3 devices (GRANDCHILD)
 						if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
-							for ((GC=0; GC<WORKING_CHILD_NUM_CHILDREN; GC++)); do
+							GC=0; GRANDCHILDREN_LEFT=${WORKING_CHILD_NUM_CHILDREN}
+							while ((GRANDCHILDREN_LEFT>0)); do
 								WORKING_GRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC]}"
+								WORKING_GRANDCHILD_LEVEL=${WORKING_GRANDCHILD_ELEMENT#* }; WORKING_GRANDCHILD_LEVEL=${WORKING_GRANDCHILD_LEVEL% *}
+
+								## Skip this array element if not a grandchild.
+								if ((WORKING_GRANDCHILD_LEVEL!=3)); then ((GC++)); continue; fi
+
 								WORKING_GRANDCHILD_DEV_NAME=${WORKING_GRANDCHILD_ELEMENT%% *}
 								WORKING_GRANDCHILD_NUM_CHILDREN=${WORKING_GRANDCHILD_ELEMENT##* }
 								if ((GC == WORKING_CHILD_NUM_CHILDREN-1)); then
@@ -481,7 +492,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 								fi
 
 								if [ -e /dev/"${WORKING_GRANDCHILD_DEV_NAME}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD_DEV_NAME}"); fi
-								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
+								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE% *}; GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
 								GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_FS=${GRANDCHILD_FS##*${WORKING_GRANDCHILD_DEV_NAME}*( )}; GRANDCHILD_FS=${GRANDCHILD_FS%% *}
 								GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_SIZE=${GRANDCHILD_SIZE##*${WORKING_GRANDCHILD_DEV_NAME}*( )}; GRANDCHILD_SIZE=${GRANDCHILD_SIZE%% *}
 								GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_USED=${GRANDCHILD_USED##*${WORKING_GRANDCHILD_DEV_NAME}*( )*([0-9])?*( )}; GRANDCHILD_USED=${GRANDCHILD_USED%% *}
@@ -502,10 +513,16 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 								done
 
 								################################
-								## Level 4 devices
-								if ((WORKING_GRANDCHILD_NUM_CHILDREN > 0)); then
-									for ((GGC=0; GGC<WORKING_GRANDCHILD_NUM_CHILDREN; GGC++)); do
+								## Level 4 devices (GREATGRANDCHILD)
+								if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
+									GGC=0; GREATGRANDCHILDREN_LEFT=${WORKING_GRANDCHILD_NUM_CHILDREN}
+									while ((GREATGRANDCHILDREN_LEFT>0)); do
 										WORKING_GREATGRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC+1+GGC]}"
+										WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_ELEMENT#* }; WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_LEVEL% *}
+
+										## Skip this array element if not a greatgrandchild.
+										if ((WORKING_GREATGRANDCHILD_LEVEL!=4)); then ((GGC++)); continue; fi
+
 										WORKING_GREATGRANDCHILD_DEV_NAME=${WORKING_GREATGRANDCHILD_ELEMENT%% *}
 										WORKING_GREATGRANDCHILD_NUM_CHILDREN=${WORKING_GREATGRANDCHILD_ELEMENT##* }
 										if ((GGC == WORKING_GRANDCHILD_NUM_CHILDREN-1)); then
@@ -533,10 +550,13 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 											else																C5="${COL}${DIM}├─${RESET}"; fi
 											printf "%b" "${C1}${C2}${C3}${C4}${C5}${GGCSPEC}\n"
 										done
+									((GGC++));  ((GREATGRANDCHILDREN_LEFT--))
 									done
 								fi
+							((GC++));  ((GRANDCHILDREN_LEFT--))
 							done
 						fi
+						((C++)); ((CHILDREN_LEFT--))
 					done
 				fi
 			fi
