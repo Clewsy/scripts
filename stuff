@@ -81,6 +81,9 @@ Valid themes:
   WHITE
 "
 
+## Enable extended globs (e.g. *( ) or +([0-p]) ).  Used in some parameter expansions.  
+shopt -s extglob
+
 ## Get command line options and set appropriate flags.
 while getopts 'Alpcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
 	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered.
@@ -149,7 +152,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 		###############################
 		## Print available CPU core temps - lm_sensors
 		for CHECK in {0..11}; do	## Look for up to 12 core temps.
-			CORE_TEMP="$(sensors | grep "Core ${CHECK}" | awk '{print $3}')"
+			CORE_TEMP=$(sensors | grep -e "Core ${CHECK}"); CORE_TEMP=${CORE_TEMP##*:*( )}; CORE_TEMP=${CORE_TEMP%% *}
 			if [ -n "${CORE_TEMP}" ]; then
 				(( FOUND_CORE_TEMP++ ))
 				CORE_TEMP_[${FOUND_CORE_TEMP}]=${CORE_TEMP}
@@ -165,7 +168,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 		###############################
 		## Print available fan speeds - lm_sensors
 		for CHECK in {1..9}; do	## Look for up to 9 fans.
-			FAN_SPEED="$(sensors | grep "fan${CHECK}" | awk '{print $2}')"
+			FAN_SPEED=$(sensors | grep -e "fan${CHECK}"); FAN_SPEED=${FAN_SPEED##*:*( )}; FAN_SPEED=${FAN_SPEED%% *}
 			if [ -n "${FAN_SPEED}" ] && [ "${FAN_SPEED}" != "0" ]; then
 				(( FOUND_FAN++ ))
 				FAN_SPEED_[$FOUND_FAN]=${FAN_SPEED}
@@ -257,28 +260,28 @@ if [[ ${GET_C_CPU_INFO} || ${GET_ALL_INFO} ]]; then
 	if ! command -v lscpu >> /dev/null ; then	## If lscpu not installed (send to /dev/null to suppress stdout)
 		printf "%b" "${COL}${BOLD}CPU:${RESET} Cannot determine cpu infomtion (lscpu not installed)\n"
 	else
-		CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:" | sed 's/Model name: *//')
-		CPU_VENDOR=$(lscpu | grep -m 1 -e "Vendor ID:" | sed 's/Vendor ID: *//')
-		CPU_ARCH=$(lscpu | grep -m 1 -e "Architecture:" | sed 's/Architecture: *//')
-		CPU_MODE=$(lscpu | grep -m 1 -e "CPU op-mode(s):" | sed 's/CPU op-mode(s): *//')
-		CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):" | sed 's/CPU(s): *//')
-		CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:" | sed 's/CPU MHz: *//')
-		CPU_MAX_SPEED=$(lscpu | grep -m 1 -e "CPU max MHz:" | sed 's/CPU max MHz: *//')
-		CPU_MIN_SPEED=$(lscpu | grep -m 1 -e "CPU min MHz:" | sed 's/CPU min MHz: *//')
+		CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:");	CPU_MODEL=${CPU_MODEL##*:*( )}
+		CPU_VENDOR=$(lscpu | grep -m 1 -e "Vendor ID:");	CPU_VENDOR=${CPU_VENDOR##*:*( )}
+		CPU_ARCH=$(lscpu | grep -m 1 -e "Architecture:");	CPU_ARCH=${CPU_ARCH##*:*( )}
+		CPU_MODE=$(lscpu | grep -m 1 -e "CPU op-mode(s):");	CPU_MODE=${CPU_MODE##*:*( )}
+		CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):");		CPU_CORES=${CPU_CORES##*:*( )}
+		CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:");		CPU_SPEED=${CPU_SPEED##*:*( )}
+		CPU_MAX_SPEED=$(lscpu | grep -m 1 -e "CPU max MHz:");	CPU_MAX_SPEED=${CPU_MAX_SPEED##*:*( )}
+		CPU_MIN_SPEED=$(lscpu | grep -m 1 -e "CPU min MHz:");	CPU_MIN_SPEED=${CPU_MIN_SPEED##*:*( )}
 		printf "%b" "${COL}${BOLD}CPU:${RESET}\n"
-		if [ -n "${CPU_MODEL}" ];	then	printf "%b" "${COL}${BOLD}├─Model:${RESET} ${CPU_MODEL}\n"; fi			## CPU Model
-		if [ -n "${CPU_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Vendor:${RESET} ${CPU_VENDOR}\n"; fi		## CPUM Vendor
-		if [ -n "${CPU_ARCH}" ];	then	printf "%b" "${COL}${BOLD}├─Architecture:${RESET} ${CPU_ARCH}\n"; fi	## Architecture
-		if [ -n "${CPU_MODE}" ];	then	printf "%b" "${COL}${BOLD}├─Mode(s):${RESET} ${CPU_MODE}\n"; fi			## CPU Mode
-		if [ -n "${CPU_CORES}" ];	then	printf "%b" "${COL}${BOLD}├─Cores:${RESET} ${CPU_CORES}\n"; fi			## CPU(s)
-		if [ -n "${CPU_SPEED}" ];	then	printf "%b" "${COL}${BOLD}└─Speed:${RESET} ${CPU_SPEED}MHz\n"			## CPU Speed
+		if [ -n "${CPU_MODEL}" ];	then	printf "%b" "${COL}${BOLD}├─Model:${RESET} ${CPU_MODEL}\n"; fi
+		if [ -n "${CPU_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Vendor:${RESET} ${CPU_VENDOR}\n"; fi
+		if [ -n "${CPU_ARCH}" ];	then	printf "%b" "${COL}${BOLD}├─Architecture:${RESET} ${CPU_ARCH}\n"; fi
+		if [ -n "${CPU_MODE}" ];	then	printf "%b" "${COL}${BOLD}├─Mode(s):${RESET} ${CPU_MODE}\n"; fi
+		if [ -n "${CPU_CORES}" ];	then	printf "%b" "${COL}${BOLD}├─Cores:${RESET} ${CPU_CORES}\n"; fi
+		if [ -n "${CPU_SPEED}" ];	then	printf "%b" "${COL}${BOLD}└─Speed:${RESET} ${CPU_SPEED}MHz\n"
 		else								printf "%b" "${COL}${BOLD}└─Speed\n"; fi
 		if [ -n "${CPU_MAX_SPEED}" ] && [ -n "${CPU_MIN_SPEED}" ]; then
-			printf "%b" "${COL}  ├─Max:${RESET} ${CPU_MAX_SPEED}MHz\n"; 	## Max CPU MHz
-			printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n";		## Min CPU MHz
+			printf "%b" "${COL}  ├─Max:${RESET} ${CPU_MAX_SPEED}MHz\n";
+			printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n";
 		else
-			if [ -n "${CPU_MAX_SPEED}" ]; then printf "%b" "${COL}  └─Max:${RESET} ${CPU_MAX_SPEED}MHz\n"; fi	## Max CPU MHz
-			if [ -n "${CPU_MIN_SPEED}" ]; then printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n"; fi	## Min CPU MHz
+			if [ -n "${CPU_MAX_SPEED}" ]; then printf "%b" "${COL}  └─Max:${RESET} ${CPU_MAX_SPEED}MHz\n"; fi
+			if [ -n "${CPU_MIN_SPEED}" ]; then printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n"; fi
 		fi
 	fi
 fi
@@ -288,13 +291,13 @@ fi
 if [[ ${GET_M_MEMORY_INFO} || ${GET_ALL_INFO} ]]; then
 	printf "%b" "${COL}${BOLD}Memory:${RESET}\n"
 	printf "%b" "${COL}${BOLD}├─RAM:${RESET}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:    ${RESET} $(free -h | grep "Mem:" | awk '{print $2}')\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:     ${RESET} $(free -h | grep "Mem:" | awk '{print $3}')\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} $(free -h | grep "Mem:" | awk '{print $7}')\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:    ${RESET} $(free -h | grep -e "Mem:" | awk '{print $2}')\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:     ${RESET} $(free -h | grep -e "Mem:" | awk '{print $3}')\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} $(free -h | grep -e "Mem:" | awk '{print $7}')\n"
 	printf "%b" "${COL}${BOLD}└─SWAP:${RESET}\n"
-	printf "%b" "${COL}  ├─Total:    ${RESET} $(free -h | grep "Swap" | awk '{print $2}')\n"
-	printf "%b" "${COL}  ├─Used:     ${RESET} $(free -h | grep "Swap" | awk '{print $3}')\n"
-	printf "%b" "${COL}  └─Free:     ${RESET} $(free -h | grep "Swap" | awk '{print $4}')\n"
+	printf "%b" "${COL}  ├─Total:    ${RESET} $(free -h | grep -e "Swap" | awk '{print $2}')\n"
+	printf "%b" "${COL}  ├─Used:     ${RESET} $(free -h | grep -e "Swap" | awk '{print $3}')\n"
+	printf "%b" "${COL}  └─Free:     ${RESET} $(free -h | grep -e "Swap" | awk '{print $4}')\n"
 fi
 
 ####################################################################################################################################
@@ -305,10 +308,9 @@ if [[ ${GET_A_AUDIO_INFO} || ${GET_V_VIDEO_INFO} || ${GET_ALL_INFO} ]]; then
 	else
 		## Both audio and video:
 		if [[ ${GET_ALL_INFO} || ${GET_A_AUDIO_INFO} && ${GET_V_VIDEO_INFO} ]]; then
-			AUDIO_INFO=$(lspci -k | grep -m 1 "Audio" | cut -c23-)
-			VIDEO_INFO=$(lspci -k | grep -m 1 "VGA" | cut -c36-)
-			if	xdpyinfo &> /dev/null;	then VIDEO_RES=$(xdpyinfo | grep "dimensions" | awk '{print $2}')
-			elif	xrandr &> /dev/null;	then VIDEO_RES=$(xrandr | grep "current" | cut -d ',' -f 2 | awk '{print $2$3$4}'); fi
+			AUDIO_INFO=$(lspci -k | grep -m 1 -e "Audio");	AUDIO_INFO=${AUDIO_INFO:22}
+			VIDEO_INFO=$(lspci -k | grep -m 1 -e "VGA");	VIDEO_INFO=${VIDEO_INFO:35}
+			if xrandr &> /dev/null;	then VIDEO_RES=$(xrandr | grep -e "current"); VIDEO_RES=${VIDEO_RES##*current }; VIDEO_RES=${VIDEO_RES%%,*}; fi
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			printf "%b" "${COL}${BOLD}Audio/Video:${RESET}\n"
@@ -317,14 +319,14 @@ if [[ ${GET_A_AUDIO_INFO} || ${GET_V_VIDEO_INFO} || ${GET_ALL_INFO} ]]; then
 			if [ -n "${VIDEO_RES}" ]; then printf "%b" "${COL}  └─Resolution:${RESET} ${VIDEO_RES}\n"; fi
 		## Just audio:
 		elif [ -n "$GET_A_AUDIO_INFO" ]; then
-			AUDIO_INFO=$(lspci -k | grep -m 1 "Audio" | cut -c23-)
+			AUDIO_INFO=$(lspci -k | grep -m 1 -e "Audio"); AUDIO_INFO=${AUDIO_INFO:22}
 			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
 			printf "%b" "${COL}${BOLD}Audio:${RESET}\n"
 			printf "%b" "${COL}${BOLD}└─Hardware:${RESET} ${AUDIO_INFO}\n"
 		## Just video:
 		elif [ -n "$GET_V_VIDEO_INFO" ]; then
-			VIDEO_INFO=$(lspci -k | grep -m 1 "VGA" | cut -c36-)
-			if xrandr &> /dev/null; then VIDEO_RES=$(xrandr | grep "current" | cut -d ',' -f 2 | awk '{print $2$3$4}'); fi
+			VIDEO_INFO=$(lspci -k | grep -m 1 -e "VGA"); VIDEO_INFO=${VIDEO_INFO:35}
+			if xrandr &> /dev/null;	then VIDEO_RES=$(xrandr | grep -e "current"); VIDEO_RES=${VIDEO_RES##*current }; VIDEO_RES=${VIDEO_RES%%,*}; fi
 			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
 			printf "%b" "${COL}${BOLD}Video:${RESET}\n"
 			printf "%b" "${COL}${BOLD}└─Hardware:${RESET} ${VIDEO_INFO}\n"
@@ -391,11 +393,10 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 		## Loop through the DEV_ARRAY, format and print device information.
 		for (( D=0; D<${#DEV_ARRAY[@]}; D++ )); do
-
 			WORKING_ELEMENT="${DEV_ARRAY[$D]}"
-			WORKING_DEV_NAME=$(awk '{print $1}' <<< "${WORKING_ELEMENT}")
-			WORKING_LEVEL=$(awk '{print $2}' <<< "${WORKING_ELEMENT}")
-			WORKING_NUM_CHILDREN=$(awk '{print $3}' <<< "${WORKING_ELEMENT}")
+			WORKING_DEV_NAME=${WORKING_ELEMENT%% *}
+			WORKING_LEVEL=${WORKING_ELEMENT#* }; WORKING_LEVEL=${WORKING_LEVEL% *}
+			WORKING_NUM_CHILDREN=${WORKING_ELEMENT##* }
 
 			################################
 			## Level 1 devices
@@ -428,8 +429,8 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 				if ((WORKING_NUM_CHILDREN > 0)); then
 					for ((C=0; C<WORKING_NUM_CHILDREN; C++)); do
 						WORKING_CHILD_ELEMENT="${DEV_ARRAY[D+1+C]}"
-						WORKING_CHILD_DEV_NAME=$(awk '{print $1}' <<< "${WORKING_CHILD_ELEMENT}")
-						WORKING_CHILD_NUM_CHILDREN=$(awk '{print $3}' <<< "${WORKING_CHILD_ELEMENT}")
+						WORKING_CHILD_DEV_NAME=${WORKING_CHILD_ELEMENT%% *}
+						WORKING_CHILD_NUM_CHILDREN=${WORKING_CHILD_ELEMENT##* }
 						if ((C == WORKING_NUM_CHILDREN-1)); then
 							printf "%b" "${C1}${COL}└─Child:${RESET} ${WORKING_CHILD_DEV_NAME}\n"
 							C2="${COL}  ${RESET}"
@@ -440,11 +441,11 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 						CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD_DEV_NAME}")
 						CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD_DEV_NAME}")
-						CHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_CHILD_DEV_NAME}" | awk '{print $2}')
+						CHILD_FS=$(df -Th 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_FS=${CHILD_FS##*${WORKING_CHILD_DEV_NAME}*( )}; CHILD_FS=${CHILD_FS%% *}
 						CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD_DEV_NAME}")
-						CHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_CHILD_DEV_NAME}" | awk '{print $2}')
-						CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_CHILD_DEV_NAME}" | awk '{print $3}')
-						CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_CHILD_DEV_NAME}" | awk '{print $5}')
+						CHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_SIZE=${CHILD_SIZE##*${WORKING_CHILD_DEV_NAME}*( )}; CHILD_SIZE=${CHILD_SIZE%% *}
+						CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_USED=${CHILD_USED##*${WORKING_CHILD_DEV_NAME}*( )*([0-9])?*( )}; CHILD_USED=${CHILD_USED%% *}
+						CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_PERC=${CHILD_PERC%%\%*}; CHILD_PERC="${CHILD_PERC##* }%"
 						CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD_DEV_NAME}") 
 
 						CHILD_SPECS=()	## Clear then reset the array of child specs
@@ -468,8 +469,8 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 						if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
 							for ((GC=0; GC<WORKING_CHILD_NUM_CHILDREN; GC++)); do
 								WORKING_GRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC]}"
-								WORKING_GRANDCHILD_DEV_NAME=$(awk '{print $1}' <<< "${WORKING_GRANDCHILD_ELEMENT}")
-								WORKING_GRANDCHILD_NUM_CHILDREN=$(awk '{print $3}' <<< "${WORKING_GRANDCHILD_ELEMENT}")
+								WORKING_GRANDCHILD_DEV_NAME=${WORKING_GRANDCHILD_ELEMENT%% *}
+								WORKING_GRANDCHILD_NUM_CHILDREN=${WORKING_GRANDCHILD_ELEMENT##* }
 								if ((GC == WORKING_CHILD_NUM_CHILDREN-1)); then
 									printf "%b" "${C1}${C2}${COL}${DIM}└─Grandchild:${RESET} ${WORKING_GRANDCHILD_DEV_NAME}\n"
 									C3="${COL}${DIM}  ${RESET}"
@@ -479,12 +480,12 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 								fi
 
 								if [ -e /dev/"${WORKING_GRANDCHILD_DEV_NAME}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD_DEV_NAME}"); fi
-								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $6}')
-								GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $2}')
-								GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $2}')
-								GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $3}')
-								GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $5}' )
-								GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep "${WORKING_GRANDCHILD_DEV_NAME}" | awk '{print $7}')
+								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
+								GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_FS=${GRANDCHILD_FS##*${WORKING_GRANDCHILD_DEV_NAME}*( )}; GRANDCHILD_FS=${GRANDCHILD_FS%% *}
+								GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_SIZE=${GRANDCHILD_SIZE##*${WORKING_GRANDCHILD_DEV_NAME}*( )}; GRANDCHILD_SIZE=${GRANDCHILD_SIZE%% *}
+								GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_USED=${GRANDCHILD_USED##*${WORKING_GRANDCHILD_DEV_NAME}*( )*([0-9])?*( )}; GRANDCHILD_USED=${GRANDCHILD_USED%% *}
+								GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_PERC=${GRANDCHILD_PERC%%\%*}; GRANDCHILD_PERC="${GRANDCHILD_PERC##* }%"
+								GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_MOUNT=${GRANDCHILD_MOUNT##* }
 
 								GRANDCHILD_SPECS=()	## Clear, reset the array of child specs.
 								if [ -n "${GRANDCHILD_TYPE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
@@ -504,8 +505,8 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 								if ((WORKING_GRANDCHILD_NUM_CHILDREN > 0)); then
 									for ((GGC=0; GGC<WORKING_GRANDCHILD_NUM_CHILDREN; GGC++)); do
 										WORKING_GREATGRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC+1+GGC]}"
-										WORKING_GREATGRANDCHILD_DEV_NAME=$(awk '{print $1}' <<< "${WORKING_GREATGRANDCHILD_ELEMENT}")
-										WORKING_GREATGRANDCHILD_NUM_CHILDREN=$(awk '{print $3}' <<< "${WORKING_GREATGRANDCHILD_ELEMENT}")
+										WORKING_GREATGRANDCHILD_DEV_NAME=${WORKING_GREATGRANDCHILD_ELEMENT%% *}
+										WORKING_GREATGRANDCHILD_NUM_CHILDREN=${WORKING_GREATGRANDCHILD_ELEMENT##* }
 										if ((GGC == WORKING_GRANDCHILD_NUM_CHILDREN-1)); then
 											printf "%b" "${C1}${C2}${C3}${COL}${DIM}└─Great-Grandchild:${RESET} ${WORKING_GREATGRANDCHILD_DEV_NAME}\n"
 											C4="${COL}${DIM}  ${RESET}"
@@ -514,15 +515,17 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 											C4="${COL}${DIM}│ ${RESET}"
 										fi
 
-										GREATGRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}" | awk '{print $2}')
-										GREATGRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}" | awk '{print $2}')
-										GREATGRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}" | awk '{print $3}')
-										GREATGRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}" | awk '{print $5}' )
+										GREATGRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_FS=${GREATGRANDCHILD_FS##*${WORKING_GREATGRANDCHILD_DEV_NAME}*( )}; GREATGRANDCHILD_FS=${GREATGRANDCHILD_FS%% *}
+										GREATGRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_SIZE=${GREATGRANDCHILD_SIZE##*${WORKING_GREATGRANDCHILD_DEV_NAME}*( )}; GREATGRANDCHILD_SIZE=${GREATGRANDCHILD_SIZE%% *}
+										GREATGRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_USED=${GREATGRANDCHILD_USED##*${WORKING_GREATGRANDCHILD_DEV_NAME}*( )*([0-9])?*( )}; GREATGRANDCHILD_USED=${GREATGRANDCHILD_USED%% *}
+										GREATGRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_PERC=${GREATGRANDCHILD_PERC%%\%*}; GREATGRANDCHILD_PERC="${GREATGRANDCHILD_PERC##* }%"
+										GREATGRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_MOUNT=${GREATGRANDCHILD_MOUNT##* }
 
 										GREATGRANDCHILD_SPECS=()
 										if [ -n "${GREATGRANDCHILD_FS}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GREATGRANDCHILD_FS}"); fi
-										if [ -n "${GREATGRANDCHILD_USED}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GREATGRANDCHILD_SIZE}"); fi
+										if [ -n "${GREATGRANDCHILD_SIZE}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GREATGRANDCHILD_SIZE}"); fi
 										if [ -n "${GREATGRANDCHILD_USED}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GREATGRANDCHILD_USED} (${GREATGRANDCHILD_PERC})"); fi
+										if [ -n "${GREATGRANDCHILD_MOUNT}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GREATGRANDCHILD_MOUNT}"); fi
 										NUM_GGCSPECS=${#GREATGRANDCHILD_SPECS[@]}
 										for GGCSPEC in "${GREATGRANDCHILD_SPECS[@]}" ; do
 											if [[ "${GGCSPEC}" == "${GREATGRANDCHILD_SPECS[((NUM_GGSPECS-1))]}" && ${WORKING_GREATGRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C5="${COL}${DIM}└─${RESET}"
@@ -584,16 +587,16 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 	fi
 
 	## Show primary dns address
-	if command -v nmcli > /dev/null; then	DNS=$(nmcli dev show | grep -m 1 "DNS" | tr -s " " | cut -d " " -f 2)
-	elif  resolvectl &> /dev/null; then	DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:" | awk '{print $3}')
-	elif [ -f /etc/resolv.conf ]; then	DNS=$(grep -m 1 "nameserver" /etc/resolv.conf | cut -d " " -f 2)
+	if command -v nmcli > /dev/null; then	DNS=$(nmcli dev show | grep -m 1 -e "DNS");		DNS=${DNS##*:*( )}
+	elif  resolvectl &> /dev/null; then	DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:");	DNS=${DNS##*: }
+	elif [ -f /etc/resolv.conf ]; then	DNS=$(grep -m 1 "nameserver" /etc/resolv.conf);		DNS=${DNS##* }
 	else					DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
 	if [ -n "${DNS}" ]; then printf "%b" "${COL}${BOLD}├─DNS:${RESET} ${DNS}\n"; fi
 
 	## Show default gateway address
-	if command -v ip > /dev/null ; then		GW=$(ip route | grep -m 1 "default" | cut -d " " -f 3)
-	elif command -v route > /dev/null ; then	GW=$(route -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
-	elif command -v netstat > /dev/null ; then	GW=$(netstat -r -n | grep -m 1 "0.0.0.0" | awk '{print $2}')
+	if command -v ip > /dev/null ; then		GW=$(ip route | grep -m 1 "default");		GW=${GW##*via };	GW=${GW%% *}
+	elif command -v route > /dev/null ; then	GW=$(route -n | grep -m 1 "0.0.0.0");		GW=${GW##0.0.0.0*( )};	GW=${GW%%  *}
+	elif command -v netstat > /dev/null ; then	GW=$(netstat -r -n | grep -m 1 "0.0.0.0");	GW=${GW##0.0.0.0*( )};	GW=${GW%%  *}
 	else						GW="Cannot determine default gateway address (ip nor route nor netstat installed)"; fi
 	if [ "${GW}" = "" ]; then GW="Could not detect gateway."; fi
 	printf "%b" "${COL}${BOLD}├─Gateway:${RESET} ${GW}\n"
@@ -610,7 +613,7 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 		for (( c=1; c<=NUM_DEVS; c++ ))
 		do
 			## Define current interface in list.
-			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d" | cut -d "/" -f 5)
+			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d"); WORKING_INTERFACE=${WORKING_INTERFACE##*/}
 			if (( c == NUM_DEVS )); then	printf "%b" "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}  ${RESET}"
 			else				printf "%b" "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}│ ${RESET}"; fi
 
@@ -623,21 +626,19 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
 
 			## Determine the IP address assigned o the interface
 			if [ "${STATUS}" != "down" ]; then
-				if command -v ip > /dev/null; then		IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet" | cut -d " " -f 6)
-				elif command -v ifconfig >> /dev/null ; then	IP=$(ifconfig "${WORKING_INTERFACE}" | grep "inet addr" | cut -d ":" -f 2 | cut -d " " -f 1)
-				else						IP="Cannot determine interface ip address (neither ip nor ifconfig installed)"; fi
+				if command -v ip > /dev/null; then	IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet"); IP=${IP##*inet }; IP=${IP%% *}
+				else					IP="Cannot determine interface ip address (ip not installed)"; fi
 			fi
 
 			## Determine the connected ESSID (if present)
 			if command -v iwgetid >> /dev/null ; then
-				IF_WIFI_CONN=$(iwgetid | awk '{print $1}')
+				IF_WIFI_CONN=$(iwgetid); IF_WIFI_CONN=${IF_WIFI_CONN%% *}
 				if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then	ESSID=$(iwgetid -r)
 				else								ESSID=""; fi
-			elif command -v iw > /dev/null; then	ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID" | cut -d " " -f 2)
-			elif command -v nmcli > /dev/null; then	ESSID=$(nmcli | grep "${WORKING_INTERFACE}: connected to" | cut -d " " -f 4)
+			elif command -v iw > /dev/null; then	ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID"); ESSID=${ESSID##*: }
 			else					ESSID=""; fi
 
-			if [ "${ESSID}" == "Wired" ] ; then ESSID=""; fi		## If an essid was found
+			ESSID=${ESSID//Wired/}	## If ESSID identified as "Wired", clear ESSID.
 
 			## Clear and then set the array of interface specs
 			INT_SPECS=()
