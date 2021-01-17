@@ -289,15 +289,16 @@ fi
 ####################################################################################################################################
 ## -m : Print memory info
 if [[ ${GET_M_MEMORY_INFO} || ${GET_ALL_INFO} ]]; then
+	MEM_ARRAY=( $(free -h) )
 	printf "%b" "${COL}${BOLD}Memory:${RESET}\n"
 	printf "%b" "${COL}${BOLD}├─RAM:${RESET}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:    ${RESET} $(free -h | grep -e "Mem:" | awk '{print $2}')\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:     ${RESET} $(free -h | grep -e "Mem:" | awk '{print $3}')\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} $(free -h | grep -e "Mem:" | awk '{print $7}')\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:    ${RESET} ${MEM_ARRAY[7]}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:     ${RESET} ${MEM_ARRAY[8]}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} ${MEM_ARRAY[12]}\n"
 	printf "%b" "${COL}${BOLD}└─SWAP:${RESET}\n"
-	printf "%b" "${COL}  ├─Total:    ${RESET} $(free -h | grep -e "Swap" | awk '{print $2}')\n"
-	printf "%b" "${COL}  ├─Used:     ${RESET} $(free -h | grep -e "Swap" | awk '{print $3}')\n"
-	printf "%b" "${COL}  └─Free:     ${RESET} $(free -h | grep -e "Swap" | awk '{print $4}')\n"
+	printf "%b" "${COL}  ├─Total:    ${RESET} ${MEM_ARRAY[14]}\n"
+	printf "%b" "${COL}  ├─Used:     ${RESET} ${MEM_ARRAY[15]}\n"
+	printf "%b" "${COL}  └─Free:     ${RESET} ${MEM_ARRAY[16]}\n"
 fi
 
 ####################################################################################################################################
