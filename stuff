@@ -572,9 +572,11 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
 	KERNEL=$(uname -s)
 	KERNEL_VER=$(uname -v)
 	KERNEL_REL=$(uname -r)
-	if command -v lsb_release >> /dev/null; then	DIST=$(lsb_release -i | cut -f2)
-							DIST_REL=$(lsb_release -r | cut -f2)
-							DIST_CODE=$(lsb_release -c | cut -f2);
+	if command -v lsb_release >> /dev/null; then
+		RELEASE_INFO=( $(lsb_release -irc) )
+		DIST=${RELEASE_INFO[2]}
+		DIST_REL=${RELEASE_INFO[4]}
+		DIST_CODE=${RELEASE_INFO[6]}
 	fi
 	SHELL_IN_USE=${SHELL##*/}
 
