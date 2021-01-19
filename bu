@@ -137,10 +137,10 @@ printf "%b" "\nConfigured ssh options   : ${BLUE}${SSH_OPTIONS[*]}${RESET}\n" > 
 #########Define array of options to be used by rsync.
 RSYNC_OPTIONS=(
 	--archive	## Archive mode, equivalent to -rlptgoD (no -H, -A, -X)
-	--relative
 	--verbose
 	--human-readable
 	--progress
+	--recursive	## Need to add -r as it is disabled by using --files-from even when using --archive.
 )
 ## Note using --archive is equivalent to:
 ##	-r --recursive
@@ -155,10 +155,10 @@ printf "%b" "Configured rsync options : ${BLUE}${RSYNC_OPTIONS[*]}${RESET}\n" > 
 ##########Determine server hostname (i.e. use local network or remote network).
 printf "%b" "\nChecking for local or remote backup server availability.\n" > ${DEST}
 if ssh "${SSH_OPTIONS[@]}" "${BU_USER}@${BU_SERVER_LOCAL}" "exit" > ${DEST} 2>&1; then		## If connected to local server.
-	BU_SERVER="${BU_SERVER_LOCAL}"							## Use the local server.
+	BU_SERVER="${BU_SERVER_LOCAL}"								## Use the local server.
 	printf "%b" "Using local server: ${BLUE}${BU_USER}${RESET}@${BLUE}${BU_SERVER}${RESET}\n" > ${DEST}
 elif ssh "${SSH_OPTIONS[@]}" "${BU_USER}@${BU_SERVER_REMOTE}" "exit" > ${DEST} 2>&1; then	## Else connected to remote server.
-	BU_SERVER="${BU_SERVER_REMOTE}"							## Use the remote server.
+	BU_SERVER="${BU_SERVER_REMOTE}"								## Use the remote server.
 	printf "%b" "Using remote server: ${BLUE}${BU_USER}${RESET}@${BLUE}${BU_SERVER}${RESET}\n" > ${DEST}
 else 
 	printf "%b" "${RED}Error:${RESET} Unable to connect to either local (${BLUE}${BU_SERVER_LOCAL}${RESET}) or remote (${BLUE}${BU_SERVER_REMOTE}${RESET}) server.\n\n"
