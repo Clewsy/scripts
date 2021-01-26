@@ -53,7 +53,7 @@ TIMESTAMP_f() { date +"%Y-%m-%d %T"; }
 NOTIFICATION_f() {
 
 	## Kill any current running blink routines.
-	pkill ${BLINK1_TOOL_PATHi##*/}
+	pkill ${BLINK1_TOOL_PATH##*/}
 
 	## Determine desired colour and flashing status.
 	case "${1}" in
