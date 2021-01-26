@@ -43,6 +43,9 @@ BLINK_GREEN="--green"
 BLINK_BLUE="--blue"
 BLINK_FLASH="--flash 1000"
 
+## Path of the blink1-tool executable.
+BLINK1_TOOL_PATH="/usr/local/sbin/blink1-tool"
+
 ## Datestamp function.  Displays similar to the default but in 24-hour format.
 TIMESTAMP_f() { date +"%Y-%m-%d %T"; }
 
@@ -50,7 +53,7 @@ TIMESTAMP_f() { date +"%Y-%m-%d %T"; }
 NOTIFICATION_f() {
 
 	## Kill any current running blink routines.
-	pkill blink1-tool
+	pkill ${BLINK1_TOOL_PATHi##*/}
 
 	## Determine desired colour and flashing status.
 	case "${1}" in
@@ -61,7 +64,7 @@ NOTIFICATION_f() {
 	esac
 
 	## Run the blink command.
-	blink1-tool "${COLOUR}" "${FLASH}" > ${DEST}
+	${BLINK1_TOOL_PATH} "${COLOUR}" "${FLASH}" > ${DEST}
 }
 
 ## stdout output text colours.
