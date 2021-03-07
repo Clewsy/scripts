@@ -69,16 +69,16 @@ Valid options:
 -h	Print this help.
 
 Valid themes:
-  RED
-  ORANGE
-  YELLOW
-  GREEN
-  BLUE
-  CYAN (default)
-  MAGENTA
-  BLACK
-  GRAY
-  WHITE
+  ${RED}RED
+  ${ORANGE}ORANGE
+  ${YELLOW}YELLOW
+  ${GREEN}GREEN
+  ${CYAN}CYAN${RESET} (default)
+  ${BLUE}BLUE
+  ${MAGENTA}MAGENTA
+  ${BLACK}BLACK
+  ${GRAY}GRAY
+  ${WHITE}WHITE${RESET}
 "
 
 ## Enable extended globs (e.g. *( ) or +([0-p]) ).  Used in some parameter expansions.  
