@@ -195,8 +195,15 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 	fi
 
 	###############################
-	## Print uptime and number of logged-in users.
-	if command -v who > /dev/null ; then	printf "%b" "${COL}${BOLD}├─Total Users:${RESET} $(who | wc -l)\n"; fi
+	## Print user/s, terminal and uptime info.
+	if command -v who > /dev/null; then
+		NUM_USERS=$(who --count) && NUM_USERS=${NUM_USERS##*=}
+		printf "%b" "${COL}${BOLD}├─Username:${RESET} ${USER}\n"; fi
+	printf "%b" "${COL}${BOLD}├─Total Users:${RESET} ${NUM_USERS}\n"
+	printf "%b" "${COL}${BOLD}├─Current Directory:${RESET} ${PWD}\n"
+	printf "%b" "${COL}${BOLD}├─Terminal:${RESET} ${TERM}\n"
+	printf "%b" "${COL}${BOLD}│ ├─Columns:${RESET} ${COLUMNS}\n"
+	printf "%b" "${COL}${BOLD}│ └─Lines:${RESET} ${LINES}\n"
 	printf "%b" "${COL}${BOLD}└─Uptime:${RESET} $(uptime -p)\n"
 fi
 
