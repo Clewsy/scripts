@@ -15,7 +15,7 @@ NO_ROUTER=1
 RED="\033[02;31m"
 BOLD="\033[01;37m"
 RESET="\033[0m"
-MAX_NAME_SIZE=12	# Max string length for hostnames.
+MAX_NAME_SIZE=14	# Max string length for hostnames.
 
 # Define and initialise temp file.
 TEMPFILE="/tmp/whodis_tempfile"
