@@ -11,8 +11,8 @@ COMMAND="~/bin/bu"	## The command to run on the remote host/s.  Note using "~" a
 ##########Exit codes
 SUCCESS=0		## Toight.
 INVALID_OPTIONS=1	## Incorrect usage.
-TOO_MANY_ARGS=2		## Icorrect usage.
-BAD_LOG_FILE=3		## Cannont write to the defined logfile.
+TOO_MANY_ARGS=2		## Incorrect usage.
+BAD_LOG_FILE=3		## Cannot write to the defined logfile.
 
 ##########Colours and formatting.
 RED="\033[02;31m"
@@ -66,7 +66,7 @@ DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with 
 
 ######### Define array of options to be used by ssh.
 SSH_OPTIONS=(
-	-4					## Use IPV4 (alternatively, -6 for IPV6).
+	"-4"					## Use IPV4 (alternatively, -6 for IPV6).
 	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
 	"-o UserKnownHostsFile=/dev/null"	## Disable auto saving "newly discovered" hosts to the default knownhosts file.
 	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
@@ -130,8 +130,7 @@ if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\n${SEPARATOR}\n\n"; fi
 } >> "${BALL_LOG_FILE}"
 while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
 				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
-	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run \"${BLUE}${COMMAND}${RESET}\" on \"${BLUE}${REM_SYS}${RESET}\"\n"; fi
-	printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[@]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n" >> ${DEST}
+	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[@]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n"; fi
 	printf "%b" "\n${BOLD}############################## BEGIN CLIENT OUTPUT ###############################\n${RESET}" >> ${DEST}
 	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}" > ${DEST}; then ## Command failed.
 		printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n" >> ${DEST}
