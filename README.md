@@ -10,7 +10,7 @@ Script Name					| Description
 [**stuff**][link_repo_stuff]			| Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 [**terbling**][link_repo_terbling]		| Prints an ascii-art logo and some basic system info to the command line.
 [**vpn**][link_repo_vpn]			| Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
-[**wami**][link_repo_wami]			| Pulls and displays info (IP, country, city, etc) from [ipinfo.io][link_web_ipinfo] - useful to verify vpn operation.
+[**wami**][link_repo_wami]			| Pulls and displays info (IP, country, city, etc) from [ifconfig.co][link_web_ifconfig] - useful to verify vpn operation.
 [**whodis**][link_repo_whodis]			| Grabs the contents of the /tmp/dhcp.leases file on a remote router, does some basic formatting and prints it to stdout.
 [**ytdl.sh**][link_repo_ytdl]			| Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Not often used since since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
 
@@ -46,7 +46,7 @@ Script Name						| Description
 [link_gitlab_clewsy_p0wer]:https://gitlab.com/clewsy/p0wer
 [link_web_termux]:https://termux.com/
 [link_web_blink1]:https://blink1.thingm.com/
-[link_web_ipinfo]:https://ipinfo.io/
+[link_web_ifconfig]:https://ifconfig.co/
 [link_web_lineageos]:https://lineageos.org/
 [link_web_newpipe]:https://newpipe.schabi.org/
 [link_web_ansible]:https://docs.ansible.com/

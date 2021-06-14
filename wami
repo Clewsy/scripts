@@ -6,8 +6,8 @@
 
 # Exit codes.
 SUCCESS=0
-NO_CURL=1
-CURL_FAIL=2
+NO_CURL=1	# curl not found.
+CURL_FAIL=2	# curl returned an error.
 
 # Text formatting codes.
 RED="\033[00;31m"
@@ -30,7 +30,7 @@ if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ifc
 fi
 
 IP=$(		grep -m 1 "ip"		"${TEMP_FILE}" | cut -d "\"" -f 4)
-HOST_NAME=$(	grep "hostname"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)	# $HOSTNAME is reserved.
+HOST_NAME=$(	grep "hostname"		"${TEMP_FILE}" | cut -d "\"" -f 4)	# $HOSTNAME is reserved.
 ORG=$(		grep "asn_org"		"${TEMP_FILE}" | cut -d "\"" -f 4)
 COUNTRY_CODE=$(	grep "country_iso"	"${TEMP_FILE}" | cut -d "\"" -f 4)
 COUNTRY=$(	grep -m 1 "country"	"${TEMP_FILE}" | cut -d "\"" -f 4)
@@ -38,8 +38,8 @@ REGION=$(	grep "region_name"	"${TEMP_FILE}" | cut -d "\"" -f 4)
 CITY=$(		grep "city"		"${TEMP_FILE}" | cut -d "\"" -f 4)
 POST_CODE=$(	grep "zip_code"		"${TEMP_FILE}" | cut -d "\"" -f 4)
 TIMEZONE=$(	grep "time_zone"	"${TEMP_FILE}" | cut -d "\"" -f 4)
-LATITUDE=$(	grep "latitude"		"${TEMP_FILE}" | cut -d ":" -f 2); LATITUDE=${LATITUDE%,};   LATITUDE=${LATITUDE#' '}
-LONGITUDE=$(	grep "longitude"	"${TEMP_FILE}" | cut -d ":" -f 2); LONGITUDE=${LONGITUDE%,}; LONGITUDE=${LONGITUDE#' '}
+LATITUDE=$(	grep "latitude"		"${TEMP_FILE}" | cut -d " " -f 4); LATITUDE=${LATITUDE%,}	# Remove trailing comma.
+LONGITUDE=$(	grep "longitude"	"${TEMP_FILE}" | cut -d " " -f 4); LONGITUDE=${LONGITUDE%,}	# Remove trailing comma.
 
 printf "\n"	# Start main output after a line break.
 if [ -n "${IP}" ];		then printf "%bIP:%b------------ %s\n" "${BOLD}" "${RESET}" "${IP}";		fi
@@ -55,6 +55,6 @@ if [ -n "${LATITUDE}" ];	then printf "%bLatitude:%b------ %s\n"  "${BOLD}" "${RE
 if [ -n "${LONGITUDE}" ];	then printf "%bLongitude:%b----- %s\n"  "${BOLD}" "${RESET}" "${LONGITUDE}";	fi
 printf "\n"	# Finish main output with a line break.
 
-rm "${TEMP_FILE}"
+rm "${TEMP_FILE}"	# Clean up.
 
 exit ${SUCCESS}
