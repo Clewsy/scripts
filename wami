@@ -1,7 +1,7 @@
 #!/bin/bash
 #: Title:	: wami
 #: Author	: clewsy (clewsy.pro)
-#: Description	: Pull information regarding the external ip address (from ipinfo.io), format then print to screen.
+#: Description	: Pull information regarding the external ip address (from ifconfig.co), format then print to screen.
 #: Options	: None (ignored).
 
 # Exit codes.
@@ -22,33 +22,37 @@ if ! command -v curl >> /dev/null ; then	# Check if curl is not installed.
 	exit ${NO_CURL}
 fi
 
-echo -e "\nPulling data from \"ipinfo.io\"..."
-if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ipinfo.io; then
-	printf "\n%bError%b: Failed to pull data from \"ipinfo.io\".  Quitting...\n\n" "${RED}" "${RESET}"
-	if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi	# Delete partial/incomplete ipinfo dump if it exists.
+printf "\nPulling data from \"ifconfig.co\"...\n"
+if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ifconfig.co/json; then
+	printf "\n%bError%b: Failed to pull data from \"ifconfig.co\".  Quitting...\n\n" "${RED}" "${RESET}"
+	if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi	# Delete partial/incomplete ifconfig.co dump if it exists.
 	exit ${CURL_FAIL}
 fi
 
-IP=$(		grep -m 1 "ip"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+IP=$(		grep -m 1 "ip"		"${TEMP_FILE}" | cut -d "\"" -f 4)
 HOST_NAME=$(	grep "hostname"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)	# $HOSTNAME is reserved.
-CITY=$(		grep "city"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-REGION=$(	grep "region"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-COUNTRY=$(	grep "country"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-LOC=$(		grep "loc"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-ORG=$(		grep "org"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-POSTAL=$(	grep -m 1 "postal"	"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-TIMEZONE=$(	grep "timezone"		"${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+ORG=$(		grep "asn_org"		"${TEMP_FILE}" | cut -d "\"" -f 4)
+COUNTRY_CODE=$(	grep "country_iso"	"${TEMP_FILE}" | cut -d "\"" -f 4)
+COUNTRY=$(	grep -m 1 "country"	"${TEMP_FILE}" | cut -d "\"" -f 4)
+REGION=$(	grep "region_name"	"${TEMP_FILE}" | cut -d "\"" -f 4)
+CITY=$(		grep "city"		"${TEMP_FILE}" | cut -d "\"" -f 4)
+POST_CODE=$(	grep "zip_code"		"${TEMP_FILE}" | cut -d "\"" -f 4)
+TIMEZONE=$(	grep "time_zone"	"${TEMP_FILE}" | cut -d "\"" -f 4)
+LATITUDE=$(	grep "latitude"		"${TEMP_FILE}" | cut -d ":" -f 2); LATITUDE=${LATITUDE%,};   LATITUDE=${LATITUDE#' '}
+LONGITUDE=$(	grep "longitude"	"${TEMP_FILE}" | cut -d ":" -f 2); LONGITUDE=${LONGITUDE%,}; LONGITUDE=${LONGITUDE#' '}
 
 printf "\n"	# Start main output after a line break.
 if [ -n "${IP}" ];		then printf "%bIP:%b------------ %s\n" "${BOLD}" "${RESET}" "${IP}";		fi
 if [ -n "${HOST_NAME}" ];	then printf "%bHostname:%b------ %s\n" "${BOLD}" "${RESET}" "${HOST_NAME}";	fi
-if [ -n "${CITY}" ];		then printf "%bCity:%b---------- %s\n" "${BOLD}" "${RESET}" "${CITY}";		fi
-if [ -n "${REGION}" ];		then printf "%bRegion:%b-------- %s\n" "${BOLD}" "${RESET}" "${REGION}";	fi
-if [ -n "${COUNTRY}" ];		then printf "%bCountry:%b------- %s\n" "${BOLD}" "${RESET}" "${COUNTRY}";	fi
-if [ -n "${LOC}" ];		then printf "%bCo-ordinates:%b-- %s\n" "${BOLD}" "${RESET}" "${LOC}";		fi
 if [ -n "${ORG}" ];		then printf "%bOrganisation:%b-- %s\n" "${BOLD}" "${RESET}" "${ORG}";		fi
-if [ -n "${POSTAL}" ];		then printf "%bPost Code:%b----- %s\n" "${BOLD}" "${RESET}" "${POSTAL}";	fi
+if [ -n "${COUNTRY_CODE}" ];	then printf "%bCountry Code:%b-- %s\n" "${BOLD}" "${RESET}" "${COUNTRY_CODE}";	fi
+if [ -n "${COUNTRY}" ];		then printf "%bCountry:%b------- %s\n" "${BOLD}" "${RESET}" "${COUNTRY}";	fi
+if [ -n "${REGION}" ];		then printf "%bRegion:%b-------- %s\n" "${BOLD}" "${RESET}" "${REGION}";	fi
+if [ -n "${CITY}" ];		then printf "%bCity:%b---------- %s\n" "${BOLD}" "${RESET}" "${CITY}";		fi
+if [ -n "${POST_CODE}" ];	then printf "%bPost Code:%b----- %s\n" "${BOLD}" "${RESET}" "${POST_CODE}";	fi
 if [ -n "${TIMEZONE}" ];	then printf "%bTimezone:%b------ %s\n" "${BOLD}" "${RESET}" "${TIMEZONE}";	fi
+if [ -n "${LATITUDE}" ];	then printf "%bLatitude:%b------ %s\n"  "${BOLD}" "${RESET}" "${LATITUDE}";	fi
+if [ -n "${LONGITUDE}" ];	then printf "%bLongitude:%b----- %s\n"  "${BOLD}" "${RESET}" "${LONGITUDE}";	fi
 printf "\n"	# Finish main output with a line break.
 
 rm "${TEMP_FILE}"
