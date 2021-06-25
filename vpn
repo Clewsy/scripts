@@ -11,7 +11,7 @@ SUCCESS=0
 BAD_USAGE=1
 BAD_CONFIG=2
 NO_CURL=3
-NO_IPINFO=4
+NO_IFCONFIG_CO=4
 OPENVPN_FAIL=5
 
 ## Colours.
@@ -23,9 +23,9 @@ RESET="\033[0m"
 
 ## Define the default vpn config file to be used by openvpn.
 ## This is ignored if the user provides an argument defining an alternate config file.
-DEFAULT_CONF="/home/jc/openvpn/Windscribe-Australia_UDP.ovpn"
+DEFAULT_CONF="/home/b4t/openvpn/Windscribe-Australia_UDP.ovpn"
 
-## Define and clear a temp file into which ipinfo.io data will be entered and then parsed.
+## Define and clear a temp file into which ifconfig.co/json data will be entered and then parsed.
 TEMP_FILE="/tmp/vpn_tempfile"
 > "${TEMP_FILE}"
 
@@ -53,7 +53,7 @@ shift $((OPTIND -1))	## This ensures only non-option arguments are considered ar
 
 ##########Check correct usage
 case $# in
-	0|1)	;;	## Theres should be 0 or 1 argument/s.
+	0|1)	;;	## There should be 0 or 1 argument/s.
 	*)	printf "%b" "\n${RED}Error${RESET}: Too many arguments.  Quitting.\n${USAGE}\n"
 		exit ${BAD_USAGE};;
 esac
@@ -77,15 +77,15 @@ fi
 printf "%b" "\nKilling any running instances of openvpn.\n\n"
 sudo pkill openvpn
 
-##########Download current data from ipinfo.io into TEMP_FILE (this is the info without the vpn active).
-if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ipinfo.io ; then
-	printf "%b" "${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting...\n\n"
-	exit ${NO_IPINFO}
+##########Download current data from ifconfig.co into TEMP_FILE (this is the info without the vpn active).
+if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ifconfig.co/json ; then
+	printf "%b" "${RED}Error${RESET}: Failed to pull data from \"ifconfig.co/json\".  Quitting...\n\n"
+	exit ${NO_IFCONFIG_CO}
 fi
 
 ##########Parse specific details from the temp file.
-CURRENT_IP=$(grep -m 1 "ip" "${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
-CURRENT_CITY=$(grep "city" "${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+CURRENT_IP=$(grep -m 1 "ip" "${TEMP_FILE}" | cut -d "\"" -f 4)
+CURRENT_CITY=$(grep "city" "${TEMP_FILE}" | cut -d "\"" -f 4)
 
 ##########Print out the current ip and city (without vpn).
 printf "%15b%b" "Current ip : " "${BOLD}${CURRENT_IP}${RESET}\n"
@@ -104,14 +104,14 @@ fi
 NEW_IP=${CURRENT_IP}
 while [ "${NEW_IP}" = "${CURRENT_IP}" ]
 do
-	if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ipinfo.io ; then
-		rm "$TEMP_FILE"
-		printf "%b" "\n${RED}Error${RESET}: Failed to pull data from \"ipinfo.io\".  Quitting...\n\n"
-		exit ${NO_IPINFO}
+	if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ifconfig.co/json ; then
+		rm "${TEMP_FILE}"
+		printf "%b" "\n${RED}Error${RESET}: Failed to pull data from \"fconfig.co/json\".  Quitting...\n\n"
+		exit ${NO_IFCONFIG_CO}
 	fi
-	NEW_IP=$(grep -m 1 "ip" "${TEMP_FILE}" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+	NEW_IP=$(grep -m 1 "ip" "${TEMP_FILE}" | cut -d "\"" -f 4)
 done
-NEW_CITY=$(grep "city" "$TEMP_FILE" | cut -d ":" -f 2 | cut -d "\"" -f 2)
+NEW_CITY=$(grep "city" "${TEMP_FILE}" | cut -d "\"" -f 4)
 
 ##########Print out the new apparent ip & city.
 printf "%b" "\n${GREEN}Connected.${RESET}\n\n"
