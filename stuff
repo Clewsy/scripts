@@ -417,9 +417,9 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 					C1="${COL}${BOLD}│ ${RESET}"
 				fi
 
-				DEVICE_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_DEV_NAME}")	## Define device type
-				DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}")	## Define device model
-				DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}")	## Define device capacity
+				DEVICE_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)		## Device type
+				DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}" 2> /dev/null)	## Device model
+				DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)		## Device capacity
 				DEV_SPECS=()	## Clear then reset the array of device specs 
 				if [ -n "${DEVICE_TYPE}" ];	then DEV_SPECS+=("${COL}Type:${RESET} ${DEVICE_TYPE}"); fi
 				if [ -n "${DEVICE_MODEL}" ];	then DEV_SPECS+=("${COL}Model:${RESET} ${DEVICE_MODEL}"); fi
@@ -452,14 +452,14 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 							C2="${COL}│ ${RESET}"
 						fi
 
-						CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD_DEV_NAME}")
-						CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD_DEV_NAME}")
+						CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
+						CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
 						CHILD_FS=$(df -Th 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_FS=${CHILD_FS##*${WORKING_CHILD_DEV_NAME}*( )}; CHILD_FS=${CHILD_FS%% *}
-						CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD_DEV_NAME}")
+						CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
 						CHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_SIZE=${CHILD_SIZE##*${WORKING_CHILD_DEV_NAME}*( )}; CHILD_SIZE=${CHILD_SIZE%% *}
 						CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_USED=${CHILD_USED##*${WORKING_CHILD_DEV_NAME}*( )*([0-9])?*( )}; CHILD_USED=${CHILD_USED%% *}
 						CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_PERC=${CHILD_PERC%%\%*}; CHILD_PERC="${CHILD_PERC##* }%"
-						CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD_DEV_NAME}") 
+						CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null) 
 
 						CHILD_SPECS=()	## Clear then reset the array of child specs
 						if [ -n "${CHILD_LABEL}" ];	then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
