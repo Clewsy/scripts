@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: vpn
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Kills any existing vnp connection then establishes a new session.  Uses openvpn.
 #: Options	: -c	Cancels/kills current vpn connection without establishing new.
 #:		: -k	Kills/cancles current vpn connection without establishing new.

@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 #: Title:	: ytdl
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Quickly download an online video to the local device.  Intended for use with Termux as a widget shortcut.
 #:		: The contents of the clipboard is assumed to be a video url which this script will download using youtube-dl.
 #: Options	: none

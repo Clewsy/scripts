@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: polly
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Poll a url and check for successful response code 200.  Logs results and provides visual status indication via a
 #:		: blink(1) device on an LED port.  Intended to be run as a cron job, for example to run every 5 minutes:
 #:		: */5 * * * * /usr/local/sbin/polly

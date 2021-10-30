@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: pong
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Sequentially ping a list of hosts then provide a summary of the ping results.
 #: Options	: -v - Verbose mode (show additional output).
 #:		: -h - Help (print usage information).

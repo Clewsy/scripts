@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: ball
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Uses rsync to back-up a file or a list of files to a remote machine.
 #: Options	: -d	Back up a directory.
 #:		: -f	Back up a file.

@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: stuff
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Pulls a bunch of system info, formats and prints to screen.
 #: Options	: -A	All info.
 #:		: -l	Live data (temps, fan speeds, users, uptime).

@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:	: apt_all
-#: Author	: clewsy (clewsy.pro)
+#: Author	: clewsy (clews.pro)
 #: Description	: Run apt-get commands (update, dist-upgrade, autoremove then autoclean) on a selected host or list of hosts.
 #: Options	: -q - Quiet mode (suppress some output).
 #:		: -v - Verbose mode (show additional output).
