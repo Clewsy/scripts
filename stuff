@@ -296,16 +296,28 @@ fi
 ####################################################################################################################################
 ## -m : Print memory info
 if [[ ${GET_M_MEMORY_INFO} || ${GET_ALL_INFO} ]]; then
-	MEM_ARRAY=( $(free -h) )
+	read -r -d '' -a MEM_ARRAY <<< "$(free -h)"	## Read in memory stats to an array.
+	MEM_TOTAL=${MEM_ARRAY[7]}
+	MEM_USED=${MEM_ARRAY[8]}
+	MEM_FREE=${MEM_ARRAY[9]}
+	MEM_SHARED=${MEM_ARRAY[10]}
+	MEM_BUFF_CACHE=${MEM_ARRAY[11]}
+	MEM_AVAILABLE=${MEM_ARRAY[12]}
+	SWAP_TOTAL=${MEM_ARRAY[14]}
+	SWAP_USED=${MEM_ARRAY[15]}
+	SWAP_FREE=${MEM_ARRAY[16]}
 	printf "%b" "${COL}${BOLD}Memory:${RESET}\n"
 	printf "%b" "${COL}${BOLD}├─RAM:${RESET}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:    ${RESET} ${MEM_ARRAY[7]}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:     ${RESET} ${MEM_ARRAY[8]}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:${RESET} ${MEM_ARRAY[12]}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:      ${RESET}${MEM_TOTAL}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:       ${RESET}${MEM_USED}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Free:       ${RESET}${MEM_FREE}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Shared:     ${RESET}${MEM_SHARED}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Buff/Cache: ${RESET}${MEM_BUFF_CACHE}\n"
+	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:  ${RESET}${MEM_AVAILABLE}\n"
 	printf "%b" "${COL}${BOLD}└─SWAP:${RESET}\n"
-	printf "%b" "${COL}  ├─Total:    ${RESET} ${MEM_ARRAY[14]}\n"
-	printf "%b" "${COL}  ├─Used:     ${RESET} ${MEM_ARRAY[15]}\n"
-	printf "%b" "${COL}  └─Free:     ${RESET} ${MEM_ARRAY[16]}\n"
+	printf "%b" "${COL}  ├─Total:      ${RESET}${SWAP_TOTAL}\n"
+	printf "%b" "${COL}  ├─Used:       ${RESET}${SWAP_USED}\n"
+	printf "%b" "${COL}  └─Free:       ${RESET}${SWAP_FREE}\n"
 fi
 
 ####################################################################################################################################
