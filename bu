@@ -188,7 +188,7 @@ else	## Expecting a text list of files/directorys.
 		QUIT_f ${BAD_LIST_FILE}
 	else	## Need to parse the list.
 		printf "%b" "\nBackup list is \"${BLUE}${ARGUMENT}${RESET}\". Checking files...\n" > ${DEST}
-		printf "%b" "Raw file list:\n${SEPARATOR}\n${BLUE}$(cat ${ARGUMENT})${RESET}\n${SEPARATOR}\n\n" > ${DEST}
+		printf "%b" "Raw file list:\n${SEPARATOR}\n${BLUE}$(cat "${ARGUMENT}")${RESET}\n${SEPARATOR}\n\n" > ${DEST}
 		printf "%b" "Validating listed files and creating valid file list:\n"
 		while read -r LINE ; do		## Iterate for every line in the backup file list.
 			STRIPPED_LINE=${LINE%%\#*}	## Strip comments.
