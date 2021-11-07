@@ -359,7 +359,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 			if ! grep -e "name" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
 			DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}	## Eliminate all but the initial whitespace.
 		done
-		for ELEMENT in ${DELETE_ELEMENTS[@]}; do unset DEV_DUMP[${ELEMENT}]; done
+		for ELEMENT in "${DELETE_ELEMENTS[@]}"; do unset "DEV_DUMP[${ELEMENT}]"; done
 
 		## Reconstitute the array - removes all empty elements.
 		DEV_DUMP=("${DEV_DUMP[@]}")
