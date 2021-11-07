@@ -41,7 +41,7 @@ BALL_LOG_FILE="${HOME}/.log/ball.log"
 if [ ! -w "${BALL_LOG_FILE%/*}" ]; then
 	if ! mkdir --parents "${BALL_LOG_FILE%/*}" || ! touch "${BALL_LOG_FILE}"; then
 		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${BALL_LOG_FILE})\n"
-		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it needs to write the logfile.
+		exit "${BAD_LOG_FILE}";	## Don't use QUIT_f because it needs to write the logfile.
 	fi
 fi
 
