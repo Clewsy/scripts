@@ -510,7 +510,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 									C3="${COL}${DIM}│ ${RESET}"
 								fi
 
-								if [ -e /dev/"${WORKING_GRANDCHILD_DEV_NAME}" ]; then GRANDCHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_GRANDCHILD_DEV_NAME}"); fi
 								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE% *}; GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
 								GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_FS=${GRANDCHILD_FS##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_FS=${GRANDCHILD_FS%% *}
 								GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_SIZE=${GRANDCHILD_SIZE##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_SIZE=${GRANDCHILD_SIZE%% *}
@@ -524,7 +523,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 								if [ -n "${GRANDCHILD_SIZE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
 								if [ -n "${GRANDCHILD_USED}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
 								if [ -n "${GRANDCHILD_MOUNT}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
-								NUM_GCSPECS=${#GRANDCHILD_SPECS[@]}
 								for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do	## Loop for GC spec.
 									if [[ "${GCSPEC}" == "${GRANDCHILD_SPECS[((NUM_GSPECS-1))]}" && ${WORKING_GRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C4="${COL}${DIM}└─${RESET}"
 									else															C4="${COL}${DIM}├─${RESET}"; fi
@@ -563,7 +561,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 										if [ -n "${GREATGRANDCHILD_SIZE}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GREATGRANDCHILD_SIZE}"); fi
 										if [ -n "${GREATGRANDCHILD_USED}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GREATGRANDCHILD_USED} (${GREATGRANDCHILD_PERC})"); fi
 										if [ -n "${GREATGRANDCHILD_MOUNT}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GREATGRANDCHILD_MOUNT}"); fi
-										NUM_GGCSPECS=${#GREATGRANDCHILD_SPECS[@]}
 										for GGCSPEC in "${GREATGRANDCHILD_SPECS[@]}" ; do
 											if [[ "${GGCSPEC}" == "${GREATGRANDCHILD_SPECS[((NUM_GGSPECS-1))]}" && ${WORKING_GREATGRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C5="${COL}${DIM}└─${RESET}"
 											else																C5="${COL}${DIM}├─${RESET}"; fi
