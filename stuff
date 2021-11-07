@@ -589,7 +589,7 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
 	KERNEL_VER=$(uname -v)
 	KERNEL_REL=$(uname -r)
 	if command -v lsb_release >> /dev/null; then
-		RELEASE_INFO=( $(lsb_release -irc) )
+		read -r -d '' -a RELEASE_INFO <<< "$(lsb_release -irc)"	## Read in lsb_release output to an array.
 		DIST=${RELEASE_INFO[2]}
 		DIST_REL=${RELEASE_INFO[4]}
 		DIST_CODE=${RELEASE_INFO[6]}
