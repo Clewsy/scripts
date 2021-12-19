@@ -5,25 +5,43 @@
 #:              : Intended to be ran as a cronjob so that the sync can be offset from peak usage where bandwidth is limited.
 #: Options	: None (ignored).
 
-##########Configurable settings.
+########## Configurable settings.
 SOURCE_HOST="amy"			## Format: user@host or alternatively just host as devined in ~/.ssh/config file.
 SOURCE_DIR="/home/jc/transfer/"		## Format: /target/directory/ i.e. use trailing '/' to capture contents of directory.
 TARGET_DIR="/home/clewsy/transfer/"	## Format: As above.
 RATE_LIMIT="100"			## Format: e.g. "100" for 100K, "1.5m" for 1.5M.
 
-#SOURCE_SERVER_REMOTE="clews.pro"
-#SOURCE_REMOTE_DIR="/home/${BU_USER}/file_cache/${HOSTNAME}"
+########## Exit codes
+SUCCESS=0	## Noice.
+#BAD_OPTION=1	## Invalid option.
+#TOO_MANY_ARGS=2	## Incorrect usage.
+BAD_LOGFILE=3	## Unable to write to the defined logfile directory.
 
-##########Define log file and ensure directory exists.
-#SNEAK_LOG_FILE="${HOME}/.log/sneak.log"
-SNEAK_LOG_FILE=".sneak.log"
-#if [ ! -w "${SNEAK_LOG_FILE%/*}" ]; then
-#	if ! mkdir --parents "${SNEAK_LOG_FILE%/*}" || ! touch "${SNEAK_LOG_FILE}"; then
-#		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
-#		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it needs to write the logfile.
-#	fi
-#fi
+########## Define log file and ensure directory exists.
+SNEAK_LOG_FILE="${HOME}/.log/sneak.log"
+#SNEAK_LOG_FILE=".sneak.log"
+if [ ! -w "${SNEAK_LOG_FILE%/*}" ]; then
+	if ! mkdir --parents "${SNEAK_LOG_FILE%/*}" || ! touch "${SNEAK_LOG_FILE}"; then
+		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
+		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it will try to write to the log file.
+	fi
+fi
 
+########## Function to print current date and time.  Used for logging.
+TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
+
+########## Function for exit conditions.  Log error or success and exit.
+QUIT_f ()
+{
+	if [ "${1}" -gt 0 ]
+		then	printf "%b%d%b"	"$(TIMESTAMP_f) ######### Script failed with error code " "${1}" ".\n" | tee -a ${SNEAK_LOG_FILE}
+		else	printf "%b" 	"$(TIMESTAMP_f) ######### Script exited successfully.\n" | tee -a ${SNEAK_LOG_FILE}
+	fi
+#	printf "%b" "${SEPARATOR}${SEPARATOR}\n" >> "${SNEAK_LOG_FILE}"
+	exit "${1}"
+}
+
+########## Set ssh options to be used by the rsync connection.
 SSH_OPTIONS=(	
 #	-4					## Use IPV4 (alternatively, -6 for IPV6).
 	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
@@ -31,9 +49,9 @@ SSH_OPTIONS=(
 	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
 	"-o ConnectTimeout=15"			## Stop attempting the connection after specified number of seconds.
 )
-RSYNC_SHELL="ssh ${SSH_OPTIONS[@]}"
+RSYNC_SHELL="ssh ${SSH_OPTIONS[@]}"		## For inserting into the rsync command with the remote shell ("--rsh=") option.
 
-#RSYNC_OPTIONS="--bwlimit=${RATE_LIMIT} --progress --verbose --archive --acls --human-readable --partial-dir=.partial --log-file=${SNEAK_LOG_FILE} --rsh=\"ssh -o StrictHostKeyChecking=no\""
+########## Set rsync options.
 RSYNC_OPTIONS=(
 	"--bwlimit=${RATE_LIMIT}"		## Set the max bandwidth that rsync will use.
 	"--progress"				## Output info about current transfer status and progress.
@@ -56,26 +74,12 @@ echo "${SSH_OPTIONS[@]}"
 echo "${RSYNC_SHELL}"
 echo "${RSYNC_OPTIONS[@]}"
 
-##########Function to print current date and time.  Used for logging.
-TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
-
-
-##########Function for exit conditions.  Log error or success and exit.
-QUIT_f ()
-{
-	if [ "${1}" -gt 0 ]; then	printf "%b%d%b" "$(TIMESTAMP_f) - Script failed with error code " "${1}" ".\n" >> "${SNEAK_LOG_FILE}"
-	else				printf "%b" "$(TIMESTAMP_f) - Script exited successfully.\n" >> "${SNEAK_LOG_FILE}"; fi
-	printf "%b" "${SEPARATOR}${SEPARATOR}\n" >> "${SNEAK_LOG_FILE}"
-	exit "${1}"
-}
-
 
 ##########Usage
 USAGE="
 Usage: ${0##*/} [option] [source] [target]
 #TO DO: Fill in usage guidance.
 "
-#todo log start date/time
 
 
 printf "%b" "$(TIMESTAMP_f) ######### Beginning sync.\n" | tee -a ${SNEAK_LOG_FILE}
@@ -88,4 +92,3 @@ rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" ${SOURCE_HOST}:${SOURCE_DIR} 
 printf "%b" "$(TIMESTAMP_f) ######### Sync complete.\n" | tee -a ${SNEAK_LOG_FILE}
 
 
-#todo log end date/time

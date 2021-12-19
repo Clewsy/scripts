@@ -7,6 +7,7 @@ Script Name					| Description
 [**p0wer\_switch**][link_repo_p0wer_switch]	| Written for use with [Termux][link_web_termux] to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
 [**polly**][link_repo_polly]			| Called as a cronjob to regularly poll a web site and check the return code.  Logs site status to file and uses a [blink(1)][link_web_blink1] as a visual status indicator.
 [**pong**][link_repo_pong]			| Runs through a list of servers, pings each once for a second then returns a success or fail result.
+[**sneak**][link_repo_sneak]			| **Under development.** Use rsync to pull the contents of a directory on a remote machine to the local machine.  Intended to be implemented as a cronjob to responsibly transfer files under limited bandwidth restrictions.
 [**stuff**][link_repo_stuff]			| Pulls and lists a bunch of useful (to me) info about the host (hardware, disks/mounts, OS, network).
 [**terbling**][link_repo_terbling]		| Prints an ascii-art logo and some basic system info to the command line.
 [**vpn**][link_repo_vpn]			| Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
@@ -32,6 +33,7 @@ Script Name						| Description
 [link_repo_p0wer_switch]:p0wer_switch
 [link_repo_polly]:polly
 [link_repo_pong]:pong
+[link_repo_sneak]:sneak
 [link_repo_stuff]:stuff
 [link_repo_terbling]:terbling
 [link_repo_vpn]:vpn
