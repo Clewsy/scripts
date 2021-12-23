@@ -3,29 +3,20 @@
 #: Author	: clewsy (clews.pro)
 #: Description	: Use rsync to pull the contents of a directory on a remote machine to the local machine.
 #:              : Intended to be ran as a cronjob so that the sync can be offset from peak usage where bandwidth is limited.
+#:		: 0 2 * * * /home/user/bin/sneak	# Example crontab entry to run sneak every day at 0200 hours.
 #: Options	: None (ignored).
 
-########## Configurable settings.
-SOURCE_HOST="amy"			## Format: user@host or alternatively just host as devined in ~/.ssh/config file.
-SOURCE_DIR="/home/jc/transfer/"		## Format: /target/directory/ i.e. use trailing '/' to capture contents of directory.
-TARGET_DIR="/home/clewsy/transfer/"	## Format: As above.
-RATE_LIMIT="100"			## Format: e.g. "100" for 100K, "1.5m" for 1.5M.
+########## Configurable settings.  SOURCE and TARGET can be overridden by arguments.
+SOURCE="amy:/home/jc/transfer/"	## Format: user@host:/path/to/dir/ or host:/path/to/dir/ or /path/to/dir/
+TARGET="/home/clewsy/transfer/"	## Format: As above.
+RATE_LIMIT="100"		## Format: e.g. "100" for 100K, "1.5m" for 1.5M.
 
 ########## Exit codes
 SUCCESS=0	## Noice.
 #BAD_OPTION=1	## Invalid option.
-#TOO_MANY_ARGS=2	## Incorrect usage.
+ONLY_ONE_ARG=2	## Incorrect usage.
+TOO_MANY_ARGS=3	## Incorrect usage.
 BAD_LOGFILE=3	## Unable to write to the defined logfile directory.
-
-########## Define log file and ensure directory exists.
-SNEAK_LOG_FILE="${HOME}/.log/sneak.log"
-#SNEAK_LOG_FILE=".sneak.log"
-if [ ! -w "${SNEAK_LOG_FILE%/*}" ]; then
-	if ! mkdir --parents "${SNEAK_LOG_FILE%/*}" || ! touch "${SNEAK_LOG_FILE}"; then
-		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
-		exit "${BAD_LOGFILE}";	## Don't use QUIT_f because it will try to write to the log file.
-	fi
-fi
 
 ########## Function to print current date and time.  Used for logging.
 TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
@@ -40,6 +31,66 @@ QUIT_f ()
 #	printf "%b" "${SEPARATOR}${SEPARATOR}\n" >> "${SNEAK_LOG_FILE}"
 	exit "${1}"
 }
+
+########## Usage
+USAGE="
+Usage examples:
+
+${0##*/} <options> [source] [target]	## Manual use requires definition of both source and target.  Alternatively;
+${0##*/} <options>			## Use the default source and target as defined in the script.
+
+Valid options:
+	-q	Quiet mode - only print the current host and the final summary.
+	-v	Verbose mode - print additional info to stdout.  Overrides Quiet mode (\"-q\").
+	-h	Print this usage and exit.
+"
+
+########## Define log file and ensure directory exists.
+SNEAK_LOG_FILE="${HOME}/.log/sneak.log"
+#SNEAK_LOG_FILE=".sneak.log"
+if [ ! -w "${SNEAK_LOG_FILE%/*}" ]; then
+	if ! mkdir --parents "${SNEAK_LOG_FILE%/*}" || ! touch "${SNEAK_LOG_FILE}"; then
+		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
+		exit "${BAD_LOGFILE}";	## Don't use QUIT_f here because it will try to write to the log file.
+	fi
+fi
+
+
+########## Interpret options
+while getopts 'h' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+	case "$OPTION" in
+#		q)	QUIET=true ;;			## Set the quiet flag to suppress certain printf commands.
+#		v)	DEST="/dev/stdout"		## -v activates verbose mode by sending output to /dev/stdout.
+#			APT_GET_VERBOSITY=""		## Verbose mode removes the "--quiet" option with apt-get commands.
+#			QUIET=false ;;			## Override Quiet mode option.
+		h)	printf "%b" "${USAGE}\n"	## -h option just prints the usage then quits.
+			QUIT_f "${SUCCESS}" ;;		## Exit successfully.
+#		?)	printf "%b" "${RED}Error:${RESET} Invalid option/s.\n ${USAGE}\n"	## Invalid option, show usage.
+#			QUIT_f "${BAD_OPTION}" ;;	## Exit with error.
+	esac
+done
+shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+
+
+######### Validate provided argument/s.
+if [ $# -gt 5 ]; then		## If more than one argument is entered.
+	printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}\n"	## Print error message and usage.
+	QUIT_f "${TOO_MANY_ARGS}"	## Exit.
+fi
+
+case "$#" in
+	0)	printf "%b" "Using default source and target:\n" ;;
+	1)	printf "%b" "Error: Must define both source and target.\n${USAGE}\n"
+		QUIT_f ${ONLY_ONE_ARG} ;;
+	2)	SOURCE=${1}
+		TARGET=${2} ;;
+	?)	printf "%b" "Error: Too many arguments.\n${USAGE}\n"
+		QUIT_f "${TOO_MANY_ARGS}" ;;
+
+esac
+
+printf "%b" "Source: ${SOURCE}\n"
+printf "%b" "Target: ${TARGET}\n"
 
 ########## Set ssh options to be used by the rsync connection.
 SSH_OPTIONS=(	
@@ -75,18 +126,13 @@ echo "${RSYNC_SHELL}"
 echo "${RSYNC_OPTIONS[@]}"
 
 
-##########Usage
-USAGE="
-Usage: ${0##*/} [option] [source] [target]
-#TO DO: Fill in usage guidance.
-"
 
 
 printf "%b" "$(TIMESTAMP_f) ######### Beginning sync.\n" | tee -a ${SNEAK_LOG_FILE}
 
 #rsync --bwlimit=${RATE_LIMIT} --progress --verbose --archive --acls --human-readable -e "ssh -o StrictHostKeyChecking=no" ${SOURCE_HOST}:${SOURCE_DIR} ${TARGET_DIR}
 #rsync --bwlimit=${RATE_LIMIT} --progress --verbose --archive --acls --human-readable --partial-dir=.partial --rsh="ssh -o StrictHostKeyChecking=no" ${SOURCE_HOST}:${SOURCE_DIR} ${TARGET_DIR}
-rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" ${SOURCE_HOST}:${SOURCE_DIR} ${TARGET_DIR}
+rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" ${SOURCE} ${TARGET}
 #rsync --bwlimit=${RATE_LIMIT} --progress --verbose --archive --acls --human-readable --partial-dir=.partial --log-file=${SNEAK_LOG_FILE} --rsh="ssh -o StrictHostKeyChecking=no" ${SOURCE_HOST}:${SOURCE_DIR} ${TARGET_DIR}
 
 printf "%b" "$(TIMESTAMP_f) ######### Sync complete.\n" | tee -a ${SNEAK_LOG_FILE}
