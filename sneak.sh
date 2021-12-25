@@ -18,6 +18,7 @@ BAD_LOGFILE=1	## Unable to write or create the logfile.
 #BAD_OPTION=2	## Invalid option.
 ONLY_ONE_ARG=3	## Incorrect usage.
 TOO_MANY_ARGS=4	## Incorrect usage.
+NO_RSYNC=5	## rsync not installed.
 
 ########## Function to print current date and time.  Used for logging.
 TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
@@ -53,7 +54,7 @@ if [ ! -w "${SNEAK_LOG_FILE}" ] && ! touch "${SNEAK_LOG_FILE}"; then
 fi
 
 ########## Interpret options
-while getopts 'h' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
+while getopts 'h' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
 	case "$OPTION" in
 #		q)	QUIET=true ;;			## Set the quiet flag to suppress certain printf commands.
 #		v)	DEST="/dev/stdout"		## -v activates verbose mode by sending output to /dev/stdout.
@@ -80,6 +81,13 @@ esac
 
 printf "%b" "Source: ${SOURCE}\n"
 printf "%b" "Target: ${TARGET}\n"
+
+
+######### Ensure rsync is installed.
+if ! which rsync >> /dev/null; then
+	printf "%b" "Error: rsync is not installed.\n"
+	QUIT_f "${NO_RSYNC}"
+fi
 
 ########## Set ssh options to be used by the rsync connection.
 SSH_OPTIONS=(	
