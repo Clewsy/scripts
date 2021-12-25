@@ -7,16 +7,17 @@
 #: Options	: None (ignored).
 
 ########## Configurable settings.  SOURCE and TARGET can be overridden by arguments.
-SOURCE="amy:/home/jc/transfer/"	## Format: user@host:/path/to/dir/ or host:/path/to/dir/ or /path/to/dir/
-TARGET="/home/clewsy/transfer/"	## Format: As above.
-RATE_LIMIT="100"		## Format: e.g. "100" for 100K, "1.5m" for 1.5M.
+SOURCE="amy:/home/jc/transfer/"		## Format: user@host:/path/to/dir/ or host:/path/to/dir/ or /path/to/dir/
+TARGET="/home/clewsy/transfer/"		## Format: As above.
+RATE_LIMIT="100"			## Format: e.g. "100" for 100K, "1.5m" for 1.5M.
+SNEAK_LOG_FILE="${HOME}/.log/sneak.log"	## Must be writable.
 
 ########## Exit codes
 SUCCESS=0	## Noice.
-#BAD_OPTION=1	## Invalid option.
-ONLY_ONE_ARG=2	## Incorrect usage.
-TOO_MANY_ARGS=3	## Incorrect usage.
-BAD_LOGFILE=3	## Unable to write to the defined logfile directory.
+BAD_LOGFILE=1	## Unable to write or create the logfile.
+#BAD_OPTION=2	## Invalid option.
+ONLY_ONE_ARG=3	## Incorrect usage.
+TOO_MANY_ARGS=4	## Incorrect usage.
 
 ########## Function to print current date and time.  Used for logging.
 TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
@@ -45,16 +46,11 @@ Valid options:
 	-h	Print this usage and exit.
 "
 
-########## Define log file and ensure directory exists.
-SNEAK_LOG_FILE="${HOME}/.log/sneak.log"
-#SNEAK_LOG_FILE=".sneak.log"
-if [ ! -w "${SNEAK_LOG_FILE%/*}" ]; then
-	if ! mkdir --parents "${SNEAK_LOG_FILE%/*}" || ! touch "${SNEAK_LOG_FILE}"; then
-		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
-		exit "${BAD_LOGFILE}";	## Don't use QUIT_f here because it will try to write to the log file.
-	fi
+########## Ensure log file exists and is writable.
+if [ ! -w "${SNEAK_LOG_FILE}" ] && ! touch "${SNEAK_LOG_FILE}"; then
+	printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
+	exit "${BAD_LOGFILE}";	## Don't use QUIT_f here because it will try to write to the log file.
 fi
-
 
 ########## Interpret options
 while getopts 'h' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
@@ -71,13 +67,7 @@ while getopts 'h' OPTION; do			## Call getopts to identify selected options and 
 done
 shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
-
 ######### Validate provided argument/s.
-if [ $# -gt 5 ]; then		## If more than one argument is entered.
-	printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}\n"	## Print error message and usage.
-	QUIT_f "${TOO_MANY_ARGS}"	## Exit.
-fi
-
 case "$#" in
 	0)	printf "%b" "Using default source and target:\n" ;;
 	1)	printf "%b" "Error: Must define both source and target.\n${USAGE}\n"
@@ -86,7 +76,6 @@ case "$#" in
 		TARGET=${2} ;;
 	?)	printf "%b" "Error: Too many arguments.\n${USAGE}\n"
 		QUIT_f "${TOO_MANY_ARGS}" ;;
-
 esac
 
 printf "%b" "Source: ${SOURCE}\n"
