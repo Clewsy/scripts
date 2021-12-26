@@ -3,7 +3,7 @@
 #: Author	: clewsy (clews.pro)
 #: Description	: Use rsync to pull the contents of a directory on a remote machine to the local machine.
 #:              : Intended to be ran as a cronjob so that the sync can be offset from peak usage where bandwidth is limited.
-#:		: 0 2 * * * /home/user/bin/sneak	# Example crontab entry to run sneak every day at 0200 hours.
+#:		: 0 2 * * * /home/user/bin/sneak -v	# Example crontab entry to run sneak every day at 0200 hours.
 #: Options	: -v - Verbose mode (show additional output).
 #:		: -h - Help (print usage information).
 
