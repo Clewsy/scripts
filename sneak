@@ -32,8 +32,8 @@ TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
 QUIT_f ()
 {
 	if [ "${1}" -gt 0 ]
-		then printf "%b%d%b"	"$(TIMESTAMP_f) ######### Script failed with error code " "${1}" ".\n" | tee -a ${SNEAK_LOG_FILE}
-		else printf "%b"	"$(TIMESTAMP_f) ######### Sync completed successfully.\n" | tee -a ${SNEAK_LOG_FILE}
+		then printf "%b%d%b"	"$(TIMESTAMP_f) ######### Script failed with error code " "${1}" ".\n" | tee -a "${SNEAK_LOG_FILE}"
+		else printf "%b"	"$(TIMESTAMP_f) ######### Sync completed successfully.\n" | tee -a "${SNEAK_LOG_FILE}"
 	fi
 	exit "${1}"
 }
@@ -77,8 +77,10 @@ case "$#" in
 	?)	printf "%b" "Error: Too many arguments.\n${USAGE}\n"
 		QUIT_f "${TOO_MANY_ARGS}" ;;
 esac
-printf "%b" "\tSource: ${SOURCE}\n" >> ${DEST}
-printf "%b" "\tTarget: ${TARGET}\n" >> ${DEST}
+{
+	printf "%b" "\tSource: ${SOURCE}\n"
+	printf "%b" "\tTarget: ${TARGET}\n"
+} >> ${DEST}
 
 ######### Ensure rsync is installed.
 printf "%b" "Location of rsync excutable: " >> ${DEST}
@@ -95,7 +97,7 @@ SSH_OPTIONS=(
 	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
 	"-o ConnectTimeout=15"			## Stop attempting the connection after specified number of seconds.
 )
-RSYNC_SHELL="ssh ${SSH_OPTIONS[@]}"		## For inserting into the rsync command with the remote shell ("--rsh=") option.
+RSYNC_SHELL="ssh ${SSH_OPTIONS[*]}"		## For inserting into the rsync command with the remote shell ("--rsh=") option.
 printf "%b" "Options for ssh:\n\t${SSH_OPTIONS[*]}\n" >> ${DEST}
 
 ########## Set rsync options.
@@ -119,8 +121,8 @@ RSYNC_OPTIONS=(
 printf "%b" "Options for rsync:\n\t${RSYNC_OPTIONS[*]}\n" >> ${DEST}
 
 ########## Actually run rsync.
-printf "%b" "$(TIMESTAMP_f) ######### Beginning sync.\n" | tee -a ${SNEAK_LOG_FILE}
-if rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" ${SOURCE} ${TARGET}
+printf "%b" "$(TIMESTAMP_f) ######### Beginning sync.\n" | tee -a "${SNEAK_LOG_FILE}"
+if rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" "${SOURCE}" "${TARGET}"
 	then QUIT_f "${SUCCESS}"
 	else printf "%b" "Error: rsync failed.\n" && QUIT_f "${RSYNC_FAILED}"
 fi
