@@ -84,7 +84,7 @@ esac
 
 ######### Ensure rsync is installed.
 printf "%b" "Location of rsync excutable: " >> ${DEST}
-if ! which rsync >> ${DEST}; then
+if ! command -v rsync >> ${DEST}; then
 	printf "%b" "Error: rsync is not installed.\n"
 	QUIT_f "${NO_RSYNC}"
 fi
@@ -126,3 +126,4 @@ if rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" "${SOURCE}" "${TARGET}"
 	then QUIT_f "${SUCCESS}"
 	else printf "%b" "Error: rsync failed.\n" && QUIT_f "${RSYNC_FAILED}"
 fi
+
