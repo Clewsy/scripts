@@ -51,8 +51,8 @@ Valid options:
 "
 ########## Ensure log file exists and is writable.
 if [ ! -w "${SNEAK_LOG_FILE}" ] && ! touch "${SNEAK_LOG_FILE}"; then
-	printf "%b" "Error: Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n";
-	exit "${BAD_LOGFILE}";	## Don't use QUIT_f here because it will try to write to the log file.
+	printf "%b" "Error: Unable to create/write to the logfile (${SNEAK_LOG_FILE})\n"
+	exit "${BAD_LOGFILE}"	## Don't use QUIT_f here because it will try to write to the log file.
 fi
 
 ########## Interpret options
@@ -82,11 +82,11 @@ esac
 	printf "%b" "\tTarget: ${TARGET}\n"
 } >> ${DEST}
 
-######### Ensure rsync is installed.
-printf "%b" "Location of rsync excutable: " >> ${DEST}
-if ! command -v rsync >> ${DEST}; then
-	printf "%b" "Error: rsync is not installed.\n"
-	QUIT_f "${NO_RSYNC}"
+########## Ensure rsync is installed.
+RSYNC_LOCATION="$(command -v rsync)"
+if [ -n "${RSYNC_LOCATION}" ];
+	then printf "%b" "Location of rsync executable: ${RSYNC_LOCATION}.\n" >> ${DEST}
+	else printf "%b" "Error: rsync is not installed.\n" >> ${DEST}; QUIT_f "${NO_RSYNC}"
 fi
 
 ########## Set ssh options to be used by the rsync connection.
@@ -126,4 +126,3 @@ if rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" "${SOURCE}" "${TARGET}"
 	then QUIT_f "${SUCCESS}"
 	else printf "%b" "Error: rsync failed.\n" && QUIT_f "${RSYNC_FAILED}"
 fi
-
