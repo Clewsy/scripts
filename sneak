@@ -32,8 +32,8 @@ TIMESTAMP_f () { date +%Y/%m/%d\ %T; }
 QUIT_f ()
 {
 	if [ "${1}" -gt 0 ]
-		then printf "%b%d%b"	"$(TIMESTAMP_f) ######### Script failed with error code " "${1}" ".\n" | tee -a "${SNEAK_LOG_FILE}"
-		else printf "%b"	"$(TIMESTAMP_f) ######### Sync completed successfully.\n" | tee -a "${SNEAK_LOG_FILE}"
+		then printf "%b%d%b"	"$(TIMESTAMP_f) ######### Script failed with error code " "${1}" ".\n" >> ${DEST} | tee -a "${SNEAK_LOG_FILE}"
+		else printf "%b"	"$(TIMESTAMP_f) ######### Sync completed successfully.\n" >> ${DEST} | tee -a "${SNEAK_LOG_FILE}"
 	fi
 	exit "${1}"
 }
@@ -121,7 +121,7 @@ RSYNC_OPTIONS=(
 printf "%b" "Options for rsync:\n\t${RSYNC_OPTIONS[*]}\n" >> ${DEST}
 
 ########## Actually run rsync.
-printf "%b" "$(TIMESTAMP_f) ######### Beginning sync.\n" | tee -a "${SNEAK_LOG_FILE}"
+printf "%b" "$(TIMESTAMP_f) ######### Beginning sync.\n" >> ${DEST} | tee -a "${SNEAK_LOG_FILE}"
 if rsync "${RSYNC_OPTIONS[@]}" --rsh="${RSYNC_SHELL}" "${SOURCE}" "${TARGET}"
 	then QUIT_f "${SUCCESS}"
 	else printf "%b" "Error: rsync failed.\n" && QUIT_f "${RSYNC_FAILED}"
