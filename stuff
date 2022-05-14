@@ -384,9 +384,14 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 		## Also tally the total number of level 1 devices NUM_LEVEL_1.
 		NUM_LEVEL_1=0
 		for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
-			DEV_NAME=${DEV_DUMP[$E]#*:\"}; DEV_NAME=${DEV_NAME%%\"*}
-			LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))	## Get level by counting initial whitespace.
-			NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+1))]%%\{*}" | wc -m) / 6 ))
+# Modifications for determining DEV_NAME, LEVEL and NEXT_LEVEL follow.
+# Required for json formatting change present since lsblk --version: 2.37.2 (Ubuntu 22.04).
+# DEV_NAME=${DEV_DUMP[$E]#*:\"}; DEV_NAME=${DEV_NAME%%\"*}
+# LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))	## Get level by counting initial whitespace.
+# NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+1))]%%\{*}" | wc -m) / 6 ))
+			DEV_NAME=${DEV_DUMP[$E]#*:}; DEV_NAME=${DEV_NAME#*\"};  DEV_NAME=${DEV_NAME%%\"*}
+			LEVEL=$(( ($(printf "%s" "${DEV_DUMP[$E]%%\"*}" | wc -m) - 3) / 6 ))	## Get level by counting whitespace.
+			NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+1))]%%\"*}" | wc -m) - 3) / 6 ))
 			DIFF=$((NEXT_LEVEL-LEVEL))
 
 			NUM_CHILDREN=0
@@ -398,7 +403,10 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 				## Increment the counter and check the next element.
 				((i++))
-				NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+i))]%%\{*}" | wc -m) / 6 ))
+# Modifications for determining NEXT_LEVEL follow.
+# Required for json formatting change present since lsblk --version: 2.37.2 (Ubuntu 22.04).
+# NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+i))]%%\{*}" | wc -m) / 6 ))
+				NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+i))]%%\"*}" | wc -m) - 3) / 6 ))
 				DIFF=$((NEXT_LEVEL-LEVEL))
 			done
 
@@ -407,7 +415,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
 			## Increment the level 1 tally.
 			if ((LEVEL == 1)); then ((NUM_LEVEL_1++)); fi
-
 		done
 
 		## Loop through the DEV_ARRAY, format and print device information.
