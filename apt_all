@@ -99,9 +99,10 @@ if [ $# -gt 1 ]; then		## If more than one argument is entered.
 fi
 
 ######### Define argument or use default.
-ARGUMENT=${1-"${0%/*}/my_hosts.list"}	## First argument is the file name of the list of remote systems.
-					## If argument not provided, set default (ball.list in same dir as script).
-					## Syntax: parameter=${parameter-default}
+ARGUMENT=${1-"localhost"}	## First argument is the file name of the list of remote systems, or just a specific host name/ip.
+				## If argument not provided, set default (ball.list in same dir as script).
+				## Syntax: parameter=${parameter-default}
+#ARGUMENT=${1-"${0%/*}/my_hosts.list"}	## This variation sets the default to a host list file in the same directory as this script.
 
 ######### Define and clear temp files.
 TEMP_SUMMARY_FILE="/tmp/temp_apt_summary"
