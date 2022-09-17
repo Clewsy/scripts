@@ -1,30 +1,30 @@
 #!/bin/bash
-#: Title:	: stuff
-#: Author	: clewsy (clews.pro)
-#: Description	: Pulls a bunch of system info, formats and prints to screen.
-#: Options	: -A	All info.
-#:		: -l	Live data (temps, fan speeds, users, uptime).
-#:		: -p	Product info.
-#:		: -c 	CPU info.
-#:		: -m	Memory info.
-#:		: -a	Audio hardware info.
-#:		: -v	Video hardware info.
-#:		: -d	Disks and partitions info.
-#:		: -o	Operating system and kernel info.
-#:		: -n	Network info.
-#:		: -h	Print help/usage.
-#:		: none	Assumes "-A".
-#: Arguments	: Will accept a single argument to set a theme colour scheme other than the configured default.  Accepted colours:
-#:		: 	BLACK or black
-#:		: 	RED or red
-#:		: 	ORANGE or orange
-#:		: 	GREEN or green
-#:		: 	YELLOW or yellow
-#:		: 	BLUE or blue
-#:		: 	MAGENTA or magenta
-#:		: 	CYAN or cyan
-#:		: 	GRAY or gray or GREY or grey
-#:		: 	WHITE or white
+#: Title:       : stuff
+#: Author       : clewsy (clews.pro)
+#: Description  : Pulls a bunch of system info, formats and prints to screen.
+#: Options      : -A    All info.
+#:              : -l    Live data (temps, fan speeds, users, uptime).
+#:              : -p    Product info.
+#:              : -c    CPU info.
+#:              : -m    Memory info.
+#:              : -a    Audio hardware info.
+#:              : -v    Video hardware info.
+#:              : -d    Disks and partitions info.
+#:              : -o    Operating system and kernel info.
+#:              : -n    Network info.
+#:              : -h    Print help/usage.
+#:              : none  Assumes "-A".
+#: Arguments    : Will accept a single argument to set a theme colour scheme other than the configured default.  Accepted colours:
+#:              : BLACK or black
+#:              : RED or red
+#:              : ORANGE or orange
+#:              : GREEN or green
+#:              : YELLOW or yellow
+#:              : BLUE or blue
+#:              : MAGENTA or magenta
+#:              : CYAN or cyan
+#:              : GRAY or gray or GREY or grey
+#:              : WHITE or white
 
 ## Exit codes.
 SUCCESS=0
@@ -56,17 +56,17 @@ USAGE="
 Usage: ${0##*/} [option] [theme]
 
 Valid options:
--A	All info.
--l	Live data (temps, fan speeds, users, uptime).
--p	Product info.
--c 	CPU info.
--m	Memory info.
--a	Audio hardware info.
--v	Video hardware info.
--d	Disks and partitions info.
--o	Operating system and kernel info.
--n	Network info.
--h	Print this help.
+-A  All info.
+-l  Live data (temps, fan speeds, users, uptime).
+-p  Product info.
+-c  CPU info.
+-m  Memory info.
+-a  Audio hardware info.
+-v  Video hardware info.
+-d  Disks and partitions info.
+-o  Operating system and kernel info.
+-n  Network info.
+-h  Print this help.
 
 Valid themes:
   ${RED}RED
@@ -85,51 +85,51 @@ Valid themes:
 shopt -s extglob
 
 ## Get command line options and set appropriate flags.
-while getopts 'Alpcmavdonh' OPTION; do			## Call getopts to identify selected options and set corresponding flags.
-	OPTIONS="TRUE"					## Used to determine if a valid or invalid option was entered.
-	case "$OPTION" in
-		A)	GET_ALL_INFO="TRUE" ;;		## Set ALL flag - same output as selecting no options.
-		l)	GET_L_LIVE_INFO="TRUE" ;;	## Set L flag - live system statistics (temp, fan speed, uptime).
-		p)	GET_P_PRODUCT_INFO="TRUE" ;;	## Set P flag - product info (inc. motherboard, chassis, bios).
-		c)	GET_C_CPU_INFO="TRUE" ;;	## Set C flag - cpu.
-		m)	GET_M_MEMORY_INFO="TRUE" ;;	## Set M flag - memory.
-		a)	GET_A_AUDIO_INFO="TRUE" ;;	## Set A flag - audio hardware.
-		v)	GET_V_VIDEO_INFO="TRUE" ;;	## Set V flag - video hardware.
-		d)	GET_D_DISKS_INFO="TRUE" ;;	## Set D flag - disks and partitions (inc. raid).
-		o)	GET_O_OS_INFO="TRUE" ;;		## Set O flag - operating system (inc. kernel).
-		n)	GET_N_NETWORK_INFO="TRUE" ;;	## Set N flag - network.
-		h)	printf "%b" "${USAGE}\n"	## Print help (usage).
-			exit ${SUCCESS} ;;		## Exit successfully.
-		?)	printf "%b" "${USAGE}\n"	## Invalid option, show usage.
-			exit ${BAD_OPTION} ;;		## Exit.
-	esac
+while getopts 'Alpcmavdonh' OPTION; do      ## Call getopts to identify selected options and set corresponding flags.
+    OPTIONS="TRUE"                          ## Used to determine if a valid or invalid option was entered.
+    case "$OPTION" in
+        A)    GET_ALL_INFO="TRUE" ;;        ## Set ALL flag - same output as selecting no options.
+        l)    GET_L_LIVE_INFO="TRUE" ;;     ## Set L flag - live system statistics (temp, fan speed, uptime).
+        p)    GET_P_PRODUCT_INFO="TRUE" ;;  ## Set P flag - product info (inc. motherboard, chassis, bios).
+        c)    GET_C_CPU_INFO="TRUE" ;;      ## Set C flag - cpu.
+        m)    GET_M_MEMORY_INFO="TRUE" ;;   ## Set M flag - memory.
+        a)    GET_A_AUDIO_INFO="TRUE" ;;    ## Set A flag - audio hardware.
+        v)    GET_V_VIDEO_INFO="TRUE" ;;    ## Set V flag - video hardware.
+        d)    GET_D_DISKS_INFO="TRUE" ;;    ## Set D flag - disks and partitions (inc. raid).
+        o)    GET_O_OS_INFO="TRUE" ;;       ## Set O flag - operating system (inc. kernel).
+        n)    GET_N_NETWORK_INFO="TRUE" ;;  ## Set N flag - network.
+        h)    printf "%b" "${USAGE}\n"      ## Print help (usage).
+            exit ${SUCCESS} ;;              ## Exit successfully.
+        ?)    printf "%b" "${USAGE}\n"      ## Invalid option, show usage.
+            exit ${BAD_OPTION} ;;           ## Exit.
+    esac
 done
-shift $((OPTIND -1))		## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))    ## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
 
 ## If no options selected,assumes -A option so set GET_ALL_INFO flag.
 if [ -z "$OPTIONS" ]; then GET_ALL_INFO="TRUE"; fi
 
 ## Ensure no more than 1 argument was entered.
 if (( $# > 1 )); then
-	printf "%b" "${RED}Error:${RESET} Invalid argument.\n"
-	printf "%b" "${USAGE}\n"
-	exit $BAD_ARGUMENT
+    printf "%b" "${RED}Error:${RESET} Invalid argument.\n"
+    printf "%b" "${USAGE}\n"
+    exit $BAD_ARGUMENT
 fi
 
 ## Parse the first argument to set the theme colour.
 case $1 in
-	"BLACK" 	| "black")	COL="${BLACK}";;
-	"RED"		| "red")	COL="${RED}";;
-	"ORANGE"	| "orange")	COL="${ORANGE}";;
-	"GREEN"		| "green")	COL="${GREEN}";;
-	"YELLOW"	| "yellow")	COL="${YELLOW}";;
-	"BLUE"		| "blue")	COL="${BLUE}";;
-	"MAGENTA"	| "magenta")	COL="${MAGENTA}";;
-	"CYAN"		| "cyan")	COL="${CYAN}";;
-	"GRAY"		| "gray")	COL="${GRAY}";;
-	"GREY"		| "grey")	COL="${GRAY}";;
-	"WHITE"		| "white")	COL="${WHITE}";;
-	*)				COL="${DEFAULT_COL}";;
+    "BLACK"     | "black")      COL="${BLACK}";;
+    "RED"       | "red")        COL="${RED}";;
+    "ORANGE"    | "orange")     COL="${ORANGE}";;
+    "GREEN"     | "green")      COL="${GREEN}";;
+    "YELLOW"    | "yellow")     COL="${YELLOW}";;
+    "BLUE"      | "blue")       COL="${BLUE}";;
+    "MAGENTA"   | "magenta")    COL="${MAGENTA}";;
+    "CYAN"      | "cyan")       COL="${CYAN}";;
+    "GRAY"      | "gray")       COL="${GRAY}";;
+    "GREY"      | "grey")       COL="${GRAY}";;
+    "WHITE"     | "white")      COL="${WHITE}";;
+    *)                          COL="${DEFAULT_COL}";;
 esac
 
 ## Begin main output.  Start with a header.
@@ -141,567 +141,567 @@ printf "%b" "${COL}${BOLD}╚═════════════════
 ## -l : Print live statistics - temperature, fan speed, uptime
 if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 
-	printf "%b" "${COL}${BOLD}Live statistics:${RESET}\n"
+    printf "%b" "${COL}${BOLD}Live statistics:${RESET}\n"
 
-	## Initialise some counters.
-	FOUND_CORE_TEMP=0
-	FOUND_FAN=0
+    ## Initialise some counters.
+    FOUND_CORE_TEMP=0
+    FOUND_FAN=0
 
-	## If sensors is available, use that to determine core temps and fan speeds.
-	if sensors &> /dev/null; then
-		###############################
-		## Print available CPU core temps - lm_sensors
-		for CHECK in {0..11}; do	## Look for up to 12 core temps.
-			CORE_TEMP=$(sensors | grep -e "Core ${CHECK}"); CORE_TEMP=${CORE_TEMP##*:*( )}; CORE_TEMP=${CORE_TEMP%% *}
-			if [ -n "${CORE_TEMP}" ]; then
-				(( FOUND_CORE_TEMP++ ))
-				CORE_TEMP_[${FOUND_CORE_TEMP}]=${CORE_TEMP}
-			fi
-		done
-		if (( FOUND_CORE_TEMP > 0 )); then
-			printf "%b" "${COL}${BOLD}├─Core Temperatures:${RESET}\n"
-			for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do	## Loop for each found core.
-				if (( CORE == FOUND_CORE_TEMP )); then	printf "%b" "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"
-				else					printf "%b" "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"; fi
-			done
-		fi
-		###############################
-		## Print available fan speeds - lm_sensors
-		for CHECK in {1..9}; do	## Look for up to 9 fans.
-			FAN_SPEED=$(sensors | grep -e "fan${CHECK}"); FAN_SPEED=${FAN_SPEED##*:*( )}; FAN_SPEED=${FAN_SPEED%% *}
-			if [ -n "${FAN_SPEED}" ] && [ "${FAN_SPEED}" != "0" ]; then
-				(( FOUND_FAN++ ))
-				FAN_SPEED_[$FOUND_FAN]=${FAN_SPEED}
-			fi
-		done
-		if (( FOUND_FAN > 0 )); then
-			printf "%b" "${COL}${BOLD}├─Fan Speeds:${RESET}\n"
-			for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do	## Loop for each found fan.
-				if (( FAN == FOUND_FAN )); then	printf "%b" "${COL}│ └─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"
-				else				printf "%b" "${COL}│ ├─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"; fi
-			done
-		fi
-	fi
+    ## If sensors is available, use that to determine core temps and fan speeds.
+    if sensors &> /dev/null; then
+        ###############################
+        ## Print available CPU core temps - lm_sensors
+        for CHECK in {0..11}; do    ## Look for up to 12 core temps.
+            CORE_TEMP=$(sensors | grep -e "Core ${CHECK}"); CORE_TEMP=${CORE_TEMP##*:*( )}; CORE_TEMP=${CORE_TEMP%% *}
+            if [ -n "${CORE_TEMP}" ]; then
+                (( FOUND_CORE_TEMP++ ))
+                CORE_TEMP_[${FOUND_CORE_TEMP}]=${CORE_TEMP}
+            fi
+        done
+        if (( FOUND_CORE_TEMP > 0 )); then
+            printf "%b" "${COL}${BOLD}├─Core Temperatures:${RESET}\n"
+            for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do    ## Loop for each found core.
+                if (( CORE == FOUND_CORE_TEMP )); then    printf "%b" "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"
+                else                    printf "%b" "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"; fi
+            done
+        fi
+        ###############################
+        ## Print available fan speeds - lm_sensors
+        for CHECK in {1..9}; do    ## Look for up to 9 fans.
+            FAN_SPEED=$(sensors | grep -e "fan${CHECK}"); FAN_SPEED=${FAN_SPEED##*:*( )}; FAN_SPEED=${FAN_SPEED%% *}
+            if [ -n "${FAN_SPEED}" ] && [ "${FAN_SPEED}" != "0" ]; then
+                (( FOUND_FAN++ ))
+                FAN_SPEED_[$FOUND_FAN]=${FAN_SPEED}
+            fi
+        done
+        if (( FOUND_FAN > 0 )); then
+            printf "%b" "${COL}${BOLD}├─Fan Speeds:${RESET}\n"
+            for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do    ## Loop for each found fan.
+                if (( FAN == FOUND_FAN )); then    printf "%b" "${COL}│ └─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"
+                else                printf "%b" "${COL}│ ├─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"; fi
+            done
+        fi
+    fi
 
-	###############################
-	## Print available core temp - raspberry pi.
-	## Sensors is not available or returned no temps, but temp file is present (likely a pi) so use that to show temperature.
-	if (( FOUND_CORE_TEMP == 0 )) && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
-		RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)	## File contains value equal to 1000*temp.
-		if (( RAW_CORE_TEMP )); then
-			CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
-			printf "%b" "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}\n"
-		fi
-	fi
+    ###############################
+    ## Print available core temp - raspberry pi.
+    ## Sensors is not available or returned no temps, but temp file is present (likely a pi) so use that to show temperature.
+    if (( FOUND_CORE_TEMP == 0 )) && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+        RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)    ## File contains value equal to 1000*temp.
+        if (( RAW_CORE_TEMP )); then
+            CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
+            printf "%b" "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}\n"
+        fi
+    fi
 
-	###############################
-	## Print user/s, terminal and uptime info.
-	if command -v who > /dev/null; then
-		NUM_USERS=$(who --count) && NUM_USERS=${NUM_USERS##*=}
-		printf "%b" "${COL}${BOLD}├─Username:${RESET} ${USER}\n"; fi
-	printf "%b" "${COL}${BOLD}├─Total Users:${RESET} ${NUM_USERS}\n"
-	printf "%b" "${COL}${BOLD}├─Current Directory:${RESET} ${PWD}\n"
-	printf "%b" "${COL}${BOLD}├─Terminal:${RESET} ${TERM}\n"
-	printf "%b" "${COL}${BOLD}│ ├─Columns:${RESET} ${COLUMNS}\n"
-	printf "%b" "${COL}${BOLD}│ └─Lines:${RESET} ${LINES}\n"
-	printf "%b" "${COL}${BOLD}└─Uptime:${RESET} $(uptime -p)\n"
+    ###############################
+    ## Print user/s, terminal and uptime info.
+    if command -v who > /dev/null; then
+        NUM_USERS=$(who --count) && NUM_USERS=${NUM_USERS##*=}
+        printf "%b" "${COL}${BOLD}├─Username:${RESET} ${USER}\n"; fi
+    printf "%b" "${COL}${BOLD}├─Total Users:${RESET} ${NUM_USERS}\n"
+    printf "%b" "${COL}${BOLD}├─Current Directory:${RESET} ${PWD}\n"
+    printf "%b" "${COL}${BOLD}├─Terminal:${RESET} ${TERM}\n"
+    printf "%b" "${COL}${BOLD}│ ├─Columns:${RESET} ${COLUMNS}\n"
+    printf "%b" "${COL}${BOLD}│ └─Lines:${RESET} ${LINES}\n"
+    printf "%b" "${COL}${BOLD}└─Uptime:${RESET} $(uptime -p)\n"
 fi
 
 ####################################################################################################################################
 ## -p : Print available product, chassis, motherboard, bios info
 if [[ ${GET_P_PRODUCT_INFO} || ${GET_ALL_INFO} ]]; then
 
-	## Check for a few basics.  If not present, assume no product info is present.
-	if	[ ! -s /sys/devices/virtual/dmi/id/product_name ]	&&
-		[ ! -s /sys/devices/virtual/dmi/id/chassis_type ]	&&
-		[ ! -s /sys/devices/virtual/dmi/id/board_name ]		&&
-		[ ! -s /sys/devices/virtual/dmi/id/bios_date ];		then printf "%b" "${COL}${BOLD}Product Info:${RESET} Not found\n"
-	else
-		printf "%b" "${COL}${BOLD}Product Info:${RESET}\n"
-		if [ -s /sys/devices/virtual/dmi/id/product_name ];	then PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name); fi
-		if [ -s /sys/devices/virtual/dmi/id/product_version ];	then PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/sys_vendor ];	then SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor); fi
-		if [ -s /sys/devices/virtual/dmi/id/chassis_type ];	then CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type); fi
-		if [ -s /sys/devices/virtual/dmi/id/chassis_version ];	then CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/chassis_vendor ];	then CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor); fi
-		if [ -s /sys/devices/virtual/dmi/id/board_name ];	then BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name); fi
-		if [ -s /sys/devices/virtual/dmi/id/board_version ];	then BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/board_vendor ];	then BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor); fi
-		if [ -s /sys/devices/virtual/dmi/id/bios_date ];	then BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date); fi
-		if [ -s /sys/devices/virtual/dmi/id/bios_version ];	then BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version); fi
-		if [ -s /sys/devices/virtual/dmi/id/bios_vendor ];	then BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor); fi
+    ## Check for a few basics.  If not present, assume no product info is present.
+    if  [ ! -s /sys/devices/virtual/dmi/id/product_name ]   &&
+        [ ! -s /sys/devices/virtual/dmi/id/chassis_type ]   &&
+        [ ! -s /sys/devices/virtual/dmi/id/board_name ]     &&
+        [ ! -s /sys/devices/virtual/dmi/id/bios_date ];     then printf "%b" "${COL}${BOLD}Product Info:${RESET} Not found\n"
+    else
+        printf "%b" "${COL}${BOLD}Product Info:${RESET}\n"
+        if [ -s /sys/devices/virtual/dmi/id/product_name ];     then PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name); fi
+        if [ -s /sys/devices/virtual/dmi/id/product_version ];  then PRODUCT_VERSION=$(cat /sys/devices/virtual/dmi/id/product_version); fi
+        if [ -s /sys/devices/virtual/dmi/id/sys_vendor ];       then SYS_VENDOR=$(cat /sys/devices/virtual/dmi/id/sys_vendor); fi
+        if [ -s /sys/devices/virtual/dmi/id/chassis_type ];     then CHASSIS_TYPE=$(cat /sys/devices/virtual/dmi/id/chassis_type); fi
+        if [ -s /sys/devices/virtual/dmi/id/chassis_version ];  then CHASSIS_VERSION=$(cat /sys/devices/virtual/dmi/id/chassis_version); fi
+        if [ -s /sys/devices/virtual/dmi/id/chassis_vendor ];   then CHASSIS_VENDOR=$(cat /sys/devices/virtual/dmi/id/chassis_vendor); fi
+        if [ -s /sys/devices/virtual/dmi/id/board_name ];       then BOARD_NAME=$(cat /sys/devices/virtual/dmi/id/board_name); fi
+        if [ -s /sys/devices/virtual/dmi/id/board_version ];    then BOARD_VERSION=$(cat /sys/devices/virtual/dmi/id/board_version); fi
+        if [ -s /sys/devices/virtual/dmi/id/board_vendor ];     then BOARD_VENDOR=$(cat /sys/devices/virtual/dmi/id/board_vendor); fi
+        if [ -s /sys/devices/virtual/dmi/id/bios_date ];        then BIOS_DATE=$(cat /sys/devices/virtual/dmi/id/bios_date); fi
+        if [ -s /sys/devices/virtual/dmi/id/bios_version ];     then BIOS_VERSION=$(cat /sys/devices/virtual/dmi/id/bios_version); fi
+        if [ -s /sys/devices/virtual/dmi/id/bios_vendor ];      then BIOS_VENDOR=$(cat /sys/devices/virtual/dmi/id/bios_vendor); fi
 
-		###############################
-		## Print available product info
-		if	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ] &&	[ -n "${SYS_VENDOR}" ];		then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})\n"
-		elif	[ -n "${PRODUCT_NAME}" ] &&	[ -n "${PRODUCT_VERSION}" ];					then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}\n"
-		elif 	[ -n "${PRODUCT_NAME}" ] &&					[ -n "${SYS_VENDOR}" ];		then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})\n"
-		elif	[ -n "${PRODUCT_NAME}" ];									then	printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}\n"; fi
+        ###############################
+        ## Print available product info
+        if      [ -n "${PRODUCT_NAME}" ] && [ -n "${PRODUCT_VERSION}" ] &&  [ -n "${SYS_VENDOR}" ]; then    printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION} (${SYS_VENDOR})\n"
+        elif    [ -n "${PRODUCT_NAME}" ] && [ -n "${PRODUCT_VERSION}" ];                            then    printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}, version ${PRODUCT_VERSION}\n"
+        elif    [ -n "${PRODUCT_NAME}" ] &&                                 [ -n "${SYS_VENDOR}" ]; then    printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME} (${SYS_VENDOR})\n"
+        elif    [ -n "${PRODUCT_NAME}" ];                                                           then    printf "%b" "${COL}${BOLD}├─Product:${RESET} ${PRODUCT_NAME}\n"; fi
 
-		###############################
-		## Print available chassis info
-		if	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ] &&	[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})\n"
-		elif	[ -n "${CHASSIS_TYPE}" ] &&	[ -n "${CHASSIS_VERSION}" ];					then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}\n"
-		elif	[ -n "${CHASSIS_TYPE}" ] &&					[ -n "${CHASSIS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})\n"
-		elif	[ -n "${CHASSIS_TYPE}" ];									then	printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}\n"; fi
+        ###############################
+        ## Print available chassis info
+        if      [ -n "${CHASSIS_TYPE}" ] && [ -n "${CHASSIS_VERSION}" ] &&  [ -n "${CHASSIS_VENDOR}" ]; then    printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION} (${CHASSIS_VENDOR})\n"
+        elif    [ -n "${CHASSIS_TYPE}" ] && [ -n "${CHASSIS_VERSION}" ];                                then    printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}, version ${CHASSIS_VERSION}\n"
+        elif    [ -n "${CHASSIS_TYPE}" ] &&                                 [ -n "${CHASSIS_VENDOR}" ]; then    printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE} (${CHASSIS_VENDOR})\n"
+        elif    [ -n "${CHASSIS_TYPE}" ];                                                               then    printf "%b" "${COL}${BOLD}├─Chassis:${RESET} ${CHASSIS_TYPE}\n"; fi
 
-		###############################
-		## Print available motherboard info
-		if	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ] &&	[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})\n"
-		elif	[ -n "${BOARD_NAME}" ] &&	[ -n "${BOARD_VERSION}" ];					then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}\n"
-		elif	[ -n "${BOARD_NAME}" ] &&					[ -n "${BOARD_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})\n"
-		elif	[ -n "${BOARD_NAME}" ];										then	printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}\n"; fi
+        ###############################
+        ## Print available motherboard info
+        if      [ -n "${BOARD_NAME}" ] &&   [ -n "${BOARD_VERSION}" ] &&    [ -n "${BOARD_VENDOR}" ];   then    printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION} (${BOARD_VENDOR})\n"
+        elif    [ -n "${BOARD_NAME}" ] &&   [ -n "${BOARD_VERSION}" ];                                  then    printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}, version ${BOARD_VERSION}\n"
+        elif    [ -n "${BOARD_NAME}" ] &&                                   [ -n "${BOARD_VENDOR}" ];   then    printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME} (${BOARD_VENDOR})\n"
+        elif    [ -n "${BOARD_NAME}" ];                                                                 then    printf "%b" "${COL}${BOLD}├─Motherboard:${RESET} ${BOARD_NAME}\n"; fi
 
-		###############################
-		## Print available bios info
-		if	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ] &&	[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})\n"
-		elif	[ -n "${BIOS_DATE}" ] &&	[ -n "${BIOS_VERSION}" ];					then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}\n"
-		elif	[ -n "${BIOS_DATE}" ] &&					[ -n "${BIOS_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})\n"
-		elif	[ -n "${BIOS_DATE}" ];										then	printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}\n"; fi
-	fi
+        ###############################
+        ## Print available bios info
+        if      [ -n "${BIOS_DATE}" ] &&    [ -n "${BIOS_VERSION}" ] && [ -n "${BIOS_VENDOR}" ];    then    printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION} (${BIOS_VENDOR})\n"
+        elif    [ -n "${BIOS_DATE}" ] &&    [ -n "${BIOS_VERSION}" ];                               then    printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VERSION}\n"
+        elif    [ -n "${BIOS_DATE}" ] &&                                [ -n "${BIOS_VENDOR}" ];    then    printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE} (${BIOS_VENDOR})\n"
+        elif    [ -n "${BIOS_DATE}" ];                                                              then    printf "%b" "${COL}${BOLD}└─Bios:${RESET} ${BIOS_DATE}\n"; fi
+    fi
 fi
 
 ####################################################################################################################################
 ##  -c : Print available CPU info
 if [[ ${GET_C_CPU_INFO} || ${GET_ALL_INFO} ]]; then
-	if ! command -v lscpu >> /dev/null ; then	## If lscpu not installed (send to /dev/null to suppress stdout)
-		printf "%b" "${COL}${BOLD}CPU:${RESET} Cannot determine cpu infomtion (lscpu not installed)\n"
-	else
-		CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:");	CPU_MODEL=${CPU_MODEL##*:*( )}
-		CPU_VENDOR=$(lscpu | grep -m 1 -e "Vendor ID:");	CPU_VENDOR=${CPU_VENDOR##*:*( )}
-		CPU_ARCH=$(lscpu | grep -m 1 -e "Architecture:");	CPU_ARCH=${CPU_ARCH##*:*( )}
-		CPU_MODE=$(lscpu | grep -m 1 -e "CPU op-mode(s):");	CPU_MODE=${CPU_MODE##*:*( )}
-		CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):");		CPU_CORES=${CPU_CORES##*:*( )}
-		CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:");		CPU_SPEED=${CPU_SPEED##*:*( )}
-		CPU_MAX_SPEED=$(lscpu | grep -m 1 -e "CPU max MHz:");	CPU_MAX_SPEED=${CPU_MAX_SPEED##*:*( )}
-		CPU_MIN_SPEED=$(lscpu | grep -m 1 -e "CPU min MHz:");	CPU_MIN_SPEED=${CPU_MIN_SPEED##*:*( )}
-		printf "%b" "${COL}${BOLD}CPU:${RESET}\n"
-		if [ -n "${CPU_MODEL}" ];	then	printf "%b" "${COL}${BOLD}├─Model:${RESET} ${CPU_MODEL}\n"; fi
-		if [ -n "${CPU_VENDOR}" ];	then	printf "%b" "${COL}${BOLD}├─Vendor:${RESET} ${CPU_VENDOR}\n"; fi
-		if [ -n "${CPU_ARCH}" ];	then	printf "%b" "${COL}${BOLD}├─Architecture:${RESET} ${CPU_ARCH}\n"; fi
-		if [ -n "${CPU_MODE}" ];	then	printf "%b" "${COL}${BOLD}├─Mode(s):${RESET} ${CPU_MODE}\n"; fi
-		if [ -n "${CPU_CORES}" ];	then	printf "%b" "${COL}${BOLD}├─Cores:${RESET} ${CPU_CORES}\n"; fi
-		if [ -n "${CPU_SPEED}" ];	then	printf "%b" "${COL}${BOLD}└─Speed:${RESET} ${CPU_SPEED}MHz\n"
-		else								printf "%b" "${COL}${BOLD}└─Speed\n"; fi
-		if [ -n "${CPU_MAX_SPEED}" ] && [ -n "${CPU_MIN_SPEED}" ]; then
-			printf "%b" "${COL}  ├─Max:${RESET} ${CPU_MAX_SPEED}MHz\n";
-			printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n";
-		else
-			if [ -n "${CPU_MAX_SPEED}" ]; then printf "%b" "${COL}  └─Max:${RESET} ${CPU_MAX_SPEED}MHz\n"; fi
-			if [ -n "${CPU_MIN_SPEED}" ]; then printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n"; fi
-		fi
-	fi
+    if ! command -v lscpu >> /dev/null ; then    ## If lscpu not installed (send to /dev/null to suppress stdout)
+        printf "%b" "${COL}${BOLD}CPU:${RESET} Cannot determine cpu infomtion (lscpu not installed)\n"
+    else
+        CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:");        CPU_MODEL=${CPU_MODEL##*:*( )}
+        CPU_VENDOR=$(lscpu | grep -m 1 -e "Vendor ID:");        CPU_VENDOR=${CPU_VENDOR##*:*( )}
+        CPU_ARCH=$(lscpu | grep -m 1 -e "Architecture:");       CPU_ARCH=${CPU_ARCH##*:*( )}
+        CPU_MODE=$(lscpu | grep -m 1 -e "CPU op-mode(s):");     CPU_MODE=${CPU_MODE##*:*( )}
+        CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):");            CPU_CORES=${CPU_CORES##*:*( )}
+        CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:");           CPU_SPEED=${CPU_SPEED##*:*( )}
+        CPU_MAX_SPEED=$(lscpu | grep -m 1 -e "CPU max MHz:");   CPU_MAX_SPEED=${CPU_MAX_SPEED##*:*( )}
+        CPU_MIN_SPEED=$(lscpu | grep -m 1 -e "CPU min MHz:");   CPU_MIN_SPEED=${CPU_MIN_SPEED##*:*( )}
+        printf "%b" "${COL}${BOLD}CPU:${RESET}\n"
+        if [ -n "${CPU_MODEL}" ];   then    printf "%b" "${COL}${BOLD}├─Model:${RESET} ${CPU_MODEL}\n"; fi
+        if [ -n "${CPU_VENDOR}" ];  then    printf "%b" "${COL}${BOLD}├─Vendor:${RESET} ${CPU_VENDOR}\n"; fi
+        if [ -n "${CPU_ARCH}" ];    then    printf "%b" "${COL}${BOLD}├─Architecture:${RESET} ${CPU_ARCH}\n"; fi
+        if [ -n "${CPU_MODE}" ];    then    printf "%b" "${COL}${BOLD}├─Mode(s):${RESET} ${CPU_MODE}\n"; fi
+        if [ -n "${CPU_CORES}" ];   then    printf "%b" "${COL}${BOLD}├─Cores:${RESET} ${CPU_CORES}\n"; fi
+        if [ -n "${CPU_SPEED}" ];   then    printf "%b" "${COL}${BOLD}└─Speed:${RESET} ${CPU_SPEED}MHz\n"
+        else                                printf "%b" "${COL}${BOLD}└─Speed\n"; fi
+        if [ -n "${CPU_MAX_SPEED}" ] && [ -n "${CPU_MIN_SPEED}" ]; then
+            printf "%b" "${COL}  ├─Max:${RESET} ${CPU_MAX_SPEED}MHz\n";
+            printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n";
+        else
+            if [ -n "${CPU_MAX_SPEED}" ]; then printf "%b" "${COL}  └─Max:${RESET} ${CPU_MAX_SPEED}MHz\n"; fi
+            if [ -n "${CPU_MIN_SPEED}" ]; then printf "%b" "${COL}  └─Min:${RESET} ${CPU_MIN_SPEED}MHz\n"; fi
+        fi
+    fi
 fi
 
 ####################################################################################################################################
 ## -m : Print memory info
 if [[ ${GET_M_MEMORY_INFO} || ${GET_ALL_INFO} ]]; then
-	read -r -d '' -a MEM_ARRAY <<< "$(free -h)"	## Read in memory stats to an array.
-	MEM_TOTAL=${MEM_ARRAY[7]}
-	MEM_USED=${MEM_ARRAY[8]}
-	MEM_FREE=${MEM_ARRAY[9]}
-	MEM_SHARED=${MEM_ARRAY[10]}
-	MEM_BUFF_CACHE=${MEM_ARRAY[11]}
-	MEM_AVAILABLE=${MEM_ARRAY[12]}
-	SWAP_TOTAL=${MEM_ARRAY[14]}
-	SWAP_USED=${MEM_ARRAY[15]}
-	SWAP_FREE=${MEM_ARRAY[16]}
-	printf "%b" "${COL}${BOLD}Memory:${RESET}\n"
-	printf "%b" "${COL}${BOLD}├─RAM:${RESET}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:      ${RESET}${MEM_TOTAL}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:       ${RESET}${MEM_USED}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Free:       ${RESET}${MEM_FREE}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Shared:     ${RESET}${MEM_SHARED}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Buff/Cache: ${RESET}${MEM_BUFF_CACHE}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:  ${RESET}${MEM_AVAILABLE}\n"
-	printf "%b" "${COL}${BOLD}└─SWAP:${RESET}\n"
-	printf "%b" "${COL}  ├─Total:      ${RESET}${SWAP_TOTAL}\n"
-	printf "%b" "${COL}  ├─Used:       ${RESET}${SWAP_USED}\n"
-	printf "%b" "${COL}  └─Free:       ${RESET}${SWAP_FREE}\n"
+    read -r -d '' -a MEM_ARRAY <<< "$(free -h)"    ## Read in memory stats to an array.
+    MEM_TOTAL=${MEM_ARRAY[7]}
+    MEM_USED=${MEM_ARRAY[8]}
+    MEM_FREE=${MEM_ARRAY[9]}
+    MEM_SHARED=${MEM_ARRAY[10]}
+    MEM_BUFF_CACHE=${MEM_ARRAY[11]}
+    MEM_AVAILABLE=${MEM_ARRAY[12]}
+    SWAP_TOTAL=${MEM_ARRAY[14]}
+    SWAP_USED=${MEM_ARRAY[15]}
+    SWAP_FREE=${MEM_ARRAY[16]}
+    printf "%b" "${COL}${BOLD}Memory:${RESET}\n"
+    printf "%b" "${COL}${BOLD}├─RAM:${RESET}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Total:      ${RESET}${MEM_TOTAL}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Used:       ${RESET}${MEM_USED}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Free:       ${RESET}${MEM_FREE}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Shared:     ${RESET}${MEM_SHARED}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Buff/Cache: ${RESET}${MEM_BUFF_CACHE}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Available:  ${RESET}${MEM_AVAILABLE}\n"
+    printf "%b" "${COL}${BOLD}└─SWAP:${RESET}\n"
+    printf "%b" "${COL}  ├─Total:   ${RESET}${SWAP_TOTAL}\n"
+    printf "%b" "${COL}  ├─Used:    ${RESET}${SWAP_USED}\n"
+    printf "%b" "${COL}  └─Free:    ${RESET}${SWAP_FREE}\n"
 fi
 
 ####################################################################################################################################
 ## -a & -v : Print audio and video info (note only first result of each if multiple video or audio devices exist)
 if [[ ${GET_A_AUDIO_INFO} || ${GET_V_VIDEO_INFO} || ${GET_ALL_INFO} ]]; then
-	if ! command -v lspci >> /dev/null || ! lspci &> /dev/null; then
-		printf "%b" "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed)\n"
-	else
-		## Both audio and video:
-		if [[ ${GET_ALL_INFO} || ${GET_A_AUDIO_INFO} && ${GET_V_VIDEO_INFO} ]]; then
-			AUDIO_INFO=$(lspci -k | grep -m 1 -e "Audio");	AUDIO_INFO=${AUDIO_INFO:22}
-			VIDEO_INFO=$(lspci -k | grep -m 1 -e "VGA");	VIDEO_INFO=${VIDEO_INFO:35}
-			if xrandr &> /dev/null;	then VIDEO_RES=$(xrandr | grep -e "current"); VIDEO_RES=${VIDEO_RES##*current }; VIDEO_RES=${VIDEO_RES%%,*}; fi
-			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
-			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
-			printf "%b" "${COL}${BOLD}Audio/Video:${RESET}\n"
-			printf "%b" "${COL}${BOLD}├─Audio Hardware:${RESET} ${AUDIO_INFO}\n"
-			printf "%b" "${COL}${BOLD}└─Video Hardware:${RESET} ${VIDEO_INFO}\n"
-			if [ -n "${VIDEO_RES}" ]; then printf "%b" "${COL}  └─Resolution:${RESET} ${VIDEO_RES}\n"; fi
-		## Just audio:
-		elif [ -n "$GET_A_AUDIO_INFO" ]; then
-			AUDIO_INFO=$(lspci -k | grep -m 1 -e "Audio"); AUDIO_INFO=${AUDIO_INFO:22}
-			if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
-			printf "%b" "${COL}${BOLD}Audio:${RESET}\n"
-			printf "%b" "${COL}${BOLD}└─Hardware:${RESET} ${AUDIO_INFO}\n"
-		## Just video:
-		elif [ -n "$GET_V_VIDEO_INFO" ]; then
-			VIDEO_INFO=$(lspci -k | grep -m 1 -e "VGA"); VIDEO_INFO=${VIDEO_INFO:35}
-			if xrandr &> /dev/null;	then VIDEO_RES=$(xrandr | grep -e "current"); VIDEO_RES=${VIDEO_RES##*current }; VIDEO_RES=${VIDEO_RES%%,*}; fi
-			if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
-			printf "%b" "${COL}${BOLD}Video:${RESET}\n"
-			printf "%b" "${COL}${BOLD}└─Hardware:${RESET} ${VIDEO_INFO}\n"
-			if [ -n "${VIDEO_RES}" ]; then printf "%b" "${COL}  └─Resolution:${RESET} ${VIDEO_RES}\n"; fi
-		fi
-	fi
+    if ! command -v lspci >> /dev/null || ! lspci &> /dev/null; then
+        printf "%b" "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed)\n"
+    else
+        ## Both audio and video:
+        if [[ ${GET_ALL_INFO} || ${GET_A_AUDIO_INFO} && ${GET_V_VIDEO_INFO} ]]; then
+            AUDIO_INFO=$(lspci -k | grep -m 1 -e "Audio");  AUDIO_INFO=${AUDIO_INFO:22}
+            VIDEO_INFO=$(lspci -k | grep -m 1 -e "VGA");    VIDEO_INFO=${VIDEO_INFO:35}
+            if xrandr &> /dev/null;    then VIDEO_RES=$(xrandr | grep -e "current"); VIDEO_RES=${VIDEO_RES##*current }; VIDEO_RES=${VIDEO_RES%%,*}; fi
+            if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
+            if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
+            printf "%b" "${COL}${BOLD}Audio/Video:${RESET}\n"
+            printf "%b" "${COL}${BOLD}├─Audio Hardware:${RESET} ${AUDIO_INFO}\n"
+            printf "%b" "${COL}${BOLD}└─Video Hardware:${RESET} ${VIDEO_INFO}\n"
+            if [ -n "${VIDEO_RES}" ]; then printf "%b" "${COL}  └─Resolution:${RESET} ${VIDEO_RES}\n"; fi
+        ## Just audio:
+        elif [ -n "$GET_A_AUDIO_INFO" ]; then
+            AUDIO_INFO=$(lspci -k | grep -m 1 -e "Audio"); AUDIO_INFO=${AUDIO_INFO:22}
+            if [ -z "${AUDIO_INFO}" ]; then AUDIO_INFO="Information not found"; fi
+            printf "%b" "${COL}${BOLD}Audio:${RESET}\n"
+            printf "%b" "${COL}${BOLD}└─Hardware:${RESET} ${AUDIO_INFO}\n"
+        ## Just video:
+        elif [ -n "$GET_V_VIDEO_INFO" ]; then
+            VIDEO_INFO=$(lspci -k | grep -m 1 -e "VGA"); VIDEO_INFO=${VIDEO_INFO:35}
+            if xrandr &> /dev/null;    then VIDEO_RES=$(xrandr | grep -e "current"); VIDEO_RES=${VIDEO_RES##*current }; VIDEO_RES=${VIDEO_RES%%,*}; fi
+            if [ -z "${VIDEO_INFO}" ]; then VIDEO_INFO="Information not found"; fi
+            printf "%b" "${COL}${BOLD}Video:${RESET}\n"
+            printf "%b" "${COL}${BOLD}└─Hardware:${RESET} ${VIDEO_INFO}\n"
+            if [ -n "${VIDEO_RES}" ]; then printf "%b" "${COL}  └─Resolution:${RESET} ${VIDEO_RES}\n"; fi
+        fi
+    fi
 fi
 
 ####################################################################################################################################
 ## -d : Print disk and partition info
 if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
-	if ! command -v lsblk >> /dev/null || ! lsblk &> /dev/null;	then
-		printf "%b" "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk absent or failed).\n"
-	else
-		printf "%b" "${COL}${BOLD}Disks and Partitions:${RESET}\n"
+    if ! command -v lsblk >> /dev/null || ! lsblk &> /dev/null;    then
+        printf "%b" "${COL}${BOLD}Disks:${RESET} Cannot determine disk/partition information (lsblk absent or failed).\n"
+    else
+        printf "%b" "${COL}${BOLD}Disks and Partitions:${RESET}\n"
 
-		## Dump lsblk device listing and map each line to an array element.
-		mapfile DEV_DUMP <<< "$(lsblk -J)"
-		## Identify then delete elements from the array that we want to ignore.
-		for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
-			if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
-			if ! grep -e "name" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then	DELETE_ELEMENTS+=("${N}") && continue; fi
-			DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}	## Eliminate all but the initial whitespace.
-		done
-		for ELEMENT in "${DELETE_ELEMENTS[@]}"; do unset "DEV_DUMP[${ELEMENT}]"; done
+        ## Dump lsblk device listing and map each line to an array element.
+        mapfile DEV_DUMP <<< "$(lsblk -J)"
+        ## Identify then delete elements from the array that we want to ignore.
+        for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
+            if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then   DELETE_ELEMENTS+=("${N}") && continue; fi
+            if ! grep -e "name" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then DELETE_ELEMENTS+=("${N}") && continue; fi
+            DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}    ## Eliminate all but the initial whitespace.
+        done
+        for ELEMENT in "${DELETE_ELEMENTS[@]}"; do unset "DEV_DUMP[${ELEMENT}]"; done
 
-		## Reconstitute the array - removes all empty elements.
-		DEV_DUMP=("${DEV_DUMP[@]}")
+        ## Reconstitute the array - removes all empty elements.
+        DEV_DUMP=("${DEV_DUMP[@]}")
 
-		## Run through each element in the DEV_DUMP array and create a new array of the format:
-		## ( DEV_NAME DEV_LEVEL DEV_CHILDREN )
-		## Where : DEV_NAME 	the name of the device within the /dev directory.
-		##	 : DEV_LEVEL 	the position within the device heirarchy.  E.g. Level 1 for sda, level 2 for sda1.
-		##	 : NUM_CHILDREN the child devices one level below the device.  Does not count great/grandchildren.
-		## Also tally the total number of level 1 devices NUM_LEVEL_1.
-		NUM_LEVEL_1=0
-		for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
+        ## Run through each element in the DEV_DUMP array and create a new array of the format:
+        ## ( DEV_NAME DEV_LEVEL DEV_CHILDREN )
+        ## Where : DEV_NAME     the name of the device within the /dev directory.
+        ##     : DEV_LEVEL     the position within the device heirarchy.  E.g. Level 1 for sda, level 2 for sda1.
+        ##     : NUM_CHILDREN the child devices one level below the device.  Does not count great/grandchildren.
+        ## Also tally the total number of level 1 devices NUM_LEVEL_1.
+        NUM_LEVEL_1=0
+        for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
 # Modifications for determining DEV_NAME, LEVEL and NEXT_LEVEL follow.
 # Required for json formatting change present since lsblk --version: 2.37.2 (Ubuntu 22.04).
 # DEV_NAME=${DEV_DUMP[$E]#*:\"}; DEV_NAME=${DEV_NAME%%\"*}
-# LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))	## Get level by counting initial whitespace.
+# LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))    ## Get level by counting initial whitespace.
 # NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+1))]%%\{*}" | wc -m) / 6 ))
-			DEV_NAME=${DEV_DUMP[$E]#*:}; DEV_NAME=${DEV_NAME#*\"};  DEV_NAME=${DEV_NAME%%\"*}
-			LEVEL=$(( ($(printf "%s" "${DEV_DUMP[$E]%%\"*}" | wc -m) - 3) / 6 ))	## Get level by counting whitespace.
-			NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+1))]%%\"*}" | wc -m) - 3) / 6 ))
-			DIFF=$((NEXT_LEVEL-LEVEL))
+            DEV_NAME=${DEV_DUMP[$E]#*:}; DEV_NAME=${DEV_NAME#*\"};  DEV_NAME=${DEV_NAME%%\"*}
+            LEVEL=$(( ($(printf "%s" "${DEV_DUMP[$E]%%\"*}" | wc -m) - 3) / 6 ))    ## Get level by counting whitespace.
+            NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+1))]%%\"*}" | wc -m) - 3) / 6 ))
+            DIFF=$((NEXT_LEVEL-LEVEL))
 
-			NUM_CHILDREN=0
-			## Loop through the next elements until we reach one of the same level - allows us to count the children.
-			i=1
-			while (( NEXT_LEVEL > LEVEL )); do
-				## If level difference is 1, current element is a direct child.  Ignores great/grandchildren.
-				if ((DIFF == 1)); then ((NUM_CHILDREN++)); fi
+            NUM_CHILDREN=0
+            ## Loop through the next elements until we reach one of the same level - allows us to count the children.
+            i=1
+            while (( NEXT_LEVEL > LEVEL )); do
+                ## If level difference is 1, current element is a direct child.  Ignores great/grandchildren.
+                if ((DIFF == 1)); then ((NUM_CHILDREN++)); fi
 
-				## Increment the counter and check the next element.
-				((i++))
+                ## Increment the counter and check the next element.
+                ((i++))
 # Modifications for determining NEXT_LEVEL follow.
 # Required for json formatting change present since lsblk --version: 2.37.2 (Ubuntu 22.04).
 # NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+i))]%%\{*}" | wc -m) / 6 ))
-				NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+i))]%%\"*}" | wc -m) - 3) / 6 ))
-				DIFF=$((NEXT_LEVEL-LEVEL))
-			done
+                NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+i))]%%\"*}" | wc -m) - 3) / 6 ))
+                DIFF=$((NEXT_LEVEL-LEVEL))
+            done
 
-			## Add the element to the array.
-			DEV_ARRAY+=("${DEV_NAME} ${LEVEL} ${NUM_CHILDREN}")
+            ## Add the element to the array.
+            DEV_ARRAY+=("${DEV_NAME} ${LEVEL} ${NUM_CHILDREN}")
 
-			## Increment the level 1 tally.
-			if ((LEVEL == 1)); then ((NUM_LEVEL_1++)); fi
-		done
+            ## Increment the level 1 tally.
+            if ((LEVEL == 1)); then ((NUM_LEVEL_1++)); fi
+        done
 
-		## Loop through the DEV_ARRAY, format and print device information.
-		for (( D=0; D<${#DEV_ARRAY[@]}; D++ )); do
-			WORKING_ELEMENT="${DEV_ARRAY[$D]}"
-			WORKING_DEV_NAME=${WORKING_ELEMENT%% *}
-			WORKING_LEVEL=${WORKING_ELEMENT#* }; WORKING_LEVEL=${WORKING_LEVEL% *}
-			WORKING_NUM_CHILDREN=${WORKING_ELEMENT##* }
+        ## Loop through the DEV_ARRAY, format and print device information.
+        for (( D=0; D<${#DEV_ARRAY[@]}; D++ )); do
+            WORKING_ELEMENT="${DEV_ARRAY[$D]}"
+            WORKING_DEV_NAME=${WORKING_ELEMENT%% *}
+            WORKING_LEVEL=${WORKING_ELEMENT#* }; WORKING_LEVEL=${WORKING_LEVEL% *}
+            WORKING_NUM_CHILDREN=${WORKING_ELEMENT##* }
 
-			################################
-			## Level 1 devices
-			if ((WORKING_LEVEL == 1)); then
-				((LEVEL_1_TALLY++))
-				if (( LEVEL_1_TALLY == NUM_LEVEL_1 )); then	## Last device in the list.
-					printf "%b" "${COL}${BOLD}└─Device:${RESET} ${WORKING_DEV_NAME}\n"
-					C1="${COL}${BOLD}  ${RESET}"
-				else
-					printf "%b" "${COL}${BOLD}├─Device:${RESET} ${WORKING_DEV_NAME}\n"
-					C1="${COL}${BOLD}│ ${RESET}"
-				fi
+            ################################
+            ## Level 1 devices
+            if ((WORKING_LEVEL == 1)); then
+                ((LEVEL_1_TALLY++))
+                if (( LEVEL_1_TALLY == NUM_LEVEL_1 )); then    ## Last device in the list.
+                    printf "%b" "${COL}${BOLD}└─Device:${RESET} ${WORKING_DEV_NAME}\n"
+                    C1="${COL}${BOLD}  ${RESET}"
+                else
+                    printf "%b" "${COL}${BOLD}├─Device:${RESET} ${WORKING_DEV_NAME}\n"
+                    C1="${COL}${BOLD}│ ${RESET}"
+                fi
 
-				DEVICE_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)		## Device type
-				DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}" 2> /dev/null)	## Device model
-				DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)		## Device capacity
-				DEV_SPECS=()	## Clear then reset the array of device specs 
-				if [ -n "${DEVICE_TYPE}" ];	then DEV_SPECS+=("${COL}Type:${RESET} ${DEVICE_TYPE}"); fi
-				if [ -n "${DEVICE_MODEL}" ];	then DEV_SPECS+=("${COL}Model:${RESET} ${DEVICE_MODEL}"); fi
-				if [ -n "${DEVICE_SIZE}" ];	then DEV_SPECS+=("${COL}Size:${RESET} ${DEVICE_SIZE}"); fi
-				NUM_DSPECS=${#DEV_SPECS[@]}
-				for DSPEC in "${DEV_SPECS[@]}"; do
-					if [[ "${DSPEC}" == "${DEV_SPECS[((NUM_DSPECS-1))]}" && ${WORKING_NUM_CHILDREN} -lt 1 ]]; then	C2="${COL}└─${RESET}"
-					else												C2="${COL}├─${RESET}"; fi
-					printf "%b" "${C1}${C2}${DSPEC}\n"
-				done
+                DEVICE_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)      ## Device type
+                DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}" 2> /dev/null)    ## Device model
+                DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)      ## Device capacity
+                DEV_SPECS=()    ## Clear then reset the array of device specs 
+                if [ -n "${DEVICE_TYPE}" ];     then DEV_SPECS+=("${COL}Type:${RESET} ${DEVICE_TYPE}"); fi
+                if [ -n "${DEVICE_MODEL}" ];    then DEV_SPECS+=("${COL}Model:${RESET} ${DEVICE_MODEL}"); fi
+                if [ -n "${DEVICE_SIZE}" ];     then DEV_SPECS+=("${COL}Size:${RESET} ${DEVICE_SIZE}"); fi
+                NUM_DSPECS=${#DEV_SPECS[@]}
+                for DSPEC in "${DEV_SPECS[@]}"; do
+                    if [[ "${DSPEC}" == "${DEV_SPECS[((NUM_DSPECS-1))]}" && ${WORKING_NUM_CHILDREN} -lt 1 ]]; then  C2="${COL}└─${RESET}"
+                    else                                                                                            C2="${COL}├─${RESET}"; fi
+                    printf "%b" "${C1}${C2}${DSPEC}\n"
+                done
 
-				################################
-				## Level 2 devices (CHILD)
-				if ((WORKING_NUM_CHILDREN > 0)); then
-					C=0; CHILDREN_LEFT=${WORKING_NUM_CHILDREN} ## C Represents current child iteration. 
-					while ((CHILDREN_LEFT>0)); do
-						WORKING_CHILD_ELEMENT="${DEV_ARRAY[D+1+C]}"
-						WORKING_CHILD_LEVEL=${WORKING_CHILD_ELEMENT#* }; WORKING_CHILD_LEVEL=${WORKING_CHILD_LEVEL% *}
+                ################################
+                ## Level 2 devices (CHILD)
+                if ((WORKING_NUM_CHILDREN > 0)); then
+                    C=0; CHILDREN_LEFT=${WORKING_NUM_CHILDREN} ## C Represents current child iteration. 
+                    while ((CHILDREN_LEFT>0)); do
+                        WORKING_CHILD_ELEMENT="${DEV_ARRAY[D+1+C]}"
+                        WORKING_CHILD_LEVEL=${WORKING_CHILD_ELEMENT#* }; WORKING_CHILD_LEVEL=${WORKING_CHILD_LEVEL% *}
 
-						## Skip this array element if not a child.
-						if ((WORKING_CHILD_LEVEL!=2)); then ((C++)); continue; fi
+                        ## Skip this array element if not a child.
+                        if ((WORKING_CHILD_LEVEL!=2)); then ((C++)); continue; fi
 
-						WORKING_CHILD_DEV_NAME=${WORKING_CHILD_ELEMENT%% *}
-						WORKING_CHILD_NUM_CHILDREN=${WORKING_CHILD_ELEMENT##* }
-						if ((CHILDREN_LEFT == 1)); then
-							printf "%b" "${C1}${COL}└─Child:${RESET} ${WORKING_CHILD_DEV_NAME}\n"
-							C2="${COL}  ${RESET}"
-						else
-							printf "%b" "${C1}${COL}├─Child:${RESET} ${WORKING_CHILD_DEV_NAME}\n"
-							C2="${COL}│ ${RESET}"
-						fi
+                        WORKING_CHILD_DEV_NAME=${WORKING_CHILD_ELEMENT%% *}
+                        WORKING_CHILD_NUM_CHILDREN=${WORKING_CHILD_ELEMENT##* }
+                        if ((CHILDREN_LEFT == 1)); then
+                            printf "%b" "${C1}${COL}└─Child:${RESET} ${WORKING_CHILD_DEV_NAME}\n"
+                            C2="${COL}  ${RESET}"
+                        else
+                            printf "%b" "${C1}${COL}├─Child:${RESET} ${WORKING_CHILD_DEV_NAME}\n"
+                            C2="${COL}│ ${RESET}"
+                        fi
 
-						CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
-						CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
-						CHILD_FS=$(df -Th 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_FS=${CHILD_FS##*"${WORKING_CHILD_DEV_NAME}"*( )}; CHILD_FS=${CHILD_FS%% *}
-						CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
-						CHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_SIZE=${CHILD_SIZE##*"${WORKING_CHILD_DEV_NAME}"*( )}; CHILD_SIZE=${CHILD_SIZE%% *}
-						CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_USED=${CHILD_USED##*"${WORKING_CHILD_DEV_NAME}"*( )*([0-9])?*( )}; CHILD_USED=${CHILD_USED%% *}
-						CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_PERC=${CHILD_PERC%%\%*}; CHILD_PERC="${CHILD_PERC##* }%"
-						CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null) 
+                        CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
+                        CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
+                        CHILD_FS=$(df -Th 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_FS=${CHILD_FS##*"${WORKING_CHILD_DEV_NAME}"*( )}; CHILD_FS=${CHILD_FS%% *}
+                        CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
+                        CHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_SIZE=${CHILD_SIZE##*"${WORKING_CHILD_DEV_NAME}"*( )}; CHILD_SIZE=${CHILD_SIZE%% *}
+                        CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_USED=${CHILD_USED##*"${WORKING_CHILD_DEV_NAME}"*( )*([0-9])?*( )}; CHILD_USED=${CHILD_USED%% *}
+                        CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_PERC=${CHILD_PERC%%\%*}; CHILD_PERC="${CHILD_PERC##* }%"
+                        CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null) 
 
-						CHILD_SPECS=()	## Clear then reset the array of child specs
-						if [ -n "${CHILD_LABEL}" ];	then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
-						if [ -n "${CHILD_TYPE}" ];	then CHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${CHILD_TYPE}"); fi
-						if [ -n "${CHILD_FS}" ];	then CHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${CHILD_FS}"); fi
-						if [ -n "${CHILD_UUID}" ];	then CHILD_SPECS+=("${COL}${DIM}UUID:${RESET} ${CHILD_UUID}"); fi
-						if [ -n "${CHILD_SIZE}" ];	then CHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${CHILD_SIZE}"); fi
-						if [ -n "${CHILD_USED}" ];	then CHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${CHILD_USED} (${CHILD_PERC})"); fi
-						if [ -n "${CHILD_MOUNT}" ];	then CHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${CHILD_MOUNT}"); fi
-						NUM_CSPECS=${#CHILD_SPECS[@]}
+                        CHILD_SPECS=()    ## Clear then reset the array of child specs
+                        if [ -n "${CHILD_LABEL}" ]; then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
+                        if [ -n "${CHILD_TYPE}" ];  then CHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${CHILD_TYPE}"); fi
+                        if [ -n "${CHILD_FS}" ];    then CHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${CHILD_FS}"); fi
+                        if [ -n "${CHILD_UUID}" ];  then CHILD_SPECS+=("${COL}${DIM}UUID:${RESET} ${CHILD_UUID}"); fi
+                        if [ -n "${CHILD_SIZE}" ];  then CHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${CHILD_SIZE}"); fi
+                        if [ -n "${CHILD_USED}" ];  then CHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${CHILD_USED} (${CHILD_PERC})"); fi
+                        if [ -n "${CHILD_MOUNT}" ]; then CHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${CHILD_MOUNT}"); fi
+                        NUM_CSPECS=${#CHILD_SPECS[@]}
 
-						for CSPEC in "${CHILD_SPECS[@]}"; do
-							if [[ "${CSPEC}" == "${CHILD_SPECS[((NUM_CSPECS-1))]}" && ${WORKING_CHILD_NUM_CHILDREN} -lt 1 ]]; then	C3="${COL}${DIM}└─${RESET}"
-							else													C3="${COL}${DIM}├─${RESET}"; fi
-							printf "%b" "${C1}${C2}${C3}${CSPEC}\n"
-						done
+                        for CSPEC in "${CHILD_SPECS[@]}"; do
+                            if [[ "${CSPEC}" == "${CHILD_SPECS[((NUM_CSPECS-1))]}" && ${WORKING_CHILD_NUM_CHILDREN} -lt 1 ]]; then  C3="${COL}${DIM}└─${RESET}"
+                            else                                                                                                    C3="${COL}${DIM}├─${RESET}"; fi
+                            printf "%b" "${C1}${C2}${C3}${CSPEC}\n"
+                        done
 
-						################################
-						## Level 3 devices (GRANDCHILD)
-						if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
-							GC=0; GRANDCHILDREN_LEFT=${WORKING_CHILD_NUM_CHILDREN}
-							while ((GRANDCHILDREN_LEFT>0)); do
-								WORKING_GRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC]}"
-								WORKING_GRANDCHILD_LEVEL=${WORKING_GRANDCHILD_ELEMENT#* }; WORKING_GRANDCHILD_LEVEL=${WORKING_GRANDCHILD_LEVEL% *}
+                        ################################
+                        ## Level 3 devices (GRANDCHILD)
+                        if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
+                            GC=0; GRANDCHILDREN_LEFT=${WORKING_CHILD_NUM_CHILDREN}
+                            while ((GRANDCHILDREN_LEFT>0)); do
+                                WORKING_GRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC]}"
+                                WORKING_GRANDCHILD_LEVEL=${WORKING_GRANDCHILD_ELEMENT#* }; WORKING_GRANDCHILD_LEVEL=${WORKING_GRANDCHILD_LEVEL% *}
 
-								## Skip this array element if not a grandchild.
-								if ((WORKING_GRANDCHILD_LEVEL!=3)); then ((GC++)); continue; fi
+                                ## Skip this array element if not a grandchild.
+                                if ((WORKING_GRANDCHILD_LEVEL!=3)); then ((GC++)); continue; fi
 
-								WORKING_GRANDCHILD_DEV_NAME=${WORKING_GRANDCHILD_ELEMENT%% *}
-								WORKING_GRANDCHILD_NUM_CHILDREN=${WORKING_GRANDCHILD_ELEMENT##* }
-								if ((GC == WORKING_CHILD_NUM_CHILDREN-1)); then
-									printf "%b" "${C1}${C2}${COL}${DIM}└─Grandchild:${RESET} ${WORKING_GRANDCHILD_DEV_NAME}\n"
-									C3="${COL}${DIM}  ${RESET}"
-								else
-									printf "%b" "${C1}${C2}${COL}${DIM}├─Grandchild:${RESET} ${WORKING_GRANDCHILD_DEV_NAME}\n"
-									C3="${COL}${DIM}│ ${RESET}"
-								fi
+                                WORKING_GRANDCHILD_DEV_NAME=${WORKING_GRANDCHILD_ELEMENT%% *}
+                                WORKING_GRANDCHILD_NUM_CHILDREN=${WORKING_GRANDCHILD_ELEMENT##* }
+                                if ((GC == WORKING_CHILD_NUM_CHILDREN-1)); then
+                                    printf "%b" "${C1}${C2}${COL}${DIM}└─Grandchild:${RESET} ${WORKING_GRANDCHILD_DEV_NAME}\n"
+                                    C3="${COL}${DIM}  ${RESET}"
+                                else
+                                    printf "%b" "${C1}${C2}${COL}${DIM}├─Grandchild:${RESET} ${WORKING_GRANDCHILD_DEV_NAME}\n"
+                                    C3="${COL}${DIM}│ ${RESET}"
+                                fi
 
-								GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE% *}; GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
-								GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_FS=${GRANDCHILD_FS##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_FS=${GRANDCHILD_FS%% *}
-								GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_SIZE=${GRANDCHILD_SIZE##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_SIZE=${GRANDCHILD_SIZE%% *}
-								GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_USED=${GRANDCHILD_USED##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )*([0-9])?*( )}; GRANDCHILD_USED=${GRANDCHILD_USED%% *}
-								GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_PERC=${GRANDCHILD_PERC%%\%*}; GRANDCHILD_PERC="${GRANDCHILD_PERC##* }%"
-								GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_MOUNT=${GRANDCHILD_MOUNT##* }
+                                GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE% *}; GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
+                                GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_FS=${GRANDCHILD_FS##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_FS=${GRANDCHILD_FS%% *}
+                                GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_SIZE=${GRANDCHILD_SIZE##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_SIZE=${GRANDCHILD_SIZE%% *}
+                                GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_USED=${GRANDCHILD_USED##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )*([0-9])?*( )}; GRANDCHILD_USED=${GRANDCHILD_USED%% *}
+                                GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_PERC=${GRANDCHILD_PERC%%\%*}; GRANDCHILD_PERC="${GRANDCHILD_PERC##* }%"
+                                GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_MOUNT=${GRANDCHILD_MOUNT##* }
 
-								GRANDCHILD_SPECS=()	## Clear, reset the array of child specs.
-								if [ -n "${GRANDCHILD_TYPE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
-								if [ -n "${GRANDCHILD_FS}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GRANDCHILD_FS}"); fi
-								if [ -n "${GRANDCHILD_SIZE}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
-								if [ -n "${GRANDCHILD_USED}" ];		then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
-								if [ -n "${GRANDCHILD_MOUNT}" ];	then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
-								for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do	## Loop for GC spec.
-									if [[ "${GCSPEC}" == "${GRANDCHILD_SPECS[((NUM_GSPECS-1))]}" && ${WORKING_GRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C4="${COL}${DIM}└─${RESET}"
-									else															C4="${COL}${DIM}├─${RESET}"; fi
-									printf "%b" "${C1}${C2}${C3}${C4}${GCSPEC}\n"
-								done
+                                GRANDCHILD_SPECS=()    ## Clear, reset the array of child specs.
+                                if [ -n "${GRANDCHILD_TYPE}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
+                                if [ -n "${GRANDCHILD_FS}" ];       then GRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GRANDCHILD_FS}"); fi
+                                if [ -n "${GRANDCHILD_SIZE}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
+                                if [ -n "${GRANDCHILD_USED}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
+                                if [ -n "${GRANDCHILD_MOUNT}" ];    then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
+                                for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do    ## Loop for GC spec.
+                                    if [[ "${GCSPEC}" == "${GRANDCHILD_SPECS[((NUM_GSPECS-1))]}" && ${WORKING_GRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then   C4="${COL}${DIM}└─${RESET}"
+                                    else                                                                                                                C4="${COL}${DIM}├─${RESET}"; fi
+                                    printf "%b" "${C1}${C2}${C3}${C4}${GCSPEC}\n"
+                                done
 
-								################################
-								## Level 4 devices (GREATGRANDCHILD)
-								if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
-									GGC=0; GREATGRANDCHILDREN_LEFT=${WORKING_GRANDCHILD_NUM_CHILDREN}
-									while ((GREATGRANDCHILDREN_LEFT>0)); do
-										WORKING_GREATGRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC+1+GGC]}"
-										WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_ELEMENT#* }; WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_LEVEL% *}
+                                ################################
+                                ## Level 4 devices (GREATGRANDCHILD)
+                                if ((WORKING_CHILD_NUM_CHILDREN > 0)); then
+                                    GGC=0; GREATGRANDCHILDREN_LEFT=${WORKING_GRANDCHILD_NUM_CHILDREN}
+                                    while ((GREATGRANDCHILDREN_LEFT>0)); do
+                                        WORKING_GREATGRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC+1+GGC]}"
+                                        WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_ELEMENT#* }; WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_LEVEL% *}
 
-										## Skip this array element if not a greatgrandchild.
-										if ((WORKING_GREATGRANDCHILD_LEVEL!=4)); then ((GGC++)); continue; fi
+                                        ## Skip this array element if not a greatgrandchild.
+                                        if ((WORKING_GREATGRANDCHILD_LEVEL!=4)); then ((GGC++)); continue; fi
 
-										WORKING_GREATGRANDCHILD_DEV_NAME=${WORKING_GREATGRANDCHILD_ELEMENT%% *}
-										WORKING_GREATGRANDCHILD_NUM_CHILDREN=${WORKING_GREATGRANDCHILD_ELEMENT##* }
-										if ((GGC == WORKING_GRANDCHILD_NUM_CHILDREN-1)); then
-											printf "%b" "${C1}${C2}${C3}${COL}${DIM}└─Great-Grandchild:${RESET} ${WORKING_GREATGRANDCHILD_DEV_NAME}\n"
-											C4="${COL}${DIM}  ${RESET}"
-										else
-											printf "%b" "${C1}${C2}${C3}${COL}${DIM}├─Great-Grandchild:${RESET} ${WORKING_GREATGRANDCHILD_DEV_NAME}\n"
-											C4="${COL}${DIM}│ ${RESET}"
-										fi
+                                        WORKING_GREATGRANDCHILD_DEV_NAME=${WORKING_GREATGRANDCHILD_ELEMENT%% *}
+                                        WORKING_GREATGRANDCHILD_NUM_CHILDREN=${WORKING_GREATGRANDCHILD_ELEMENT##* }
+                                        if ((GGC == WORKING_GRANDCHILD_NUM_CHILDREN-1)); then
+                                            printf "%b" "${C1}${C2}${C3}${COL}${DIM}└─Great-Grandchild:${RESET} ${WORKING_GREATGRANDCHILD_DEV_NAME}\n"
+                                            C4="${COL}${DIM}  ${RESET}"
+                                        else
+                                            printf "%b" "${C1}${C2}${C3}${COL}${DIM}├─Great-Grandchild:${RESET} ${WORKING_GREATGRANDCHILD_DEV_NAME}\n"
+                                            C4="${COL}${DIM}│ ${RESET}"
+                                        fi
 
-										GREATGRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_FS=${GREATGRANDCHILD_FS##*"${WORKING_GREATGRANDCHILD_DEV_NAME}"*( )}; GREATGRANDCHILD_FS=${GREATGRANDCHILD_FS%% *}
-										GREATGRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_SIZE=${GREATGRANDCHILD_SIZE##*"${WORKING_GREATGRANDCHILD_DEV_NAME}"*( )}; GREATGRANDCHILD_SIZE=${GREATGRANDCHILD_SIZE%% *}
-										GREATGRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_USED=${GREATGRANDCHILD_USED##*"${WORKING_GREATGRANDCHILD_DEV_NAME}"*( )*([0-9])?*( )}; GREATGRANDCHILD_USED=${GREATGRANDCHILD_USED%% *}
-										GREATGRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_PERC=${GREATGRANDCHILD_PERC%%\%*}; GREATGRANDCHILD_PERC="${GREATGRANDCHILD_PERC##* }%"
-										GREATGRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_MOUNT=${GREATGRANDCHILD_MOUNT##* }
+                                        GREATGRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_FS=${GREATGRANDCHILD_FS##*"${WORKING_GREATGRANDCHILD_DEV_NAME}"*( )}; GREATGRANDCHILD_FS=${GREATGRANDCHILD_FS%% *}
+                                        GREATGRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_SIZE=${GREATGRANDCHILD_SIZE##*"${WORKING_GREATGRANDCHILD_DEV_NAME}"*( )}; GREATGRANDCHILD_SIZE=${GREATGRANDCHILD_SIZE%% *}
+                                        GREATGRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_USED=${GREATGRANDCHILD_USED##*"${WORKING_GREATGRANDCHILD_DEV_NAME}"*( )*([0-9])?*( )}; GREATGRANDCHILD_USED=${GREATGRANDCHILD_USED%% *}
+                                        GREATGRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_PERC=${GREATGRANDCHILD_PERC%%\%*}; GREATGRANDCHILD_PERC="${GREATGRANDCHILD_PERC##* }%"
+                                        GREATGRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GREATGRANDCHILD_DEV_NAME}"); GREATGRANDCHILD_MOUNT=${GREATGRANDCHILD_MOUNT##* }
 
-										GREATGRANDCHILD_SPECS=()
-										if [ -n "${GREATGRANDCHILD_FS}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GREATGRANDCHILD_FS}"); fi
-										if [ -n "${GREATGRANDCHILD_SIZE}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GREATGRANDCHILD_SIZE}"); fi
-										if [ -n "${GREATGRANDCHILD_USED}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GREATGRANDCHILD_USED} (${GREATGRANDCHILD_PERC})"); fi
-										if [ -n "${GREATGRANDCHILD_MOUNT}" ];	then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GREATGRANDCHILD_MOUNT}"); fi
-										for GGCSPEC in "${GREATGRANDCHILD_SPECS[@]}" ; do
-											if [[ "${GGCSPEC}" == "${GREATGRANDCHILD_SPECS[((NUM_GGSPECS-1))]}" && ${WORKING_GREATGRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then	C5="${COL}${DIM}└─${RESET}"
-											else																C5="${COL}${DIM}├─${RESET}"; fi
-											printf "%b" "${C1}${C2}${C3}${C4}${C5}${GGCSPEC}\n"
-										done
-									((GGC++));  ((GREATGRANDCHILDREN_LEFT--))
-									done
-								fi
-							((GC++));  ((GRANDCHILDREN_LEFT--))
-							done
-						fi
-						((C++)); ((CHILDREN_LEFT--))
-					done
-				fi
-			fi
-		done
-	fi
+                                        GREATGRANDCHILD_SPECS=()
+                                        if [ -n "${GREATGRANDCHILD_FS}" ];      then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GREATGRANDCHILD_FS}"); fi
+                                        if [ -n "${GREATGRANDCHILD_SIZE}" ];    then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GREATGRANDCHILD_SIZE}"); fi
+                                        if [ -n "${GREATGRANDCHILD_USED}" ];    then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GREATGRANDCHILD_USED} (${GREATGRANDCHILD_PERC})"); fi
+                                        if [ -n "${GREATGRANDCHILD_MOUNT}" ];   then GREATGRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GREATGRANDCHILD_MOUNT}"); fi
+                                        for GGCSPEC in "${GREATGRANDCHILD_SPECS[@]}" ; do
+                                            if [[ "${GGCSPEC}" == "${GREATGRANDCHILD_SPECS[((NUM_GGSPECS-1))]}" && ${WORKING_GREATGRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then   C5="${COL}${DIM}└─${RESET}"
+                                            else                                                                                                                            C5="${COL}${DIM}├─${RESET}"; fi
+                                            printf "%b" "${C1}${C2}${C3}${C4}${C5}${GGCSPEC}\n"
+                                        done
+                                    ((GGC++));  ((GREATGRANDCHILDREN_LEFT--))
+                                    done
+                                fi
+                            ((GC++));  ((GRANDCHILDREN_LEFT--))
+                            done
+                        fi
+                        ((C++)); ((CHILDREN_LEFT--))
+                    done
+                fi
+            fi
+        done
+    fi
 fi
 
 ####################################################################################################################################
 ## -o : Print OS kernel and distribution info
 if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
-	OS_NAME=$(uname -o)
-	ARCH=$(uname -m)
-	KERNEL=$(uname -s)
-	KERNEL_VER=$(uname -v)
-	KERNEL_REL=$(uname -r)
-	if command -v lsb_release >> /dev/null; then
-		read -r -d '' -a RELEASE_INFO <<< "$(lsb_release -irc)"	## Read in lsb_release output to an array.
-		DIST=${RELEASE_INFO[2]}
-		DIST_REL=${RELEASE_INFO[4]}
-		DIST_CODE=${RELEASE_INFO[6]}
-	fi
-	SHELL_IN_USE=${SHELL##*/}
+    OS_NAME=$(uname -o)
+    ARCH=$(uname -m)
+    KERNEL=$(uname -s)
+    KERNEL_VER=$(uname -v)
+    KERNEL_REL=$(uname -r)
+    if command -v lsb_release >> /dev/null; then
+        read -r -d '' -a RELEASE_INFO <<< "$(lsb_release -irc)"    ## Read in lsb_release output to an array.
+        DIST=${RELEASE_INFO[2]}
+        DIST_REL=${RELEASE_INFO[4]}
+        DIST_CODE=${RELEASE_INFO[6]}
+    fi
+    SHELL_IN_USE=${SHELL##*/}
 
-	printf "%b" "${COL}${BOLD}Operating System:${RESET}\n"
-	printf "%b" "${COL}${BOLD}├─OS:${RESET} ${OS_NAME}\n"
-	printf "%b" "${COL}${BOLD}├─Architecture:${RESET} ${ARCH}\n"
-	printf "%b" "${COL}${BOLD}├─Kernel:${RESET} ${KERNEL}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Version:${RESET} ${KERNEL_VER}\n"
-	printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Release:${RESET} ${KERNEL_REL}\n"
-	if [ -z "${DIST}" ]; then	printf "%b" "${COL}${BOLD}├─Distribution: ${RESET}Unknown (no lsb_release)\n"
-	else				printf "%b" "${COL}${BOLD}├─Distribution:${RESET} ${DIST}\n"
-					printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} ${DIST_REL}\n"
-					printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} ${DIST_CODE}\n"
-	fi 
-	printf "%b" "${COL}${BOLD}└─Shell:${RESET} ${SHELL_IN_USE}\n"
-	if [ -n "${BASH_VERSION}" ]; then printf "%b" "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}\n"; fi
+    printf "%b" "${COL}${BOLD}Operating System:${RESET}\n"
+    printf "%b" "${COL}${BOLD}├─OS:${RESET} ${OS_NAME}\n"
+    printf "%b" "${COL}${BOLD}├─Architecture:${RESET} ${ARCH}\n"
+    printf "%b" "${COL}${BOLD}├─Kernel:${RESET} ${KERNEL}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Version:${RESET} ${KERNEL_VER}\n"
+    printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Release:${RESET} ${KERNEL_REL}\n"
+    if [ -z "${DIST}" ]; then   printf "%b" "${COL}${BOLD}├─Distribution: ${RESET}Unknown (no lsb_release)\n"
+    else                        printf "%b" "${COL}${BOLD}├─Distribution:${RESET} ${DIST}\n"
+                                printf "%b" "${COL}${BOLD}│ ${RESET}${COL}├─Release:${RESET} ${DIST_REL}\n"
+                                printf "%b" "${COL}${BOLD}│ ${RESET}${COL}└─Codename:${RESET} ${DIST_CODE}\n"
+    fi 
+    printf "%b" "${COL}${BOLD}└─Shell:${RESET} ${SHELL_IN_USE}\n"
+    if [ -n "${BASH_VERSION}" ]; then printf "%b" "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}\n"; fi
 fi
 
 ####################################################################################################################################
 ## -n : Print network and network interface info
 if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
-	printf "%b" "${COL}${BOLD}Network:${RESET}\n"
+    printf "%b" "${COL}${BOLD}Network:${RESET}\n"
 
-	## Show external IP
-	if ! command -v curl >> /dev/null ; then
-		EXT_IP="Cannot determine - curl not installed."
-	else
-		EXT_IP=$(curl --silent --max-time 5 https://ipecho.net/plain)
-		if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi
-		printf "%b" "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}\n"
-	fi
+    ## Show external IP
+    if ! command -v curl >> /dev/null ; then
+        EXT_IP="Cannot determine - curl not installed."
+    else
+        EXT_IP=$(curl --silent --max-time 5 https://ipecho.net/plain)
+        if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi
+        printf "%b" "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}\n"
+    fi
 
-	## Show primary dns address
-	if command -v nmcli > /dev/null && nmcli -t &> /dev/null; then	DNS=$(nmcli dev show | grep -m 1 -e "DNS");		DNS=${DNS##*:*( )}
-	elif  resolvectl &> /dev/null; then	DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:");	DNS=${DNS##*: }
-	elif [ -f /etc/resolv.conf ]; then	DNS=$(grep -m 1 "nameserver" /etc/resolv.conf);		DNS=${DNS##* }
-	else					DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
-	if [ -n "${DNS}" ]; then printf "%b" "${COL}${BOLD}├─DNS:${RESET} ${DNS}\n"; fi
+    ## Show primary dns address
+    if command -v nmcli > /dev/null && nmcli -t &> /dev/null; then  DNS=$(nmcli dev show | grep -m 1 -e "DNS");             DNS=${DNS##*:*( )}
+    elif  resolvectl &> /dev/null; then                             DNS=$(resolvectl status | grep -m 1 -e "DNS Servers:"); DNS=${DNS##*: }
+    elif [ -f /etc/resolv.conf ]; then                              DNS=$(grep -m 1 "nameserver" /etc/resolv.conf);         DNS=${DNS##* }
+    else                                                            DNS="Not found (no nmcli and no /etc/resolve.conf)."; fi
+    if [ -n "${DNS}" ]; then printf "%b" "${COL}${BOLD}├─DNS:${RESET} ${DNS}\n"; fi
 
-	## Show default gateway address
-	if command -v ip > /dev/null ; then		GW=$(ip route | grep -m 1 "default");		GW=${GW##*via };	GW=${GW%% *}
-	elif command -v route > /dev/null ; then	GW=$(route -n | grep -m 1 "0.0.0.0");		GW=${GW##0.0.0.0*( )};	GW=${GW%%  *}
-	elif command -v netstat > /dev/null ; then	GW=$(netstat -r -n | grep -m 1 "0.0.0.0");	GW=${GW##0.0.0.0*( )};	GW=${GW%%  *}
-	else						GW="Cannot determine default gateway address (ip nor route nor netstat installed)"; fi
-	if [ "${GW}" = "" ]; then GW="Could not detect gateway."; fi
-	printf "%b" "${COL}${BOLD}├─Gateway:${RESET} ${GW}\n"
+    ## Show default gateway address
+    if command -v ip > /dev/null; then          GW=$(ip route | grep -m 1 "default");       GW=${GW##*via };        GW=${GW%% *}
+    elif command -v route > /dev/null; then     GW=$(route -n | grep -m 1 "0.0.0.0");       GW=${GW##0.0.0.0*( )};  GW=${GW%%  *}
+    elif command -v netstat > /dev/null; then   GW=$(netstat -r -n | grep -m 1 "0.0.0.0");  GW=${GW##0.0.0.0*( )};  GW=${GW%%  *}
+    else                                        GW="Cannot determine default gateway address (ip nor route nor netstat installed)"; fi
+    if [ "${GW}" = "" ]; then GW="Could not detect gateway."; fi
+    printf "%b" "${COL}${BOLD}├─Gateway:${RESET} ${GW}\n"
 
-	## Get hostname
-	printf "%b" "${COL}${BOLD}├─Hostname:${RESET} $(uname -n)\n"
+    ## Get hostname
+    printf "%b" "${COL}${BOLD}├─Hostname:${RESET} $(uname -n)\n"
 
-	## Get info for all network interface devices (physical and virtual)
-	if ! find /sys/class/net &> /dev/null ; then printf "%b" "${COL}${BOLD}└─Interface:${RESET} Cannot detect interfaces (no /sys/class/net/).\n"
-	else
+    ## Get info for all network interface devices (physical and virtual)
+    if ! find /sys/class/net &> /dev/null ; then printf "%b" "${COL}${BOLD}└─Interface:${RESET} Cannot detect interfaces (no /sys/class/net/).\n"
+    else
 
-		## Run this loop for each interface.
-		NUM_DEVS=$(find /sys/class/net -type l | wc -w)
-		for (( c=1; c<=NUM_DEVS; c++ ))
-		do
-			## Define current interface in list.
-			WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d"); WORKING_INTERFACE=${WORKING_INTERFACE##*/}
-			if (( c == NUM_DEVS )); then	printf "%b" "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}  ${RESET}"
-			else				printf "%b" "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}│ ${RESET}"; fi
+        ## Run this loop for each interface.
+        NUM_DEVS=$(find /sys/class/net -type l | wc -w)
+        for (( c=1; c<=NUM_DEVS; c++ ))
+        do
+            ## Define current interface in list.
+            WORKING_INTERFACE=$(find /sys/class/net -type l | sed "${c}q;d"); WORKING_INTERFACE=${WORKING_INTERFACE##*/}
+            if (( c == NUM_DEVS )); then    printf "%b" "${COL}${BOLD}└─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}  ${RESET}"
+            else                            printf "%b" "${COL}${BOLD}├─Interface:${RESET} ${WORKING_INTERFACE}\n" && C1="${COL}${BOLD}│ ${RESET}"; fi
 
-			## Determine current status of interface.
-			if [ -e /sys/class/net/"${WORKING_INTERFACE}"/operstate ]; then	STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)
-			else								STATUS="unknown"; fi
+            ## Determine current status of interface.
+            if [ -e /sys/class/net/"${WORKING_INTERFACE}"/operstate ]; then STATUS=$(cat /sys/class/net/"${WORKING_INTERFACE}"/operstate)
+            else                                                            STATUS="unknown"; fi
 
-			## Determine the MAC address of interface.
-			MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)
+            ## Determine the MAC address of interface.
+            MAC=$(cat /sys/class/net/"${WORKING_INTERFACE}"/address)
 
-			## Determine the IP address assigned o the interface
-			if [ "${STATUS}" != "down" ]; then
-				if command -v ip > /dev/null; then	IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet"); IP=${IP##*inet }; IP=${IP%% *}
-				else					IP="Cannot determine interface ip address (ip not installed)"; fi
-			fi
+            ## Determine the IP address assigned o the interface
+            if [ "${STATUS}" != "down" ]; then
+                if command -v ip > /dev/null; then  IP=$(ip addr show "${WORKING_INTERFACE}" | grep -w -m1 "inet"); IP=${IP##*inet }; IP=${IP%% *}
+                else                                IP="Cannot determine interface ip address (ip not installed)"; fi
+            fi
 
-			## Determine the connected ESSID (if present)
-			if command -v iwgetid >> /dev/null ; then
-				IF_WIFI_CONN=$(iwgetid); IF_WIFI_CONN=${IF_WIFI_CONN%% *}
-				if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then	ESSID=$(iwgetid -r)
-				else								ESSID=""; fi
-			elif command -v iw > /dev/null; then	ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID"); ESSID=${ESSID##*: }
-			else					ESSID=""; fi
+            ## Determine the connected ESSID (if present)
+            if command -v iwgetid >> /dev/null ; then
+                IF_WIFI_CONN=$(iwgetid); IF_WIFI_CONN=${IF_WIFI_CONN%% *}
+                if [ "${IF_WIFI_CONN}" == "${WORKING_INTERFACE}" ]; then    ESSID=$(iwgetid -r)
+                else                                                        ESSID=""; fi
+            elif command -v iw > /dev/null; then    ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID"); ESSID=${ESSID##*: }
+            else                                    ESSID=""; fi
 
-			ESSID=${ESSID//Wired/}	## If ESSID identified as "Wired", clear ESSID.
+            ESSID=${ESSID//Wired/}    ## If ESSID identified as "Wired", clear ESSID.
 
-			## Clear and then set the array of interface specs
-			INT_SPECS=()
-			if [ -n "${STATUS}" ]; then	INT_SPECS+=("${COL}Status:${RESET} ${STATUS}"); fi
-			if [ -n "${MAC}" ]; then 	INT_SPECS+=("${COL}Mac Address:${RESET} ${MAC}"); fi
-			if [ -n "${IP}" ]; then		INT_SPECS+=("${COL}IP Address:${RESET} ${IP}"); fi
-			if [ -n "${ESSID}" ]; then	INT_SPECS+=("${COL}Connected ESSID:${RESET} ${ESSID}"); fi
+            ## Clear and then set the array of interface specs
+            INT_SPECS=()
+            if [ -n "${STATUS}" ]; then INT_SPECS+=("${COL}Status:${RESET} ${STATUS}"); fi
+            if [ -n "${MAC}" ]; then    INT_SPECS+=("${COL}Mac Address:${RESET} ${MAC}"); fi
+            if [ -n "${IP}" ]; then     INT_SPECS+=("${COL}IP Address:${RESET} ${IP}"); fi
+            if [ -n "${ESSID}" ]; then  INT_SPECS+=("${COL}Connected ESSID:${RESET} ${ESSID}"); fi
 
-			## Print out each of the identified specifications for the current inteface
-			for (( icspec=0; icspec<${#INT_SPECS[@]}; icspec++ ))
-			do
-				if (( icspec==(${#INT_SPECS[@]}-1) )); then	C2="${COL}└─${RESET}"
-				else						C2="${COL}├─${RESET}"; fi
-				printf "%b" "${C1}${C2}${INT_SPECS[icspec]}\n"
-			done
-		done
-	fi
+            ## Print out each of the identified specifications for the current inteface
+            for (( icspec=0; icspec<${#INT_SPECS[@]}; icspec++ ))
+            do
+                if (( icspec==(${#INT_SPECS[@]}-1) )); then C2="${COL}└─${RESET}"
+                else                                        C2="${COL}├─${RESET}"; fi
+                printf "%b" "${C1}${C2}${INT_SPECS[icspec]}\n"
+            done
+        done
+    fi
 fi
 
 printf "%b" "${COL}${BOLD}──────────────────────────────────────────────────${RESET}\n\n"
