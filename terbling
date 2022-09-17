@@ -59,14 +59,14 @@ S01="${BOLD}Bios:${RESET} ${BIOS_DATE}, version ${BIOS_VER} (${BIOS_VENDOR})"
 
 ################################################################################
 ## CPU info
-CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:"); CPU_MODEL="${CPU_MODEL##*  }"
-CPU_VEND=$(lscpu  | grep -m 1 -e "Vendor ID:"); CPU_VEND="${CPU_VEND##*  }"
+CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:");   CPU_MODEL="${CPU_MODEL##*  }"
+CPU_VEND=$(lscpu  | grep -m 1 -e "Vendor ID:");    CPU_VEND="${CPU_VEND##*  }"
 CPU_ARCH=$(lscpu  | grep -m 1 -e "Architecture:"); CPU_ARCH="${CPU_ARCH##*  }"
-CPU_MODE=$(lscpu  | grep -m 1 -e "CPU op-mode"); CPU_MODE="${CPU_MODE##*  }"
-CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):"); CPU_CORES="${CPU_CORES##*  }"
-CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:"); CPU_SPEED="${CPU_SPEED##*  }"
-CPU_MAX=$(lscpu   | grep -m 1 -e "CPU max MHz:"); CPU_MAX="${CPU_MAX##*  }"
-CPU_MIN=$(lscpu   | grep -m 1 -e "CPU min MHz:"); CPU_MIN="${CPU_MIN##*  }"
+CPU_MODE=$(lscpu  | grep -m 1 -e "CPU op-mode");   CPU_MODE="${CPU_MODE##*  }"
+CPU_CORES=$(lscpu | grep -m 1 -e "CPU(s):");       CPU_CORES="${CPU_CORES##*  }"
+CPU_SPEED=$(lscpu | grep -m 1 -e "CPU MHz:");      CPU_SPEED="${CPU_SPEED##*  }"
+CPU_MAX=$(lscpu   | grep -m 1 -e "CPU max MHz:");  CPU_MAX="${CPU_MAX##*  }"
+CPU_MIN=$(lscpu   | grep -m 1 -e "CPU min MHz:");  CPU_MIN="${CPU_MIN##*  }"
 
 S02="${BOLD}Processor:${RESET}"
 S03="--Model:${RESET} ${CPU_MODEL}"
