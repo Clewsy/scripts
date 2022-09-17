@@ -1,8 +1,9 @@
 #!/bin/bash
-#: Title:	: whodis
-#: Author	: clewsy (clews.pro)
-#: Description	: Grabs the content of /tmp/dhcp.leases from a defined host (typically a router), tabulates and prints to screen.
-#: Options	: none
+#: Title:       : whodis
+#: Author       : clewsy (clews.pro)
+#: Description  : Grabs the content of /tmp/dhcp.leases from a defined host
+#:              : (typically a router), tabulates and prints to screen.
+#: Options      : none
 
 # Define the user and hostame (or ip address) of the router.
 ROUTER="root@kif"
@@ -15,35 +16,36 @@ NO_ROUTER=1
 RED="\033[02;31m"
 BOLD="\033[01;37m"
 RESET="\033[0m"
-MAX_NAME_SIZE=14	# Max string length for hostnames.
+MAX_LENGTH=14   # Max string length for hostnames.
 
 # Define and initialise temp file.
 TEMPFILE="/tmp/whodis_tempfile"
 > "${TEMPFILE}"
 
-# Connect to the router and cat the dhcp.leases file.  Store to local temp file.
+# Connect to the router and copy dhcp.leases file to local temp file.
 if ! ssh ${ROUTER} "cat /tmp/dhcp.leases" > ${TEMPFILE}; then
-	printf "%b" "${RED}Failed.${RESET}  No connection to router.\n"
-	exit ${NO_ROUTER}
+    printf "%b" "${RED}Failed.${RESET}  No connection to router.\n"
+    exit ${NO_ROUTER}
 fi
 
 # Print the table column headings.
-printf "${BOLD}%${MAX_NAME_SIZE}s  %-10s  %-8s  %-17s  %s${RESET}\n" "NAME" "DATE" "TIME" "MAC" "IP"
+printf "${BOLD}%${MAX_LENGTH}s  %-10s  %-8s  %-17s  %s${RESET}\n" "NAME" "DATE" "TIME" "MAC" "IP"
 
 # Loop through each row in the temp file.
 while read -r row; do
 
-	printf -v DATE "%s" "$(date --date=@"${row:0:10}" +%Y-%m-%d)"	# Parse date.
-	printf -v TIME "%s" "$(date --date=@"${row:0:10}" +%T)"		# Parse time.
-	MAC=${row:11:17}						# Parse MAC address.
-	IP=$(cut -d " " -f 3 <<<"${row}")				# Parse IP address.
-	NAME=$(cut -d " " -f 4 <<<"${row}")				# Parse hostname.
+    # Parse and fomat data from each row.
+    printf -v DATE "%s" "$(date --date=@"${row:0:10}" +%Y-%m-%d)"
+    printf -v TIME "%s" "$(date --date=@"${row:0:10}" +%T)"
+    MAC=${row:11:17}
+    IP=$(cut -d " " -f 3 <<<"${row}")
+    NAME=$(cut -d " " -f 4 <<<"${row}")
 
-	printf "%${MAX_NAME_SIZE}s  %-10s  %-8s  %-17s  %s\n" "${NAME}" "${DATE}" "${TIME}" "${MAC}" "${IP}"
+    # Print each formatted row.
+    printf "%${MAX_LENGTH}s  %-10s  %-8s  %-17s  %s\n" "${NAME}" "${DATE}" "${TIME}" "${MAC}" "${IP}"
 
 done < ${TEMPFILE}
 
 # Clean up and exit.
 rm ${TEMPFILE}
 exit ${SUCCESS}
-
