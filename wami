@@ -1,60 +1,87 @@
 #!/bin/bash
-#: Title:	: wami
-#: Author	: clewsy (clews.pro)
-#: Description	: Pull information regarding the external ip address (from ifconfig.co), format then print to screen.
-#: Options	: None (ignored).
+#: Title:       : wami
+#: Author       : clewsy (clews.pro)
+#: Description  : Pull information regarding the external ip address
+#:              : (from ifconfig.co), format then print to screen.
+#: Options      : None (ignored).
 
 # Exit codes.
 SUCCESS=0
-NO_CURL=1	# curl not found.
-CURL_FAIL=2	# curl returned an error.
+NO_CURL=1   # curl not found.
+CURL_FAIL=2 # curl returned an error.
 
 # Text formatting codes.
 RED="\033[00;31m"
 BOLD="\033[01;37m"
 RESET="\033[00;0m"
 
-TEMP_FILE="/tmp/wami_tempfile"						# Define the preferred temp file location.
-if [ ! -w "${TEMP_FILE%/*}" ]; then TEMP_FILE="./wami_tempfile"; fi	# Default to the current directory.
+# Define the preferred temp file location.  Default to the current directory.
+TEMP_FILE="/tmp/wami_tempfile"
+if [ ! -w "${TEMP_FILE%/*}" ]; then TEMP_FILE="./wami_tempfile"; fi
 
-if ! command -v curl >> /dev/null ; then	# Check if curl is not installed.
-	printf "\n%bError%b: curl is not installed.  Quitting.\n\n" "${RED}" "${RESET}"
-	exit ${NO_CURL}
+# Check if curl is not installed.
+if ! command -v curl >> /dev/null ; then
+    printf "\n%bError%b: curl is not installed." "${RED}" "${RESET}"
+    printf "\nQuitting.\n\n"
+    exit ${NO_CURL}
 fi
 
+# Define options to use with curl command.
+CURL_OPTIONS=(
+    --silent
+    --connect-timeout 5
+    --max-time 10
+)
+
+# Pull the ip info.  Write to temp file.
 printf "\nPulling data from \"ifconfig.co\"...\n"
-if ! curl --silent --connect-timeout 5 --max-time 10 --output "${TEMP_FILE}" ifconfig.co/json; then
-	printf "\n%bError%b: Failed to pull data from \"ifconfig.co\".  Quitting...\n\n" "${RED}" "${RESET}"
-	if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi	# Delete partial/incomplete ifconfig.co dump if it exists.
-	exit ${CURL_FAIL}
+if ! curl ${CURL_OPTIONS} --output "${TEMP_FILE}" ifconfig.co/json; then
+    printf "\n%bError%b: Failed to pull data from \"ifconfig.co\"." "${RED}" "${RESET}"
+    printf "\nQuitting.\n\n"
+    if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi
+    exit ${CURL_FAIL}
 fi
 
-IP=$(		grep -m 1 "ip"		"${TEMP_FILE}" | cut -d "\"" -f 4)
-HOST_NAME=$(	grep "hostname"		"${TEMP_FILE}" | cut -d "\"" -f 4)	# $HOSTNAME is reserved.
-ORG=$(		grep "asn_org"		"${TEMP_FILE}" | cut -d "\"" -f 4)
-COUNTRY_CODE=$(	grep "country_iso"	"${TEMP_FILE}" | cut -d "\"" -f 4)
-COUNTRY=$(	grep -m 1 "country"	"${TEMP_FILE}" | cut -d "\"" -f 4)
-REGION=$(	grep "region_name"	"${TEMP_FILE}" | cut -d "\"" -f 4)
-CITY=$(		grep "city"		"${TEMP_FILE}" | cut -d "\"" -f 4)
-POST_CODE=$(	grep "zip_code"		"${TEMP_FILE}" | cut -d "\"" -f 4)
-TIMEZONE=$(	grep "time_zone"	"${TEMP_FILE}" | cut -d "\"" -f 4)
-LATITUDE=$(	grep "latitude"		"${TEMP_FILE}" | cut -d " " -f 4); LATITUDE=${LATITUDE%,}	# Remove trailing comma.
-LONGITUDE=$(	grep "longitude"	"${TEMP_FILE}" | cut -d " " -f 4); LONGITUDE=${LONGITUDE%,}	# Remove trailing comma.
+# Parse the ip info.
+IP=$(           grep -m 1 "ip"      "${TEMP_FILE}")
+HOST_NAME=$(    grep "hostname"     "${TEMP_FILE}")
+ORG=$(          grep "asn_org"      "${TEMP_FILE}")
+COUNTRY_CODE=$( grep "country_iso"  "${TEMP_FILE}")
+COUNTRY=$(      grep -m 1 "country" "${TEMP_FILE}")
+REGION=$(       grep "region_name"  "${TEMP_FILE}")
+CITY=$(         grep "city"         "${TEMP_FILE}")
+POST_CODE=$(    grep "zip_code"     "${TEMP_FILE}")
+TIMEZONE=$(     grep "time_zone"    "${TEMP_FILE}")
+LATITUDE=$(     grep "latitude"     "${TEMP_FILE}")
+LONGITUDE=$(    grep "longitude"    "${TEMP_FILE}")
 
-printf "\n"	# Start main output after a line break.
-if [ -n "${IP}" ];		then printf "%bIP:%b------------ %s\n" "${BOLD}" "${RESET}" "${IP}";		fi
-if [ -n "${HOST_NAME}" ];	then printf "%bHostname:%b------ %s\n" "${BOLD}" "${RESET}" "${HOST_NAME}";	fi
-if [ -n "${ORG}" ];		then printf "%bOrganisation:%b-- %s\n" "${BOLD}" "${RESET}" "${ORG}";		fi
-if [ -n "${COUNTRY_CODE}" ];	then printf "%bCountry Code:%b-- %s\n" "${BOLD}" "${RESET}" "${COUNTRY_CODE}";	fi
-if [ -n "${COUNTRY}" ];		then printf "%bCountry:%b------- %s\n" "${BOLD}" "${RESET}" "${COUNTRY}";	fi
-if [ -n "${REGION}" ];		then printf "%bRegion:%b-------- %s\n" "${BOLD}" "${RESET}" "${REGION}";	fi
-if [ -n "${CITY}" ];		then printf "%bCity:%b---------- %s\n" "${BOLD}" "${RESET}" "${CITY}";		fi
-if [ -n "${POST_CODE}" ];	then printf "%bPost Code:%b----- %s\n" "${BOLD}" "${RESET}" "${POST_CODE}";	fi
-if [ -n "${TIMEZONE}" ];	then printf "%bTimezone:%b------ %s\n" "${BOLD}" "${RESET}" "${TIMEZONE}";	fi
-if [ -n "${LATITUDE}" ];	then printf "%bLatitude:%b------ %s\n"  "${BOLD}" "${RESET}" "${LATITUDE}";	fi
-if [ -n "${LONGITUDE}" ];	then printf "%bLongitude:%b----- %s\n"  "${BOLD}" "${RESET}" "${LONGITUDE}";	fi
-printf "\n"	# Finish main output with a line break.
+# Remove trailing characters.       # Remove leading characters.
+IP=${IP%\",};                       IP=${IP##*\"}
+HOST_NAME=${HOST_NAME%\",};         HOST_NAME=${HOSTNAME##*\"}
+ORG=${ORG%\",};                     ORG=${ORG##*\"}
+COUNTRY_CODE=${COUNTRY_CODE%\",};   COUNTRY_CODE=${COUNTRY_CODE##*\"}
+COUNTRY=${COUNTRY%\",};             COUNTRY=${COUNTRY##*\"}
+REGION=${REGION%\",};               REGION=${REGION##*\"}
+CITY=${CITY%\",};                   CITY=${CITY##*\"}
+POST_CODE=${POST_CODE%\",};         POST_CODE=${POST_CODE##*\"}
+TIMEZONE=${TIMEZONE%\",};           TIMEZONE=${TIMEZONE##*\"}
+LATITUDE=${LATITUDE%,};             LATITUDE=${LATITUDE##*\ }
+LONGITUDE=${LONGITUDE%,};           LONGITUDE=${LONGITUDE##*\ }
 
-rm "${TEMP_FILE}"	# Clean up.
+printf "\n"    # Start main output after a line break.
+if [ -n "${IP}" ];              then printf "%bIP:%b------------ %s\n" "${BOLD}" "${RESET}" "${IP}";            fi
+if [ -n "${HOST_NAME}" ];       then printf "%bHostname:%b------ %s\n" "${BOLD}" "${RESET}" "${HOST_NAME}";     fi
+if [ -n "${ORG}" ];             then printf "%bOrganisation:%b-- %s\n" "${BOLD}" "${RESET}" "${ORG}";           fi
+if [ -n "${COUNTRY_CODE}" ];    then printf "%bCountry Code:%b-- %s\n" "${BOLD}" "${RESET}" "${COUNTRY_CODE}";  fi
+if [ -n "${COUNTRY}" ];         then printf "%bCountry:%b------- %s\n" "${BOLD}" "${RESET}" "${COUNTRY}";       fi
+if [ -n "${REGION}" ];          then printf "%bRegion:%b-------- %s\n" "${BOLD}" "${RESET}" "${REGION}";        fi
+if [ -n "${CITY}" ];            then printf "%bCity:%b---------- %s\n" "${BOLD}" "${RESET}" "${CITY}";          fi
+if [ -n "${POST_CODE}" ];       then printf "%bPost Code:%b----- %s\n" "${BOLD}" "${RESET}" "${POST_CODE}";     fi
+if [ -n "${TIMEZONE}" ];        then printf "%bTimezone:%b------ %s\n" "${BOLD}" "${RESET}" "${TIMEZONE}";      fi
+if [ -n "${LATITUDE}" ];        then printf "%bLatitude:%b------ %s\n" "${BOLD}" "${RESET}" "${LATITUDE}";      fi
+if [ -n "${LONGITUDE}" ];       then printf "%bLongitude:%b----- %s\n" "${BOLD}" "${RESET}" "${LONGITUDE}";     fi
+printf "\n"    # Finish main output with a line break.
+
+rm "${TEMP_FILE}"    # Clean up.
 
 exit ${SUCCESS}
