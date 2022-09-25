@@ -1,18 +1,20 @@
 #!/bin/bash
-#: Title:	: ball
-#: Author	: clewsy (clews.pro)
-#: Description	: Run a backup script (bu) on a selected host or list of hosts.
-#: Options	: -q - Quiet mode (suppress some output).
-#:		: -v - Verbose mode (show additional output).
-#:		: -h - Help (print usage information).
+#: Title:       : ball
+#: Author       : clewsy (clews.pro)
+#: Description  : Run a backup script (bu) on a selected host or list of hosts.
+#: Options      : -q - Quiet mode (suppress some output).
+#:              : -v - Verbose mode (show additional output).
+#:              : -h - Help (print usage information).
 
-COMMAND="~/bin/bu"	## The command to run on the remote host/s.  Note using "~" avoids expanding on the client side.
+## The command to run on the remote host/s.
+## Note using "~" avoids expanding on the client side.
+COMMAND="~/bin/bu"
 
 ##########Exit codes
-SUCCESS=0		## Toight.
-INVALID_OPTIONS=1	## Incorrect usage.
-TOO_MANY_ARGS=2		## Incorrect usage.
-BAD_LOG_FILE=3		## Cannot write to the defined logfile.
+SUCCESS=0           ## Toight.
+INVALID_OPTIONS=1   ## Incorrect usage.
+TOO_MANY_ARGS=2     ## Incorrect usage.
+BAD_LOG_FILE=3      ## Cannot write to the defined logfile.
 
 ##########Colours and formatting.
 RED="\033[02;31m"
@@ -22,7 +24,9 @@ BOLD="\033[01;37m"
 RESET="\033[0m"
 TABLE_WIDTH=30
 SEPARATOR="----------------------------------------------------------------------------------"
-FILL_H_f () { for ((i=1; i<=$1; i++)); do printf "%s" "═"; done; } ## Print '═' a specified number of times.
+
+##########Print '═' a specified number of times.
+FILL_H_f () { for ((i=1; i<=$1; i++)); do printf "%s" "═"; done; }
 
 ##########Function to print current date and time.  Used for logging.
 TIMESTAMP_f () { date +%Y-%m-%d\ %T; }
@@ -30,19 +34,19 @@ TIMESTAMP_f () { date +%Y-%m-%d\ %T; }
 ##########Function for exit conditions.  Log error or success and exit.
 QUIT_f ()
 {
-	if [ "${1}" -gt 0 ]; then	printf "%s%d%b" "$(TIMESTAMP_f) [X] Script failed with error code " "${1}" ".\n" >> "${BALL_LOG_FILE}"
-	else				printf "%b" "$(TIMESTAMP_f) [√] Script exited successfully.\n" >> "${BALL_LOG_FILE}"; fi
-	printf "%b" "${SEPARATOR}\n" >> "${BALL_LOG_FILE}"
-	exit "${1}"
+    if [ "${1}" -gt 0 ]; then   printf "%s%d%b" "$(TIMESTAMP_f) [X] Script failed with error code " "${1}" ".\n" >> "${BALL_LOG_FILE}"
+    else                        printf "%b" "$(TIMESTAMP_f) [√] Script exited successfully.\n" >> "${BALL_LOG_FILE}"; fi
+    printf "%b" "${SEPARATOR}\n" >> "${BALL_LOG_FILE}"
+    exit "${1}"
 }
 
 ##########Define log file and ensure directory exists and is writable.
 BALL_LOG_FILE="${HOME}/.log/ball.log"
 if [ ! -w "${BALL_LOG_FILE%/*}" ]; then
-	if ! mkdir --parents "${BALL_LOG_FILE%/*}" || ! touch "${BALL_LOG_FILE}"; then
-		printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${BALL_LOG_FILE})\n"
-		exit "${BAD_LOG_FILE}";	## Don't use QUIT_f because it needs to write the logfile.
-	fi
+    if ! mkdir --parents "${BALL_LOG_FILE%/*}" || ! touch "${BALL_LOG_FILE}"; then
+        printf "%b" "${RED}Error:${RESET} Unable to create/write to the logfile (${BALL_LOG_FILE})\n"
+        exit "${BAD_LOG_FILE}";    ## Not QUIT_f as it needs the logfile.
+    fi
 fi
 
 #########Usage
@@ -50,109 +54,109 @@ USAGE="
 Usage: ${0##*/} [option] [host/list]
 
 Where [host/list] is either:
-	host	-	a specific remote system on which command \"${COMMAND}\" will be run.
-	list	-	a text list of remote systems on which command \"${COMMAND}\" will be run.
+    host    -    a specific host on which <\"${COMMAND}\"> will be run.
+    list    -    a text list of hosts on which <\"${COMMAND}\"> will be run.
 
-If no argument is provided, a list file of the name my_hosts.list will be used (if present).
+If no argument is provided, list file \"my_hosts.list\" will be used.
 
-Options:	-q	Quiet mode - suppress most output.
-		-v	Verbose output.
-		-h	Show this help.
+Options:    -q  Quiet mode - suppress most output.
+            -v  Verbose output.
+            -h  Show this help.
 "
 
 #########Default values can be changed with -q or -v options. 
-VERBOSITY=""		## Define the default verbosity (i.e. none).  Can be changed with option -v.
-DEST="/dev/null"	## Default destination for output.  Change to /dev/stdout with option -v.
+VERBOSITY=""        ## Define the default verbosity (i.e. none).
+DEST="/dev/null"    ## Default destination for output.
 
 ######### Define array of options to be used by ssh.
 SSH_OPTIONS=(
-	"-4"					## Use IPV4 (alternatively, -6 for IPV6).
-	"-o StrictHostKeyChecking=no"		## Disable user verification for connecting to unknown (not yet authenticated) host.
-	"-o UserKnownHostsFile=/dev/null"	## Disable auto saving "newly discovered" hosts to the default knownhosts file.
-	"-o BatchMode=yes"			## Disable password prompts and host key confirmation requests.
-	"-o ConnectTimeout=4"			## Stop attempting the connection after specified number of seconds.
+    "-4"
+    "-o StrictHostKeyChecking=no"
+    "-o UserKnownHostsFile=/dev/null"
+    "-o BatchMode=yes"
+    "-o ConnectTimeout=4"
 )
 
 ##########Interpret options
-while getopts 'qvh' OPTION; do				## Call getopts to identify selected options and set corresponding flags.
-	case "$OPTION" in
-		q)	QUIET_MODE="TRUE"		## -q sets flag that will suppress some output destined for /dev/stdout.
-			VERBOSITY="-q" ;;
-		v)	VERBOSITY="-v"			## -v activates verbose mode by iadding the -v flag to the bu.sh command.
-			DEST="/dev/stdout" ;;
-		h)	printf "%b" "${USAGE}\n"	## -h option just prints the usage then quits.
-			QUIT_f ${SUCCESS} ;;		## Exit successfully.
-		?)	printf "%b" "${RED}Error:${RESET} Invalid option/s.\n${USAGE}\n"
-			QUIT_f ${INVALID_OPTIONS} ;;	## Exit.
-	esac
+while getopts 'qvh' OPTION; do
+    case "$OPTION" in
+        q)  VERBOSITY="-q" ;;
+            QUIET_MODE="TRUE"
+        v)  VERBOSITY="-v"
+            DEST="/dev/stdout" ;;
+        h)  printf "%b" "${USAGE}\n"
+            QUIT_f ${SUCCESS} ;;
+        ?)  printf "%b" "${RED}Error:${RESET} Invalid option/s.\n${USAGE}\n"
+            QUIT_f ${INVALID_OPTIONS} ;;
+    esac
 done
-shift $((OPTIND -1))	## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))
 
 ##########Check correct usage.
-if [ $# -gt 1 ]; then								## Check if more than one argument was entered.
-	printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}\n"	## If so, show usage and exit.
-	QUIT_f ${TOO_MANY_ARGS}
+if [ $# -gt 1 ]; then   ## If more than one argument was entered.
+    printf "%b" "${RED}Error:${RESET} Too many arguments.\n${USAGE}\n"
+    QUIT_f ${TOO_MANY_ARGS}
 fi
 
 ##########Define the argument (user input or default).
-ARGUMENT=${1-"${0%/*}/my_hosts.list"}	## First argument is the file name of the list of remote systems.
-					## If argument not provided, set default (by_hosts.list in same dir as script).
-					## Syntax: parameter=${parameter-default}.
+## First argument is the file name of the list of remote systems.
+## If argument not provided, set default (my_hosts.list in same dir as script).
+ARGUMENT=${1-"${0%/*}/my_hosts.list"}
 
 ##########Define and clear the temp files.
 TEMP_BALL_SUMMARY="/tmp/temp_ball_summary"
 > "${TEMP_BALL_SUMMARY}"
-
 TEMP_REM_SYS_LIST="/tmp/temp_rem_sys_list"
 > "${TEMP_REM_SYS_LIST}"
 
 ##########Validate the argument and thus define the remote host/s.
 ## Arg specifies a remote host.
 if [ ! -f "${ARGUMENT}" ] || [ ! -r "${ARGUMENT}" ]; then
-	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
-	printf "%b" "${ARGUMENT}\n" > "${TEMP_REM_SYS_LIST}"
+    if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
+    printf "%b" "${ARGUMENT}\n" > "${TEMP_REM_SYS_LIST}"
 ## Arg specifies a list of remote hosts.
 else
-	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system list is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
-	while read -r LINE ; do	## Strip #comments from the lines.
-		STRIPPED_LINE="${LINE%%\#*}"
-		if [ "${STRIPPED_LINE}" ]; then printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"; fi
-	done < "${ARGUMENT}"
-	printf "%b" "\nTarget systems:\n" >> ${DEST}
-	printf "%b" "${BLUE}$(cat "${TEMP_REM_SYS_LIST}")${RESET}\n" >> ${DEST}		## Show the intended target systems.
+    if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\nRemote system list is \"${BLUE}${ARGUMENT}${RESET}\".\n"; fi
+    while read -r LINE ; do    ## Strip #comments from the lines.
+        STRIPPED_LINE="${LINE%%\#*}"
+        if [ "${STRIPPED_LINE}" ]; then printf "%b" "${STRIPPED_LINE}\n" >> "${TEMP_REM_SYS_LIST}"; fi
+    done < "${ARGUMENT}"
+    printf "%b" "\nTarget systems:\n" >> ${DEST}
+    printf "%b" "${BLUE}$(cat "${TEMP_REM_SYS_LIST}")${RESET}\n" >> ${DEST}
 fi
 
 ########## Loop through the remote system list.
 if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "\n${SEPARATOR}\n\n"; fi
 {
-	printf "%b" "$(TIMESTAMP_f) - Script initiated for following hosts:\n"
-	cat "${TEMP_REM_SYS_LIST}"
+    printf "%b" "$(TIMESTAMP_f) - Script initiated for following hosts:\n"
+    cat "${TEMP_REM_SYS_LIST}"
 } >> "${BALL_LOG_FILE}"
-while read -r REM_SYS <&2; do	## Loop to repeat commands for each file name entry in the backup file list ($BU_FILE_LIST)
-				## <&2 needed as descriptor for nested while read loops (while read loop within called script)
-	if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[*]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n"; fi
-	printf "%b" "\n${BOLD}############################## BEGIN CLIENT OUTPUT ###############################\n${RESET}" >> ${DEST}
-	if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}" > ${DEST}; then ## Command failed.
-		printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n" >> ${DEST}
-		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${RED}Failure.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
-		printf "%b" "$(TIMESTAMP_f) [X] Failed to run ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
-		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${RED}Failure.${RESET}  Command failed on \"${BLUE}${REM_SYS}${RESET}\"\n\n${SEPARATOR}\n\n"; fi
 
-		continue
-	else	## Command is successful.
-		printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n\n" >> ${DEST}
-		printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${GREEN}Success.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
-		printf "%b" "$(TIMESTAMP_f) [√] Successfully ran ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
-		if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${GREEN}Success.${RESET}  Command succeded on \"${BLUE}${REM_SYS}${RESET}\"\n\n${SEPARATOR}\n\n"; fi
+## Loop to repeat commands for each file name in $BU_FILE_LIST.
+while read -r REM_SYS <&2; do
+    if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "Attempting to run command: ${BLUE}ssh ${SSH_OPTIONS[*]} ${REM_SYS} \"${COMMAND} ${VERBOSITY}\"${RESET}\n"; fi
+    printf "%b" "\n${BOLD}############################## BEGIN CLIENT OUTPUT ###############################\n${RESET}" >> ${DEST}
+    if ! ssh "${SSH_OPTIONS[@]}" "${REM_SYS}" "${COMMAND} ${VERBOSITY}" > ${DEST}; then
+        printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n" >> ${DEST}
+        printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${RED}Failure.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
+        printf "%b" "$(TIMESTAMP_f) [X] Failed to run ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
+        if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${RED}Failure.${RESET}  Command failed on \"${BLUE}${REM_SYS}${RESET}\"\n\n${SEPARATOR}\n\n"; fi
 
-	fi
-done 2< "${TEMP_REM_SYS_LIST}"		## File read by the while loop which includes a list of files to be backed up.
+        continue
+    else    ## Command is successful.
+        printf "%b" "${BOLD}##############################  END CLIENT OUTPUT  ###############################${RESET}\n\n" >> ${DEST}
+        printf "%-$((TABLE_WIDTH-10))s%b" "${REM_SYS}" "${GREEN}Success.${RESET}\n" >> "${TEMP_BALL_SUMMARY}"
+        printf "%b" "$(TIMESTAMP_f) [√] Successfully ran ${COMMAND} on ${REM_SYS}.\n" >> "${BALL_LOG_FILE}"
+        if [ "${QUIET_MODE}" != "TRUE" ]; then printf "%b" "${GREEN}Success.${RESET}  Command succeded on \"${BLUE}${REM_SYS}${RESET}\"\n\n${SEPARATOR}\n\n"; fi
+
+    fi
+done 2< "${TEMP_REM_SYS_LIST}"  ## File read by the while loop.
 
 
-########### Print out in a pretty format a table indicating the success or failure for each host in the list.
+########### Print out in a pretty format a summary table.
 printf "%b" "\n${BOLD}╔═Summary:$(FILL_H_f $((TABLE_WIDTH-11)))╗${RESET}\n"
 while read -r RESULT ; do
-	printf "%b" "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}\n"
+    printf "%b" "${BOLD}║${RESET}${RESULT}${BOLD}║${RESET}\n"
 done < "${TEMP_BALL_SUMMARY}"
 printf "%b" "${BOLD}╚$(FILL_H_f ${TABLE_WIDTH}-2)╝${RESET}\n\n"
 
