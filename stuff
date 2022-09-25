@@ -14,17 +14,18 @@
 #:              : -n    Network info.
 #:              : -h    Print help/usage.
 #:              : none  Assumes "-A".
-#: Arguments    : Will accept a single argument to set a theme colour scheme other than the configured default.  Accepted colours:
-#:              : BLACK or black
-#:              : RED or red
-#:              : ORANGE or orange
-#:              : GREEN or green
-#:              : YELLOW or yellow
-#:              : BLUE or blue
-#:              : MAGENTA or magenta
-#:              : CYAN or cyan
-#:              : GRAY or gray or GREY or grey
-#:              : WHITE or white
+#: Arguments    : Will accept a single argument to set a theme colour scheme
+#:              : other than the configured default.  Accepted colours:
+#:              : - BLACK or black
+#:              : - RED or red
+#:              : - ORANGE or orange
+#:              : - GREEN or green
+#:              : - YELLOW or yellow
+#:              : - BLUE or blue
+#:              : - MAGENTA or magenta
+#:              : - CYAN or cyan
+#:              : - GRAY or gray or GREY or grey
+#:              : - WHITE or white
 
 ## Exit codes.
 SUCCESS=0
@@ -81,22 +82,23 @@ Valid themes:
   ${WHITE}WHITE${RESET}
 "
 
-## Enable extended globs (e.g. *( ) or +([0-p]) ).  Used in some parameter expansions.  
+## Enable extended globs (e.g. *( ) or +([0-p]) ).
+## Used in some parameter expansions.  
 shopt -s extglob
 
 ## Get command line options and set appropriate flags.
-while getopts 'Alpcmavdonh' OPTION; do      ## Call getopts to identify selected options and set corresponding flags.
-    OPTIONS="TRUE"                          ## Used to determine if a valid or invalid option was entered.
+while getopts 'Alpcmavdonh' OPTION; do      ## getopts to identify options
+    OPTIONS="TRUE"
     case "$OPTION" in
-        A)    GET_ALL_INFO="TRUE" ;;        ## Set ALL flag - same output as selecting no options.
-        l)    GET_L_LIVE_INFO="TRUE" ;;     ## Set L flag - live system statistics (temp, fan speed, uptime).
-        p)    GET_P_PRODUCT_INFO="TRUE" ;;  ## Set P flag - product info (inc. motherboard, chassis, bios).
+        A)    GET_ALL_INFO="TRUE" ;;        ## Set ALL flag.
+        l)    GET_L_LIVE_INFO="TRUE" ;;     ## Set L flag - temp, fans, uptime.
+        p)    GET_P_PRODUCT_INFO="TRUE" ;;  ## Set P flag - product info.
         c)    GET_C_CPU_INFO="TRUE" ;;      ## Set C flag - cpu.
         m)    GET_M_MEMORY_INFO="TRUE" ;;   ## Set M flag - memory.
         a)    GET_A_AUDIO_INFO="TRUE" ;;    ## Set A flag - audio hardware.
         v)    GET_V_VIDEO_INFO="TRUE" ;;    ## Set V flag - video hardware.
-        d)    GET_D_DISKS_INFO="TRUE" ;;    ## Set D flag - disks and partitions (inc. raid).
-        o)    GET_O_OS_INFO="TRUE" ;;       ## Set O flag - operating system (inc. kernel).
+        d)    GET_D_DISKS_INFO="TRUE" ;;    ## Set D flag - disks and parts.
+        o)    GET_O_OS_INFO="TRUE" ;;       ## Set O flag - OS and kernel.
         n)    GET_N_NETWORK_INFO="TRUE" ;;  ## Set N flag - network.
         h)    printf "%b" "${USAGE}\n"      ## Print help (usage).
             exit ${SUCCESS} ;;              ## Exit successfully.
@@ -104,7 +106,8 @@ while getopts 'Alpcmavdonh' OPTION; do      ## Call getopts to identify selected
             exit ${BAD_OPTION} ;;           ## Exit.
     esac
 done
-shift $((OPTIND -1))    ## This ensures only non-option arguments are considered arguments when referencing $#, #* and $n.
+shift $((OPTIND -1))    ## Ensures only non-option arguments are considered
+                        ## when referencing $#, #* and $n.
 
 ## If no options selected,assumes -A option so set GET_ALL_INFO flag.
 if [ -z "$OPTIONS" ]; then GET_ALL_INFO="TRUE"; fi
@@ -137,7 +140,7 @@ printf "%b" "\n${COL}${BOLD}╔════════════════�
 printf "%b" "${COL}${BOLD}║${RESET} ${BOLD}System Information ${RESET}${COL}${BOLD}║${RESET}\n"
 printf "%b" "${COL}${BOLD}╚════════════════════╝${RESET}\n"
 
-####################################################################################################################################
+################################################################################
 ## -l : Print live statistics - temperature, fan speed, uptime
 if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 
@@ -207,11 +210,11 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
     printf "%b" "${COL}${BOLD}└─Uptime:${RESET} $(uptime -p)\n"
 fi
 
-####################################################################################################################################
+################################################################################
 ## -p : Print available product, chassis, motherboard, bios info
 if [[ ${GET_P_PRODUCT_INFO} || ${GET_ALL_INFO} ]]; then
 
-    ## Check for a few basics.  If not present, assume no product info is present.
+    ## Check for a few basics.  If none, assume no product info is present.
     if  [ ! -s /sys/devices/virtual/dmi/id/product_name ]   &&
         [ ! -s /sys/devices/virtual/dmi/id/chassis_type ]   &&
         [ ! -s /sys/devices/virtual/dmi/id/board_name ]     &&
@@ -261,10 +264,10 @@ if [[ ${GET_P_PRODUCT_INFO} || ${GET_ALL_INFO} ]]; then
     fi
 fi
 
-####################################################################################################################################
+################################################################################
 ##  -c : Print available CPU info
 if [[ ${GET_C_CPU_INFO} || ${GET_ALL_INFO} ]]; then
-    if ! command -v lscpu >> /dev/null ; then    ## If lscpu not installed (send to /dev/null to suppress stdout)
+    if ! command -v lscpu >> /dev/null ; then    ## If lscpu not installed.
         printf "%b" "${COL}${BOLD}CPU:${RESET} Cannot determine cpu infomtion (lscpu not installed)\n"
     else
         CPU_MODEL=$(lscpu | grep -m 1 -e "Model name:");        CPU_MODEL=${CPU_MODEL##*:*( )}
@@ -293,10 +296,10 @@ if [[ ${GET_C_CPU_INFO} || ${GET_ALL_INFO} ]]; then
     fi
 fi
 
-####################################################################################################################################
+################################################################################
 ## -m : Print memory info
 if [[ ${GET_M_MEMORY_INFO} || ${GET_ALL_INFO} ]]; then
-    read -r -d '' -a MEM_ARRAY <<< "$(free -h)"    ## Read in memory stats to an array.
+    read -r -d '' -a MEM_ARRAY <<< "$(free -h)"    ## Read in memory stats.
     MEM_TOTAL=${MEM_ARRAY[7]}
     MEM_USED=${MEM_ARRAY[8]}
     MEM_FREE=${MEM_ARRAY[9]}
@@ -320,8 +323,9 @@ if [[ ${GET_M_MEMORY_INFO} || ${GET_ALL_INFO} ]]; then
     printf "%b" "${COL}  └─Free:    ${RESET}${SWAP_FREE}\n"
 fi
 
-####################################################################################################################################
-## -a & -v : Print audio and video info (note only first result of each if multiple video or audio devices exist)
+################################################################################
+## -a & -v : Print audio and video info.
+## (note only first result of each if multiple video or audio devices exist).
 if [[ ${GET_A_AUDIO_INFO} || ${GET_V_VIDEO_INFO} || ${GET_ALL_INFO} ]]; then
     if ! command -v lspci >> /dev/null || ! lspci &> /dev/null; then
         printf "%b" "${COL}${BOLD}Audio/Video:${RESET} Cannot determine audio or video information (lspci not installed)\n"
@@ -355,7 +359,7 @@ if [[ ${GET_A_AUDIO_INFO} || ${GET_V_VIDEO_INFO} || ${GET_ALL_INFO} ]]; then
     fi
 fi
 
-####################################################################################################################################
+################################################################################
 ## -d : Print disk and partition info
 if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
     if ! command -v lsblk >> /dev/null || ! lsblk &> /dev/null;    then
@@ -376,35 +380,40 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
         ## Reconstitute the array - removes all empty elements.
         DEV_DUMP=("${DEV_DUMP[@]}")
 
-        ## Run through each element in the DEV_DUMP array and create a new array of the format:
+        ## Run through each element in the DEV_DUMP array and create a new array
+        ## of the format:
         ## ( DEV_NAME DEV_LEVEL DEV_CHILDREN )
-        ## Where : DEV_NAME     the name of the device within the /dev directory.
-        ##     : DEV_LEVEL     the position within the device heirarchy.  E.g. Level 1 for sda, level 2 for sda1.
-        ##     : NUM_CHILDREN the child devices one level below the device.  Does not count great/grandchildren.
+        ## Where: DEV_NAME      name of the device within the /dev directory.
+        ##      : DEV_LEVEL     position within the device heirarchy.
+        ##                      (e.g. Level 1 for sda, level 2 for sda1).
+        ##      : NUM_CHILDREN  child devices one level below the device.
+        ##                      Does not count great/grandchildren.
         ## Also tally the total number of level 1 devices NUM_LEVEL_1.
         NUM_LEVEL_1=0
         for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
 # Modifications for determining DEV_NAME, LEVEL and NEXT_LEVEL follow.
-# Required for json formatting change present since lsblk --version: 2.37.2 (Ubuntu 22.04).
+# Required for json formatting change since lsblk --version: 2.37.2 (22.04).
 # DEV_NAME=${DEV_DUMP[$E]#*:\"}; DEV_NAME=${DEV_NAME%%\"*}
-# LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))    ## Get level by counting initial whitespace.
+# LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))
 # NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+1))]%%\{*}" | wc -m) / 6 ))
             DEV_NAME=${DEV_DUMP[$E]#*:}; DEV_NAME=${DEV_NAME#*\"};  DEV_NAME=${DEV_NAME%%\"*}
-            LEVEL=$(( ($(printf "%s" "${DEV_DUMP[$E]%%\"*}" | wc -m) - 3) / 6 ))    ## Get level by counting whitespace.
+            ## Get LEVEL by counting whitespace.
+            LEVEL=$(( ($(printf "%s" "${DEV_DUMP[$E]%%\"*}" | wc -m) - 3) / 6 ))
             NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+1))]%%\"*}" | wc -m) - 3) / 6 ))
             DIFF=$((NEXT_LEVEL-LEVEL))
 
             NUM_CHILDREN=0
-            ## Loop through the next elements until we reach one of the same level - allows us to count the children.
+            ## Loop through the next elements until we reach one of the same
+            ## level - allows us to count the children.
             i=1
             while (( NEXT_LEVEL > LEVEL )); do
-                ## If level difference is 1, current element is a direct child.  Ignores great/grandchildren.
+                ## If level difference is 1, current element is a direct child.
                 if ((DIFF == 1)); then ((NUM_CHILDREN++)); fi
 
                 ## Increment the counter and check the next element.
                 ((i++))
 # Modifications for determining NEXT_LEVEL follow.
-# Required for json formatting change present since lsblk --version: 2.37.2 (Ubuntu 22.04).
+# Required for json formatting change present since lsblk --version: 2.37.2
 # NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+i))]%%\{*}" | wc -m) / 6 ))
                 NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+i))]%%\"*}" | wc -m) - 3) / 6 ))
                 DIFF=$((NEXT_LEVEL-LEVEL))
@@ -428,7 +437,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
             ## Level 1 devices
             if ((WORKING_LEVEL == 1)); then
                 ((LEVEL_1_TALLY++))
-                if (( LEVEL_1_TALLY == NUM_LEVEL_1 )); then    ## Last device in the list.
+                if (( LEVEL_1_TALLY == NUM_LEVEL_1 )); then    ## Last device.
                     printf "%b" "${COL}${BOLD}└─Device:${RESET} ${WORKING_DEV_NAME}\n"
                     C1="${COL}${BOLD}  ${RESET}"
                 else
@@ -436,9 +445,9 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
                     C1="${COL}${BOLD}│ ${RESET}"
                 fi
 
-                DEVICE_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)      ## Device type
-                DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}" 2> /dev/null)    ## Device model
-                DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)      ## Device capacity
+                DEVICE_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)
+                DEVICE_MODEL=$(lsblk -dno MODEL /dev/"${WORKING_DEV_NAME}" 2> /dev/null)
+                DEVICE_SIZE=$(lsblk -dno SIZE /dev/"${WORKING_DEV_NAME}" 2> /dev/null)
                 DEV_SPECS=()    ## Clear then reset the array of device specs 
                 if [ -n "${DEVICE_TYPE}" ];     then DEV_SPECS+=("${COL}Type:${RESET} ${DEVICE_TYPE}"); fi
                 if [ -n "${DEVICE_MODEL}" ];    then DEV_SPECS+=("${COL}Model:${RESET} ${DEVICE_MODEL}"); fi
@@ -453,7 +462,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
                 ################################
                 ## Level 2 devices (CHILD)
                 if ((WORKING_NUM_CHILDREN > 0)); then
-                    C=0; CHILDREN_LEFT=${WORKING_NUM_CHILDREN} ## C Represents current child iteration. 
+                    C=0; CHILDREN_LEFT=${WORKING_NUM_CHILDREN}
                     while ((CHILDREN_LEFT>0)); do
                         WORKING_CHILD_ELEMENT="${DEV_ARRAY[D+1+C]}"
                         WORKING_CHILD_LEVEL=${WORKING_CHILD_ELEMENT#* }; WORKING_CHILD_LEVEL=${WORKING_CHILD_LEVEL% *}
@@ -524,13 +533,13 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
                                 GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_PERC=${GRANDCHILD_PERC%%\%*}; GRANDCHILD_PERC="${GRANDCHILD_PERC##* }%"
                                 GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_MOUNT=${GRANDCHILD_MOUNT##* }
 
-                                GRANDCHILD_SPECS=()    ## Clear, reset the array of child specs.
+                                GRANDCHILD_SPECS=()
                                 if [ -n "${GRANDCHILD_TYPE}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
                                 if [ -n "${GRANDCHILD_FS}" ];       then GRANDCHILD_SPECS+=("${COL}${DIM}Filesystem:${RESET} ${GRANDCHILD_FS}"); fi
                                 if [ -n "${GRANDCHILD_SIZE}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Size:${RESET} ${GRANDCHILD_SIZE}"); fi
                                 if [ -n "${GRANDCHILD_USED}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Usage:${RESET} ${GRANDCHILD_USED} (${GRANDCHILD_PERC})"); fi
                                 if [ -n "${GRANDCHILD_MOUNT}" ];    then GRANDCHILD_SPECS+=("${COL}${DIM}Mount:${RESET} ${GRANDCHILD_MOUNT}"); fi
-                                for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do    ## Loop for GC spec.
+                                for GCSPEC in "${GRANDCHILD_SPECS[@]}" ; do
                                     if [[ "${GCSPEC}" == "${GRANDCHILD_SPECS[((NUM_GSPECS-1))]}" && ${WORKING_GRANDCHILD_NUM_CHILDREN} -lt 1 ]]; then   C4="${COL}${DIM}└─${RESET}"
                                     else                                                                                                                C4="${COL}${DIM}├─${RESET}"; fi
                                     printf "%b" "${C1}${C2}${C3}${C4}${GCSPEC}\n"
@@ -544,7 +553,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
                                         WORKING_GREATGRANDCHILD_ELEMENT="${DEV_ARRAY[D+1+C+1+GC+1+GGC]}"
                                         WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_ELEMENT#* }; WORKING_GREATGRANDCHILD_LEVEL=${WORKING_GREATGRANDCHILD_LEVEL% *}
 
-                                        ## Skip this array element if not a greatgrandchild.
+                                        ## Skip if not a greatgrandchild.
                                         if ((WORKING_GREATGRANDCHILD_LEVEL!=4)); then ((GGC++)); continue; fi
 
                                         WORKING_GREATGRANDCHILD_DEV_NAME=${WORKING_GREATGRANDCHILD_ELEMENT%% *}
@@ -587,7 +596,7 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
     fi
 fi
 
-####################################################################################################################################
+################################################################################
 ## -o : Print OS kernel and distribution info
 if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
     OS_NAME=$(uname -o)
@@ -596,7 +605,8 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
     KERNEL_VER=$(uname -v)
     KERNEL_REL=$(uname -r)
     if command -v lsb_release >> /dev/null; then
-        read -r -d '' -a RELEASE_INFO <<< "$(lsb_release -irc)"    ## Read in lsb_release output to an array.
+        ## Read in lsb_release output to an array.
+        read -r -d '' -a RELEASE_INFO <<< "$(lsb_release -irc)"
         DIST=${RELEASE_INFO[2]}
         DIST_REL=${RELEASE_INFO[4]}
         DIST_CODE=${RELEASE_INFO[6]}
@@ -618,7 +628,7 @@ if [[ ${GET_O_OS_INFO} || ${GET_ALL_INFO} ]]; then
     if [ -n "${BASH_VERSION}" ]; then printf "%b" "${COL}${BOLD}  ${RESET}${COL}└─Version:${RESET} ${BASH_VERSION}\n"; fi
 fi
 
-####################################################################################################################################
+################################################################################
 ## -n : Print network and network interface info
 if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
     printf "%b" "${COL}${BOLD}Network:${RESET}\n"
@@ -684,7 +694,7 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
             elif command -v iw > /dev/null; then    ESSID=$(iw dev "${WORKING_INTERFACE}" link | grep "SSID"); ESSID=${ESSID##*: }
             else                                    ESSID=""; fi
 
-            ESSID=${ESSID//Wired/}    ## If ESSID identified as "Wired", clear ESSID.
+            ESSID=${ESSID//Wired/}    ## If ESSID is "Wired", clear ESSID.
 
             ## Clear and then set the array of interface specs
             INT_SPECS=()
@@ -693,7 +703,7 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
             if [ -n "${IP}" ]; then     INT_SPECS+=("${COL}IP Address:${RESET} ${IP}"); fi
             if [ -n "${ESSID}" ]; then  INT_SPECS+=("${COL}Connected ESSID:${RESET} ${ESSID}"); fi
 
-            ## Print out each of the identified specifications for the current inteface
+            ## Print out each of the identified specs for the current inteface.
             for (( icspec=0; icspec<${#INT_SPECS[@]}; icspec++ ))
             do
                 if (( icspec==(${#INT_SPECS[@]}-1) )); then C2="${COL}└─${RESET}"
