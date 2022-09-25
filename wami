@@ -35,8 +35,8 @@ CURL_OPTIONS=(
 
 # Pull the ip info.  Write to temp file.
 printf "\nPulling data from \"ifconfig.co\"...\n"
-if ! curl ${CURL_OPTIONS} --output "${TEMP_FILE}" ifconfig.co/json; then
-    printf "\n%bError%b: Failed to pull data from \"ifconfig.co\"." "${RED}" "${RESET}"
+if ! curl "${CURL_OPTIONS[@]}" --output "${TEMP_FILE}" ifconfig.co/json; then
+    printf "\n%bError%b: Failed to reach \"ifconfig.co\"." "${RED}" "${RESET}"
     printf "\nQuitting.\n\n"
     if [[ -f "${TEMP_FILE}" ]]; then rm "${TEMP_FILE}"; fi
     exit ${CURL_FAIL}
@@ -57,7 +57,7 @@ LONGITUDE=$(    grep "longitude"    "${TEMP_FILE}")
 
 # Remove trailing characters.       # Remove leading characters.
 IP=${IP%\",};                       IP=${IP##*\"}
-HOST_NAME=${HOST_NAME%\",};         HOST_NAME=${HOSTNAME##*\"}
+HOST_NAME=${HOST_NAME%\",};         HOST_NAME=${HOST_NAME##*\"}
 ORG=${ORG%\",};                     ORG=${ORG##*\"}
 COUNTRY_CODE=${COUNTRY_CODE%\",};   COUNTRY_CODE=${COUNTRY_CODE##*\"}
 COUNTRY=${COUNTRY%\",};             COUNTRY=${COUNTRY##*\"}
@@ -68,7 +68,7 @@ TIMEZONE=${TIMEZONE%\",};           TIMEZONE=${TIMEZONE##*\"}
 LATITUDE=${LATITUDE%,};             LATITUDE=${LATITUDE##*\ }
 LONGITUDE=${LONGITUDE%,};           LONGITUDE=${LONGITUDE##*\ }
 
-printf "\n"    # Start main output after a line break.
+printf "\n" # Start main output after a line break.
 if [ -n "${IP}" ];              then printf "%bIP:%b------------ %s\n" "${BOLD}" "${RESET}" "${IP}";            fi
 if [ -n "${HOST_NAME}" ];       then printf "%bHostname:%b------ %s\n" "${BOLD}" "${RESET}" "${HOST_NAME}";     fi
 if [ -n "${ORG}" ];             then printf "%bOrganisation:%b-- %s\n" "${BOLD}" "${RESET}" "${ORG}";           fi
@@ -80,8 +80,8 @@ if [ -n "${POST_CODE}" ];       then printf "%bPost Code:%b----- %s\n" "${BOLD}"
 if [ -n "${TIMEZONE}" ];        then printf "%bTimezone:%b------ %s\n" "${BOLD}" "${RESET}" "${TIMEZONE}";      fi
 if [ -n "${LATITUDE}" ];        then printf "%bLatitude:%b------ %s\n" "${BOLD}" "${RESET}" "${LATITUDE}";      fi
 if [ -n "${LONGITUDE}" ];       then printf "%bLongitude:%b----- %s\n" "${BOLD}" "${RESET}" "${LONGITUDE}";     fi
-printf "\n"    # Finish main output with a line break.
+printf "\n" # Finish main output with a line break.
 
-rm "${TEMP_FILE}"    # Clean up.
+rm "${TEMP_FILE}"   # Clean up.
 
 exit ${SUCCESS}
