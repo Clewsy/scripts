@@ -24,6 +24,7 @@ printf "%b" "Desired command on target: \"${COMMAND}\"\n"
 printf "%b" "Attempting local connection.\n"
 if ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"; then
     printf "%b" "Command successfully sent locally.\n"
+    exit "$(SUCCESS)"
 else
     printf "%b" "Unable to make local connection.  Attempting remote connection.\n"
     if ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} \"${COMMAND}\""; then
