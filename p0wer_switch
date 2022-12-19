@@ -1,28 +1,36 @@
 #!/data/data/com.termux/files/usr/bin/bash
-#: Title:	: p0wer_switch
-#: Author	: clewsy (clews.pro)
-#: Description	: Script for use with Termux on phone or tablet. Connects to p0wer server over local network if available, otherwise
-#:		: attempts a remote connection.  Once connected, runs ${COMMAND}. Intended to run p0wer app on p0wer server to
-#:		: switch on/off a selected mains outlet, but easily modified to run other commands over ssh from a Termux shortcut.
-#: Options	: None
+#: Title:       : p0wer_switch
+#: Author       : clewsy (clews.pro)
+#: Description  : Script for use with Termux on phone or tablet. Connects to
+#:              : p0wer server over local network if available, otherwise
+#:              : attempts a remote connection.  Once connected, runs
+#:              : ${COMMAND}. Intended to run p0wer app on p0wer server to
+#:              : switch on/off a selected mains outlet, but easily modified to
+#:              : run other commands over ssh from a Termux shortcut.
+#: Options      : None
 
-LOC_USER="b4t"				# User for attempting local network connection (faster).
-LOC_SERVER="p0wer"			# Hostname fo attempting local network connection.
-REM_USER="b4t"				# User for attempting remote network connection (if local fails).
-REM_SERVER="clews.pro"			# Hostname for remote network connection.
-COMMAND="/usr/local/sbin/p0wer a off"	# Command to run on server.
+# Configurable options.
+LOC_USER="b4t"                          # User for local connection (faster).
+LOC_SERVER="p0wer"                      # Hostname fo attemp local connection.
+REM_USER="b4t"                          # User for remote connection (slower).
+REM_SERVER="clews.pro"                  # Hostname for remote connection.
+COMMAND="/usr/local/sbin/p0wer a off"   # Command to run on server.
+
+# Exit codes
+SUCCESS="0"         ## Command run successfully.
+COMMAND_FAILED="1"  ## Attempts to run the command over ssh failed.
 
 printf "%b" "Desired command on target: \"${COMMAND}\"\n"
 printf "%b" "Attempting local connection.\n"
 if ssh -t ${LOC_USER}@${LOC_SERVER} "${COMMAND}"; then
-	printf "%b" "Command successfully sent locally.\n"
+    printf "%b" "Command successfully sent locally.\n"
 else
-	printf "%b" "Unable to make local connection.  Attempting remote connection.\n"
-	if ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} \"${COMMAND}\""; then
-		printf "%b" "Command successfully sent remotely.\n\n"
-	else
-		printf "%b" "Unable to connect.  Quitting.\n\n"
-	fi
+    printf "%b" "Unable to make local connection.  Attempting remote connection.\n"
+    if ssh -t ${REM_USER}@${REM_SERVER} "ssh -t ${LOC_USER}@${LOC_SERVER} \"${COMMAND}\""; then
+        printf "%b" "Command successfully sent remotely.\n\n"
+        exit "$(SUCCESS)"
+    else
+        printf "%b" "Unable to connect.  Quitting.\n\n"
+        exit "$(COMMAND_FAILED)"
+    fi
 fi
-
-exit 0
