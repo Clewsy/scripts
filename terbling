@@ -122,7 +122,6 @@ ${COL}${BOLD} /________________________   \   \   \    ${RESET}${COL}${S15}
 ${COL}${BOLD}                          \   \   \  /    ${RESET}${COL}${S16}
 ${COL}${BOLD}   ________________________\   \   \/    ${RESET}${COL}${S17}
 ${COL}${BOLD}   \                            \       ${RESET}${COL}${S18}
-${COL}${BOLD}    \____________________________\     ${RESET}${COL}${S19}
-${COL}${BOLD}                                      ${RESET}${COL}${S20}\n\n\n"
+${COL}${BOLD}    \____________________________\     ${RESET}${COL}${S19}\n"
 
 exit ${SUCCESS}
