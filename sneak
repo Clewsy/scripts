@@ -114,7 +114,7 @@ printf "%b" "Options for ssh:\n\t${SSH_OPTIONS[*]}\n" >> ${DEST}
 RSYNC_OPTIONS=(
     "--bwlimit=${RATE_LIMIT}"       ## Set the max bandwidth that rsync will use.
     "--progress"                    ## Output info about current transfer status and progress.
-    "--verbose=3"                   ## Output extra information.
+    "--verbose"                     ## Output extra information.
     "--human-readable"              ## Numbers output (e.g. progress info) are easily readable.
     "--partial-dir=.partial"        ## Define directory to store partially transferred files.
     "--log-file=${SNEAK_LOG_FILE}"  ## Define the logfile.
