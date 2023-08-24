@@ -2,8 +2,6 @@
 Script Name                                 | Description
 --------------------------------------------|-----------------------------------
 [**apt_all**][link_repo_apt_all]            | Runs apt-get update, apt-get dist-upgrade, apt-get autoremove and apt-get autoclean on a provided host or list of hosts.  Logs results to file.
-[**ball**][link_repo_ball]                  | Runs bu on a bunch of remote host or list of hosts.  Logs results to file.
-[**bu**][link_repo_bu]                      | Uses rsync to back up files and directories in a list file to a remote server.  Logs results to file.
 [**p0wer\_switch**][link_repo_p0wer_switch] | Written for use with [Termux][link_web_termux] to connect to a server that can control wireless mains outlets via [p0wer][link_gitlab_clewsy_p0wer].
 [**polly**][link_repo_polly]                | Called as a cronjob to regularly poll a web site and check the return code.  Logs site status to file and uses a [blink(1)][link_web_blink1] as a visual status indicator.
 [**pong**][link_repo_pong]                  | Runs through a list of servers, pings each once for a second then returns a success or fail result.
@@ -20,10 +18,12 @@ Script Name                                 | Description
 # archived:
 Script Name                                             | Description
 --------------------------------------------------------|-----------------------
+[**ball**][link_repo_ball]                              | Runs bu on a bunch of remote host or list of hosts.  Logs results to file.  Deprecated thanks to [Ansible][link_web_ansible].
+[**bu**][link_repo_bu]                                  | Uses rsync to back up files and directories in a list file to a remote server.  Logs results to file.  Deprecated thanks to [Ansible][link_web_ansible].
 [**cal\_backup.sh**][link_repo_archive_cal_backup.sh]   | Generates an \*.ics file from a nextcloud calendar and archives it.  Intended to be used as a cronjob.  No longer used since moving nextcloud to a docker container.
 [**chuck.sh**][link_repo_archive_chuck.sh]              | Very similar to grab.sh, but used to upload to the remote server.  No longer used.
 [**grab.sh**][link_repo_archive_grab.sh]                | Uses rsync (to allow resume after interruption) to download a specified file from a remote server.  No longer used.
-[**nc\_backup.sh**][link_repo_archive_nc_backup.sh]     | A script to create a local backup of a nextcloud instance including the database, data files and config files.  To be called as a cronjob.  (A separate cronjob on a remote system syncs this local backup to create a remote backup.)  No longer used since moving nextcloud to a docker container.
+[**nc\_backup.sh**][link_repo_archive_nc_backup.sh]     | A script to create a local backup of a nextcloud instance including the database, data files and config files.  Called as a cronjob.  No longer used since moving nextcloud to docker.
 [**roll_out.sh**][link_repo_archive_roll_out.sh]        | Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.  I used this to sync my custom scripts to a list of hosts.  Now deprecated as I manage this task with [Ansible][link_web_ansible].
 
 
