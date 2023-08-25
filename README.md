@@ -24,7 +24,7 @@ Script Name                                             | Description
 [**grab.sh**][link_repo_archive_grab.sh]                | Uses rsync (to allow resume after interruption) to download a specified file from a remote server.  No longer used.
 [**nc\_backup.sh**][link_repo_archive_nc_backup.sh]     | A script to create a local backup of a nextcloud instance including the database, data files and config files.  Called as a cronjob.  No longer used since moving nextcloud to docker.
 [**roll_out.sh**][link_repo_archive_roll_out.sh]        | Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.  I used this to sync my custom scripts to a list of hosts.  Now deprecated as I manage this task with [Ansible][link_web_ansible].
-[**ytdl.sh**][link_repo_ytdl]                           | Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  No longer used since since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.  Also, from the command line, [yt-dlc][link_web_yt-dlc] is an improved downloader (forked from [youtube-dl][link_web_youtube-dl]).
+[**ytdl.sh**][link_repo_ytdl]                           | Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  No longer used since since switching running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.  Also, from the command line, [yt-dlc][link_web_yt-dlc] is an improved downloader (forked from [youtube-dl][link_web_youtube-dl]).
 
 
 [link_repo_apt_all]:apt_all
