@@ -11,7 +11,6 @@ Script Name                                 | Description
 [**vpn**][link_repo_vpn]                    | Kills current openvpn service then reconnects and confirms.  Useful for quickly re-establishing connection if it goes bad.
 [**wami**][link_repo_wami]                  | Pulls and displays info (IP, country, city, etc) from [ifconfig.co][link_web_ifconfig] - useful to verify vpn operation.
 [**whodis**][link_repo_whodis]              | Grabs the contents of the /tmp/dhcp.leases file on a remote router, does some basic formatting and prints it to stdout.
-[**ytdl.sh**][link_repo_ytdl]               | Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  Not often used since since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.
 
 <br />  
 
@@ -25,6 +24,7 @@ Script Name                                             | Description
 [**grab.sh**][link_repo_archive_grab.sh]                | Uses rsync (to allow resume after interruption) to download a specified file from a remote server.  No longer used.
 [**nc\_backup.sh**][link_repo_archive_nc_backup.sh]     | A script to create a local backup of a nextcloud instance including the database, data files and config files.  Called as a cronjob.  No longer used since moving nextcloud to docker.
 [**roll_out.sh**][link_repo_archive_roll_out.sh]        | Attempt to copy a specified file/directory to a destination (relative to home directory) on a list of remote hosts.  I used this to sync my custom scripts to a list of hosts.  Now deprecated as I manage this task with [Ansible][link_web_ansible].
+[**ytdl.sh**][link_repo_ytdl]                           | Written for use with [Termux][link_web_termux] to download a youtube video direct to the device.  No longer used since since switching to [LineageOS][link_web_lineageos] and running [NewPipe][link_web_newpipe] instead of the youtube app.  Newpipe has direct download capability.  Also, from the command line, [yt-dlc][link_web_yt-dlc] is an improved downloader (forked from [youtube-dl][link_web_youtube-dl]).
 
 
 [link_repo_apt_all]:apt_all
@@ -46,9 +46,11 @@ Script Name                                             | Description
 [link_repo_archive_nc_backup.sh]:archive/nc_backup.sh
 [link_repo_archive_roll_out.sh]:archive/roll_out.sh
 [link_gitlab_clewsy_p0wer]:https://gitlab.com/clewsy/p0wer
-[link_web_termux]:https://termux.com/
+[link_web_ansible]:https://docs.ansible.com/
 [link_web_blink1]:https://blink1.thingm.com/
 [link_web_ifconfig]:https://ifconfig.co/
 [link_web_lineageos]:https://lineageos.org/
 [link_web_newpipe]:https://newpipe.schabi.org/
-[link_web_ansible]:https://docs.ansible.com/
+[link_web_termux]:https://termux.com/
+[link_web_youtube-dl]:https://github.com/ytdl-org/youtube-dl
+[link_web_yt-dlc]:https://github.com/blackjack4494/yt-dlc
