@@ -2,18 +2,18 @@
 #: Title:       : stuff
 #: Author       : clewsy (clews.pro)
 #: Description  : Pulls a bunch of system info, formats and prints to screen.
-#: Options      : -A    All info.
-#:              : -l    Live data (temps, fan speeds, users, uptime).
-#:              : -p    Product info.
-#:              : -c    CPU info.
-#:              : -m    Memory info.
-#:              : -a    Audio hardware info.
-#:              : -v    Video hardware info.
-#:              : -d    Disks and partitions info.
-#:              : -o    Operating system and kernel info.
-#:              : -n    Network info.
-#:              : -h    Print help/usage.
-#:              : none  Assumes "-A".
+#: Options      : -A   : All info.
+#:              : -l   : Live data (temps, fan speeds, users, uptime).
+#:              : -p   : Product info.
+#:              : -c   : CPU info.
+#:              : -m   : Memory info.
+#:              : -a   : Audio hardware info.
+#:              : -v   : Video hardware info.
+#:              : -d   : Disks and partitions info.
+#:              : -o   : Operating system and kernel info.
+#:              : -n   : Network info.
+#:              : -h   : Print help/usage.
+#:              : none : Assumes "-A".
 #: Arguments    : Will accept a single argument to set a theme colour scheme
 #:              : other than the configured default.  Accepted colours:
 #:              : - BLACK or black

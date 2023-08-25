@@ -3,9 +3,9 @@
 #: Author       : clewsy (clews.pro)
 #: Description  : Kills any existing vnp connection then establishes a new
 #:              : session.  Uses openvpn.
-#: Options      : -c - Cancels/kills current vpn connection.
-#:              : -k - Kills/cancles current vpn connection.
-#:              : -h - Help (print usage then exit).
+#: Options      : -c : Cancels/kills current vpn connection.
+#:              : -k : Kills/cancles current vpn connection.
+#:              : -h : Help (print usage then exit).
 
 ## Exit codes.
 SUCCESS=0
