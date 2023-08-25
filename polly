@@ -6,31 +6,28 @@
 #:              : blink(1) device on a USB port.  Intended to be run as a cron
 #:              : job, for example to run every 5 minutes:
 #:              : */5 * * * * /usr/local/sbin/polly
-#:
-#: Options      : -p    Poll url and check status.  This is the primary function
-#:              :       of the script.
-#:              : -s    Show last Status.  Effectively displays the last entry
-#:              :       in the log file.  Does not run a new poll operation.
-#:              : -l    Show Log file.  Effectively dumps the contents of the
-#:              :       entire log file to stdout.
-#:              : -r    Reset status.  Allows resetting from "RECOVERED" to "OK"
-#:              :       (assuming new poll returns "OK", not "FAILED").
-#:              : -v    Verbose mode.  Shows additional output.
-#:              : -h    Help.  Print usage information.
-#:
+#: Options      : -p : Poll url and check status.  This is the primary function
+#:              :      of the script.
+#:              : -s : Show last Status.  Effectively displays the last entry
+#:              :      in the log file.  Does not run a new poll operation.
+#:              : -l : Show Log file.  Effectively dumps the contents of the
+#:              :      entire log file to stdout.
+#:              : -r : Reset status.  Allows resetting from "RECOVERED" to "OK"
+#:              :      (assuming new poll returns "OK", not "FAILED").
+#:              : -v : Verbose mode.  Shows additional output.
+#:              : -h : Help.  Print usage information.
 #: Notes        : For long-term deployment, consider configuring and deploying a
 #:              : logrotate file.  For example:
-#:
-#:              : #/etc/logrotate.d/polly
-#:              : /var/log/polly.log {
-#:              :   su root root
-#:              :   monthly
-#:              :   rotate 12
-#:              :   compress
-#:              :   missingok
-#:              :   notifempty
-#:              :   create 644 root root
-#:              : }
+#:              :   #/etc/logrotate.d/polly
+#:              :   /var/log/polly.log {
+#:              :     su root root
+#:              :     monthly
+#:              :     rotate 12
+#:              :     compress
+#:              :     missingok
+#:              :     notifempty
+#:              :     create 644 root root
+#:              :   }
 
 ## Exit codes.
 SUCCESS=0
