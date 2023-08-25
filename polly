@@ -1,16 +1,26 @@
 #!/bin/bash
 #: Title:       : polly
 #: Author       : clewsy (clews.pro)
-#: Description  : Poll a url and check for successful response code 200.  Logs results and provides visual status indication via a
-#:              : blink(1) device on an LED port.  Intended to be run as a cron job, for example to run every 5 minutes:
+#: Description  : Poll a url and check for successful response code 200.
+#:              : Logs results and provides visual status indication via a
+#:              : blink(1) device on a USB port.  Intended to be run as a cron
+#:              : job, for example to run every 5 minutes:
 #:              : */5 * * * * /usr/local/sbin/polly
-#: Options      : -p - Poll url and check status.  This is the primary function of the script.
-#:              : -s - Show last Status.  Effecticely displays the last entry in the log file.  Does not run a new poll operation.
-#:              : -l - Show Log file.  Effectively dumps the entire log file to stdout.
-#:              : -r - Reset status.  Allows resetting from "RECOVERED" to "OK" (assuming new poll returns "OK", not "FAILED").
-#:              : -v - Verbose mode.  Shows additional output.
-#:              : -h - Help.  Print usage information.
-#: Notes        : For long-term deployment, consider configuring a logrotate file.  For example:
+#:
+#: Options      : -p    Poll url and check status.  This is the primary function
+#:              :       of the script.
+#:              : -s    Show last Status.  Effectively displays the last entry
+#:              :       in the log file.  Does not run a new poll operation.
+#:              : -l    Show Log file.  Effectively dumps the contents of the
+#:              :       entire log file to stdout.
+#:              : -r    Reset status.  Allows resetting from "RECOVERED" to "OK"
+#:              :       (assuming new poll returns "OK", not "FAILED").
+#:              : -v    Verbose mode.  Shows additional output.
+#:              : -h    Help.  Print usage information.
+#:
+#: Notes        : For long-term deployment, consider configuring and deploying a
+#:              : logrotate file.  For example:
+#:
 #:              : #/etc/logrotate.d/polly
 #:              : /var/log/polly.log {
 #:              :   su root root
@@ -29,7 +39,7 @@ BAD_OPTION=2
 BAD_ARGUMENT=3
 NO_CURL=4
 
-HOST_URL="https://clews.pro"    ## Host url or ip address to test for site status.
+HOST_URL="https://clews.pro"    ## Host url or ip address to poll.
 
 LOG_FILE="/var/log/polly.log"   ## Log file location.
 
@@ -168,7 +178,7 @@ if [ "${TEST_RESULT}" != 200 ]; then    ## Site is down.
     NOTIFICATION_f "FAILED" &
 else
     printf "%b" "\nChecking last poll result recorded in log file...\n"
-    if tail --lines 1 ${LOG_FILE} | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then            ## Site is up but was down.
+    if tail --lines 1 ${LOG_FILE} | grep -e "FAILURE" -e "WARNING" >> ${DEST}; then
         printf "%b" "\n${ORANGE}WARNING${RESET} - Site has recovered from downtime, but everything seems okay now.\n\n"
         printf "%b" "$(TIMESTAMP_f) - WARNING - Site running but has recovered from downtime.\n" >> $LOG_FILE
         printf "%b" "Running recovered notification function...\n\n" > ${DEST}
