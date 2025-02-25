@@ -1,19 +1,47 @@
 #!/bin/bash
 #: Title:       : wami
-#: Author       : clewsy (clews.pro)
+#: Author       : clewsy (clews.tech)
 #: Description  : Pull information regarding the external ip address
-#:              : (from ifconfig.co), format then print to screen.
-#: Options      : None (ignored).
+#:              : (from ifconfig.co), format, then print to screen.
+#: Options      : -4    Resolve names to IPv4 addresses only.
+#:              : -6    Resolve names to IPv6 addresses only.
 
 # Exit codes.
 SUCCESS=0
-NO_CURL=1   # curl not found.
-CURL_FAIL=2 # curl returned an error.
+BAD_OPTION=1    # Invalid option entered.
+NO_CURL=2       # curl not found.
+CURL_FAIL=3     # curl returned an error.
 
 # Text formatting codes.
 RED="\033[00;31m"
 BOLD="\033[01;37m"
 RESET="\033[00;0m"
+
+# Usage
+USAGE="
+${0##*/}: Determine external IP address and location information.
+
+Usage: ${BOLD}${0##*/} <option>${RESET}
+
+Options:
+-4 : Attepmt to resolve names to IPv4 address only.
+-6 : Attepmt to resolve names to IPv6 address only.
+-h : Print this usage and exit.
+"
+
+# Get command line options and set appropriate flags.
+while getopts '46h' OPTION; do      ## getopts to identify options
+    case "$OPTION" in
+        4)  IPV="--ipv4" ;;             ## Force curl to resolve to IPv4 only.
+        6)  IPV="--ipv6" ;;             ## Force curl to resolve to IPv6 only.
+        h)  printf "%b" "${USAGE}\n"    ## Print help (usage).
+            exit ${SUCCESS} ;;          ## Exit successfully.
+        ?)  printf "%b" "${USAGE}\n"    ## Invalid option, show usage.
+            exit ${BAD_OPTION} ;;       ## Exit.
+    esac
+done
+shift $((OPTIND -1))    ## Ensures only non-option arguments are considered
+                        ## when referencing $#, #* and $n.
 
 # Define the preferred temp file location.  Default to the current directory.
 TEMP_FILE="/tmp/wami_tempfile"
@@ -31,6 +59,7 @@ CURL_OPTIONS=(
     --silent
     --connect-timeout 5
     --max-time 10
+    ${IPV}
 )
 
 # Pull the ip info.  Write to temp file.
