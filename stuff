@@ -45,7 +45,7 @@ GRAY="\\033[00;90m"
 WHITE="\\033[00;37m"
 
 ## Set theme colour.
-DEFAULT_COL="${CYAN}"
+DEFAULT_COL="${RED}"
 
 ## Text emphasis.
 BOLD="\\033[1m"
@@ -179,7 +179,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
         done
         if (( FOUND_FAN > 0 )); then
             printf "%b" "${COL}${BOLD}├─Fan Speeds:${RESET}\n"
-            for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do    ## Loop for each found fan.
+            for (( FAN=1; FAN<=FOUND_FAN; FAN++ )); do    ## Loop for each fan.
                 if (( FAN == FOUND_FAN )); then    printf "%b" "${COL}│ └─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"
                 else                printf "%b" "${COL}│ ├─Fan ${FAN} Speed:${RESET} ${FAN_SPEED_[${FAN}]}rpm\n"; fi
             done
@@ -188,7 +188,8 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
 
     ###############################
     ## Print available core temp - raspberry pi.
-    ## Sensors is not available or returned no temps, but temp file is present (likely a pi) so use that to show temperature.
+    ## Sensors is not available or returned no temps, but temp file is present
+    ## (likely a pi) so use that to show temperature.
     if (( FOUND_CORE_TEMP == 0 )) && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
         RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)    ## File contains value equal to 1000*temp.
         if (( RAW_CORE_TEMP )); then
@@ -482,12 +483,13 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
                         CHILD_LABEL=$(lsblk -dno LABEL /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
                         CHILD_TYPE=$(lsblk -dno TYPE /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
-                        CHILD_FS=$(df -Th 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_FS=${CHILD_FS##*"${WORKING_CHILD_DEV_NAME}"*( )}; CHILD_FS=${CHILD_FS%% *}
                         CHILD_UUID=$(lsblk -dno UUID /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null)
-                        CHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_SIZE=${CHILD_SIZE##*"${WORKING_CHILD_DEV_NAME}"*( )}; CHILD_SIZE=${CHILD_SIZE%% *}
-                        CHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_USED=${CHILD_USED##*"${WORKING_CHILD_DEV_NAME}"*( )*([0-9])?*( )}; CHILD_USED=${CHILD_USED%% *}
-                        CHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"); CHILD_PERC=${CHILD_PERC%%\%*}; CHILD_PERC="${CHILD_PERC##* }%"
-                        CHILD_MOUNT=$(lsblk -dno MOUNTPOINT /dev/"${WORKING_CHILD_DEV_NAME}" 2> /dev/null) 
+                        CHILD_DF_ARRAY=($(df -Tlh 2>/dev/null | grep -m 1 -e "${WORKING_CHILD_DEV_NAME}"));
+                        CHILD_FS=${CHILD_DF_ARRAY[1]}
+                        CHILD_SIZE=${CHILD_DF_ARRAY[2]}
+                        CHILD_USED=${CHILD_DF_ARRAY[3]}
+                        CHILD_PERC=${CHILD_DF_ARRAY[5]}
+                        CHILD_MOUNT=${CHILD_DF_ARRAY[6]}
 
                         CHILD_SPECS=()    ## Clear then reset the array of child specs
                         if [ -n "${CHILD_LABEL}" ]; then CHILD_SPECS+=("${COL}${DIM}Label:${RESET} ${CHILD_LABEL}"); fi
@@ -527,11 +529,12 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
                                 fi
 
                                 GRANDCHILD_TYPE=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_TYPE=${GRANDCHILD_TYPE% *}; GRANDCHILD_TYPE=${GRANDCHILD_TYPE##* }
-                                GRANDCHILD_FS=$(df -Th 2>/dev/null | grep -m 1 "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_FS=${GRANDCHILD_FS##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_FS=${GRANDCHILD_FS%% *}
-                                GRANDCHILD_SIZE=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_SIZE=${GRANDCHILD_SIZE##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )}; GRANDCHILD_SIZE=${GRANDCHILD_SIZE%% *}
-                                GRANDCHILD_USED=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_USED=${GRANDCHILD_USED##*"${WORKING_GRANDCHILD_DEV_NAME}"*( )*([0-9])?*( )}; GRANDCHILD_USED=${GRANDCHILD_USED%% *}
-                                GRANDCHILD_PERC=$(df -lh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_PERC=${GRANDCHILD_PERC%%\%*}; GRANDCHILD_PERC="${GRANDCHILD_PERC##* }%"
-                                GRANDCHILD_MOUNT=$(lsblk -in /dev/"${WORKING_CHILD_DEV_NAME}" | grep -e "${WORKING_GRANDCHILD_DEV_NAME}"); GRANDCHILD_MOUNT=${GRANDCHILD_MOUNT##* }
+                                GRANDCHILD_DF_ARRAY=($(df -Tlh 2>/dev/null | grep -m 1 -e "${WORKING_GRANDCHILD_DEV_NAME}"));
+                                GRANDCHILD_FS=${GRANDCHILD_DF_ARRAY[1]}
+                                GRANDCHILD_SIZE=${GRANDCHILD_DF_ARRAY[2]}
+                                GRANDCHILD_USED=${GRANDCHILD_DF_ARRAY[3]}
+                                GRANDCHILD_PERC=${GRANDCHILD_DF_ARRAY[5]}
+                                GRANDCHILD_MOUNT=${GRANDCHILD_DF_ARRAY[6]}
 
                                 GRANDCHILD_SPECS=()
                                 if [ -n "${GRANDCHILD_TYPE}" ];     then GRANDCHILD_SPECS+=("${COL}${DIM}Type:${RESET} ${GRANDCHILD_TYPE}"); fi
