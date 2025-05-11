@@ -45,7 +45,7 @@ GRAY="\\033[00;90m"
 WHITE="\\033[00;37m"
 
 ## Set theme colour.
-DEFAULT_COL="${RED}"
+DEFAULT_COL="${CYAN}"
 
 ## Text emphasis.
 BOLD="\\033[1m"
@@ -163,7 +163,7 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
         done
         if (( FOUND_CORE_TEMP > 0 )); then
             printf "%b" "${COL}${BOLD}├─Core Temperatures:${RESET}\n"
-            for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do    ## Loop for each found core.
+            for (( CORE=1; CORE<=FOUND_CORE_TEMP; CORE++ )); do ## Loop cores.
                 if (( CORE == FOUND_CORE_TEMP )); then    printf "%b" "${COL}│ └─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"
                 else                    printf "%b" "${COL}│ ├─Core ${CORE} Temp:${RESET} ${CORE_TEMP_[${CORE}]}\n"; fi
             done
@@ -191,7 +191,8 @@ if [[ ${GET_L_LIVE_INFO} || ${GET_ALL_INFO} ]]; then
     ## Sensors is not available or returned no temps, but temp file is present
     ## (likely a pi) so use that to show temperature.
     if (( FOUND_CORE_TEMP == 0 )) && [ -f /sys/class/thermal/thermal_zone0/temp ]; then
-        RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)    ## File contains value equal to 1000*temp.
+        ## ../thermal_zone0/temp file contains value equal to 1000*temp.
+        RAW_CORE_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2> /dev/null)
         if (( RAW_CORE_TEMP )); then
             CORE_TEMP="$(( RAW_CORE_TEMP/1000 )).$(( RAW_CORE_TEMP%1000 ))°C"
             printf "%b" "${COL}${BOLD}├─Core Temperature:${RESET} ${CORE_TEMP}\n"
@@ -374,7 +375,8 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
         for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
             if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then   DELETE_ELEMENTS+=("${N}") && continue; fi
             if ! grep -e "name" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then DELETE_ELEMENTS+=("${N}") && continue; fi
-            DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}    ## Eliminate all but the initial whitespace.
+            ## Need to eliminate all but the initial whitespace:
+            DEV_DUMP[$N]=${DEV_DUMP[$N]//", "/","}    
         done
         for ELEMENT in "${DELETE_ELEMENTS[@]}"; do unset "DEV_DUMP[${ELEMENT}]"; done
 
@@ -392,11 +394,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
         ## Also tally the total number of level 1 devices NUM_LEVEL_1.
         NUM_LEVEL_1=0
         for (( E = 0; E < ${#DEV_DUMP[@]}; E++ )); do
-# Modifications for determining DEV_NAME, LEVEL and NEXT_LEVEL follow.
-# Required for json formatting change since lsblk --version: 2.37.2 (22.04).
-# DEV_NAME=${DEV_DUMP[$E]#*:\"}; DEV_NAME=${DEV_NAME%%\"*}
-# LEVEL=$(( $(printf "%s" "${DEV_DUMP[$E]%%\{*}" | wc -m) / 6 ))
-# NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+1))]%%\{*}" | wc -m) / 6 ))
             DEV_NAME=${DEV_DUMP[$E]#*:}; DEV_NAME=${DEV_NAME#*\"};  DEV_NAME=${DEV_NAME%%\"*}
             ## Get LEVEL by counting whitespace.
             LEVEL=$(( ($(printf "%s" "${DEV_DUMP[$E]%%\"*}" | wc -m) - 3) / 6 ))
@@ -413,9 +410,6 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
 
                 ## Increment the counter and check the next element.
                 ((i++))
-# Modifications for determining NEXT_LEVEL follow.
-# Required for json formatting change present since lsblk --version: 2.37.2
-# NEXT_LEVEL=$(( $(printf "%s" "${DEV_DUMP[((E+i))]%%\{*}" | wc -m) / 6 ))
                 NEXT_LEVEL=$(( ($(printf "%s" "${DEV_DUMP[((E+i))]%%\"*}" | wc -m) - 3) / 6 ))
                 DIFF=$((NEXT_LEVEL-LEVEL))
             done
