@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:       : polly
-#: Author       : clewsy (clews.pro)
+#: Author       : clewsy (clews.tech)
 #: Description  : Poll a url and check for successful response code 200.
 #:              : Logs results and provides visual status indication via a
 #:              : blink(1) device on a USB port.  Intended to be run as a cron
@@ -36,7 +36,7 @@ BAD_OPTION=2
 BAD_ARGUMENT=3
 NO_CURL=4
 
-HOST_URL="https://clews.pro"    ## Host url or ip address to poll.
+HOST_URL="https://clews.tech"    ## Host url or ip address to poll.
 
 LOG_FILE="/var/log/polly.log"   ## Log file location.
 
@@ -91,7 +91,7 @@ Valid options:
 -s    Show the current status (i.e. result of last poll).
 -l    Show the full log.
 -r    Reset the recovered flag.
--v     Verbose output.
+-v    Verbose output.
 -h    Show help.
 <none>    Same as -p, standard poll.
 "
