@@ -111,7 +111,7 @@ while getopts 'pslrvh' OPTION; do
             exit ${SUCCESS} ;;
         r)  POLLY_RESET="true" ;;
         v)  DEST="/dev/stdout"
-            CURL_VERBOSITY="" ;;
+            CURL_VERBOSITY="--verbose" ;;
         h)  printf "%b" "${USAGE}\n"
             exit ${SUCCESS} ;;
         ?)  echo -e "${USAGE}"
