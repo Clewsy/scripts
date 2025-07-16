@@ -1,6 +1,6 @@
 #!/bin/bash
 #: Title:       : stuff
-#: Author       : clewsy (clews.pro)
+#: Author       : clewsy (clews.tech)
 #: Description  : Pulls a bunch of system info, formats and prints to screen.
 #: Options      : -A   : All info.
 #:              : -l   : Live data (temps, fan speeds, users, uptime).
@@ -90,19 +90,19 @@ shopt -s extglob
 while getopts 'Alpcmavdonh' OPTION; do      ## getopts to identify options
     OPTIONS="TRUE"
     case "$OPTION" in
-        A)    GET_ALL_INFO="TRUE" ;;        ## Set ALL flag.
-        l)    GET_L_LIVE_INFO="TRUE" ;;     ## Set L flag - temp, fans, uptime.
-        p)    GET_P_PRODUCT_INFO="TRUE" ;;  ## Set P flag - product info.
-        c)    GET_C_CPU_INFO="TRUE" ;;      ## Set C flag - cpu.
-        m)    GET_M_MEMORY_INFO="TRUE" ;;   ## Set M flag - memory.
-        a)    GET_A_AUDIO_INFO="TRUE" ;;    ## Set A flag - audio hardware.
-        v)    GET_V_VIDEO_INFO="TRUE" ;;    ## Set V flag - video hardware.
-        d)    GET_D_DISKS_INFO="TRUE" ;;    ## Set D flag - disks and parts.
-        o)    GET_O_OS_INFO="TRUE" ;;       ## Set O flag - OS and kernel.
-        n)    GET_N_NETWORK_INFO="TRUE" ;;  ## Set N flag - network.
-        h)    printf "%b" "${USAGE}\n"      ## Print help (usage).
+        A)  GET_ALL_INFO="TRUE" ;;          ## Set ALL flag.
+        l)  GET_L_LIVE_INFO="TRUE" ;;       ## Set L flag - temp, fans, uptime.
+        p)  GET_P_PRODUCT_INFO="TRUE" ;;    ## Set P flag - product info.
+        c)  GET_C_CPU_INFO="TRUE" ;;        ## Set C flag - cpu.
+        m)  GET_M_MEMORY_INFO="TRUE" ;;     ## Set M flag - memory.
+        a)  GET_A_AUDIO_INFO="TRUE" ;;      ## Set A flag - audio hardware.
+        v)  GET_V_VIDEO_INFO="TRUE" ;;      ## Set V flag - video hardware.
+        d)  GET_D_DISKS_INFO="TRUE" ;;      ## Set D flag - disks and parts.
+        o)  GET_O_OS_INFO="TRUE" ;;         ## Set O flag - OS and kernel.
+        n)  GET_N_NETWORK_INFO="TRUE" ;;    ## Set N flag - network.
+        h)  printf "%b" "${USAGE}\n"        ## Print help (usage).
             exit ${SUCCESS} ;;              ## Exit successfully.
-        ?)    printf "%b" "${USAGE}\n"      ## Invalid option, show usage.
+        ?)  printf "%b" "${USAGE}\n"        ## Invalid option, show usage.
             exit ${BAD_OPTION} ;;           ## Exit.
     esac
 done
@@ -370,7 +370,9 @@ if [[ ${GET_D_DISKS_INFO} || ${GET_ALL_INFO} ]]; then
         printf "%b" "${COL}${BOLD}Disks and Partitions:${RESET}\n"
 
         ## Dump lsblk device listing and map each line to an array element.
-        mapfile DEV_DUMP <<< "$(lsblk -J)"
+        ## Note json formatting from older versions of lsblk may cause issues.
+        ## E.g. works with lsblk v2.38.1 but fails with v2.36.1
+        mapfile DEV_DUMP <<< "$(lsblk --json)"
         ## Identify then delete elements from the array that we want to ignore.
         for (( N = 0; N < ${#DEV_DUMP[@]}; N++ )); do
             if grep -e "loop" <<< "${DEV_DUMP[((N))]}" >> /dev/null; then   DELETE_ELEMENTS+=("${N}") && continue; fi
