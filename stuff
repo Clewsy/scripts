@@ -636,7 +636,7 @@ if [[ ${GET_N_NETWORK_INFO} || ${GET_ALL_INFO} ]]; then
     if ! command -v curl >> /dev/null ; then
         EXT_IP="Cannot determine - curl not installed."
     else
-        EXT_IP=$(curl --silent --max-time 5 https://ipecho.net/plain)
+        EXT_IP=$(curl -4 --silent --max-time 5 https://ipecho.net/plain)
         if [ -z "${EXT_IP}" ]; then EXT_IP="No External Connection"; fi
         printf "%b" "${COL}${BOLD}├─External IP:${RESET} ${EXT_IP}\n"
     fi
